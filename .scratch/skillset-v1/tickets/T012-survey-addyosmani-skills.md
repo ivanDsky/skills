@@ -2,7 +2,7 @@
 id: T012
 title: Survey addyosmani/agent-skills
 labels: [wayfinder:research]
-status: open
+status: closed
 assignee: research-addyosmani
 blocked-by: []
 ---
@@ -13,4 +13,6 @@ blocked-by: []
 
 ## Resolution
 
-(appended on close)
+Surveyed via primary sources (git tree, README, AGENTS.md, evals/README.md, run-evals.js, skill-lint.js, CI workflow, sample skills/cases/graders). Findings: .scratch/skillset-v1/research/addyosmani-agent-skills.md
+Core steal: their three-tier eval framework — free CI structural lint + description-routing evals (≥3 positive/≥2 negative prompts with owner-pairwise checks, collision detection, rank-1 ratchet) + opt-in headless-`claude` behavioral evals (expectations[], git-baselined fixture workspaces, fenced-trace grading, pressure fixtures). Routing failures are fixed by editing the description, not the eval — that loop is the authoring-standard practice to adopt.
+Skip: 24-skill lifecycle breadth, 11-host adapter sprawl, repo-root references/ (breaks per-skill npx installs — we invert it), hooks, personas, plugin A/B evals until post-v1.

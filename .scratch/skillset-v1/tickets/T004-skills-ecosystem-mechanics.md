@@ -2,7 +2,7 @@
 id: T004
 title: Ecosystem mechanics: npx skills + skills.sh
 labels: [wayfinder:research]
-status: open
+status: closed
 assignee: research-ecosystem
 blocked-by: []
 ---
@@ -13,4 +13,6 @@ What makes a repo a first-class citizen of the npx skills ecosystem? Study verce
 
 ## Resolution
 
-(appended on close)
+Findings: `.scratch/skillset-v1/research/skills-ecosystem.md`.
+`add` discovery = repo-root SKILL.md (early-returns), known containers (`skills/` first) walked 3 deep, any top-level dir at depth 1, `skills.sh.json` `paths`, plugin manifests, then recursive fallback; frontmatter needs string `name` + `description` only (no name/dir check — our lint must cover it). skills.sh.json is display-only groupings on skills.sh; listing + badge + counts are telemetry-driven from installs; `pi` targets `.agents/skills/`.
+Repo checklist delivered in the findings file; urgent item: `_template/` currently surfaces as installable skill `template` — mark `metadata.internal: true`.

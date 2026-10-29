@@ -15,12 +15,12 @@ skills/<name>/          # one directory per skill
 ├── SKILL.md            # required: YAML frontmatter + instructions
 ├── references/         # optional: detail docs, loaded only when needed
 └── scripts/            # optional: helper scripts the instructions call
-_template/              # copy to skills/<name>/ to start a new skill
+docs/skill-template/    # copy to skills/<name>/ to start a new skill
 ```
 
 ## Writing a skill
 
-1. `cp -r _template skills/my-skill` — the `name` must match the directory.
+1. `cp -r docs/skill-template skills/my-skill` — the `name` must match the directory.
 2. Frontmatter rules:
 
    | Field | Rules |

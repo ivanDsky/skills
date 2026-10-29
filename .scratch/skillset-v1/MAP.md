@@ -12,6 +12,7 @@ labels: [wayfinder:map]
 - Every skill must pass frontmatter validation (name matches dir, description non-empty) or it silently never loads.
 - Research findings land as files under `.scratch/skillset-v1/research/` — any session can zoom them.
 - Research roster (one notes file per repo under `.scratch/skillset-v1/research/`): obra/superpowers (T001), mattpocock/skills (T002), agentskills.io spec + anthropics/skills (T003), npx skills ecosystem (T004), affaan-m/ECC + awesome-llm-apps from the KDnuggets list (T010), ciembor/agent-rules-books (T011), addyosmani/agent-skills (T012).
+- Adoption candidates (install-as-is or integrate — user-supplied): DietrichGebert/ponytail (T013), Leonxlnx/taste-skill (T014), pbakaus/impeccable (T015), tt-a1i/archify (T016).
 - The user adds personal priorities/wants once the repo is deploy-ready.
 - Distribution decision already made: `npx skills` (vercel-labs/skills CLI); local tracker for planning (see docs/agents/issue-tracker.md).
 
