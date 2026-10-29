@@ -11,6 +11,7 @@ labels: [wayfinder:map]
 - Authoring bar: `writing-great-skills` (installed) — predictability, routing-oriented descriptions, progressive disclosure, checkable completion criteria.
 - Every skill must pass frontmatter validation (name matches dir, description non-empty) or it silently never loads.
 - Research findings land as files under `.scratch/skillset-v1/research/` — any session can zoom them.
+- Synthesis: [`REFERENCE-MAP.md`](REFERENCE-MAP.md) — per-repo digests (novelty, organization, what we take) + state-of-the-art briefing. Read it before working any grilling ticket.
 - Research roster (one notes file per repo under `.scratch/skillset-v1/research/`): obra/superpowers (T001), mattpocock/skills (T002), agentskills.io spec + anthropics/skills (T003), npx skills ecosystem (T004), affaan-m/ECC + awesome-llm-apps from the KDnuggets list (T010), ciembor/agent-rules-books (T011), addyosmani/agent-skills (T012).
 - Adoption candidates (install-as-is or integrate — user-supplied): DietrichGebert/ponytail (T013), Leonxlnx/taste-skill (T014), pbakaus/impeccable (T015), tt-a1i/archify (T016).
 - The user adds personal priorities/wants once the repo is deploy-ready.
