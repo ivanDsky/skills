@@ -2,7 +2,7 @@
 id: T013
 title: Adopt? DietrichGebert/ponytail
 labels: [wayfinder:research]
-status: open
+status: closed
 assignee: research-ponytail
 blocked-by: []
 ---
@@ -13,4 +13,4 @@ ADOPTION CANDIDATE (user intent: install as-is or integrate — not a repo to im
 
 ## Resolution
 
-(appended on close)
+Surveyed from primary sources (README, INSTALL, AGENTS.md, all six SKILL.md, plugin manifest, hooks, benchmarks). Ponytail is one ~3KB behavior prompt (lazy-senior-dev ladder) plus 5 companion skills, wrapped for ~20 hosts; MIT; 180k stars verified; its agentic benchmark (585 sessions, hidden adversarial checks, mutation-tested tests) is real and unusually honest. Verdict: install-as-is `ponytail-review`, `ponytail-audit`, `ponytail-debt` via `npx skills add`; integrate-adapt the core `ponytail` prompt (own the ~760-token ladder text instead of the always-on Node-hook persona); skip `ponytail-gain` (static marketing card) and `ponytail-help`. Full findings: .scratch/skillset-v1/research/ponytail.md
