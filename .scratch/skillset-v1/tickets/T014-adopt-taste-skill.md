@@ -2,7 +2,7 @@
 id: T014
 title: Adopt? Leonxlnx/taste-skill
 labels: [wayfinder:research]
-status: open
+status: closed
 assignee: research-taste-skill
 blocked-by: []
 ---
@@ -13,4 +13,5 @@ ADOPTION CANDIDATE. 'Agent skills that give coding agents taste: art direction, 
 
 ## Resolution
 
-(appended on close)
+Adopted: **install-as-is** `design-taste-frontend` (the repo's only skill — older ones moved to taste-skill-classics). Verified 105,510 stars, MIT, v2.1.5 (2026-10-25), zero-dependency runtime we already meet (Node 22+, any installed Chrome/Edge/Chromium). Fills our real gap (art-directed pages + app screens with a measured browser gate); complements emil-design-eng/apple-design, minor routing + style conflicts noted. Caveats: ~30-45 min & few hundred k tokens per page build, opinionated bans (mitigated by `--allow`/`--keep`).
+Findings: .scratch/skillset-v1/research/taste-skill.md
