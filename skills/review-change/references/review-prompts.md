@@ -8,7 +8,11 @@ dual-verdict subagent.
 - Diff command + commit list (`git diff <base>...HEAD`,
   `git log <base>..HEAD --oneline`).
 - Spec excerpt with its numbered assumptions.
-- Care-axes (ranked) + the `references/rules-*.md` payloads they select.
+- Care-axes (ranked) + the rules payloads they select:
+  `design-architecture`'s `rules-architecture.md` (architecture axis) and
+  `rules-code-style.md` (comments, naming, AI-slop patterns — style findings
+  grade against it; a comment-slop or swallowing-catch finding is Important
+  by default).
 - Relevant ledger lines.
 
 ## Standard reviewer — one report, under 400 words
