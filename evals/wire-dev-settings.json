@@ -1,0 +1,23 @@
+{
+  "skill": "wire-dev-settings",
+  "positive": [
+    "Add a feature flag so I can toggle the new card stack remotely",
+    "I want a dev settings screen with toggles and links to prototype screens",
+    "Make the new onboarding skippable from my phone without shipping a new build",
+    "Set up a playground where I can browse all the composables"
+  ],
+  "negative": [
+    {
+      "prompt": "Distribute this build to testers",
+      "owner": "deploy-firebase"
+    },
+    {
+      "prompt": "Diagnose why the card flickers",
+      "owner": "diagnose-bug"
+    },
+    {
+      "prompt": "Design the module boundaries for the flags system",
+      "owner": "design-architecture"
+    }
+  ]
+}

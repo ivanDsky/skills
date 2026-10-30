@@ -32,6 +32,7 @@ round, an independent architect decides fix-forward vs teardown.
 `preview-compose` (previews + animation preview verification) ·
 `deploy-firebase` (test users + APK distribution) ·
 `deploy-tailscale` (device registry + APK sharing)
+`wire-dev-settings` (reactive Firebase flags, dev menu, Showkase playground)
 
 **Adapted (owned text, credited sources):**
 `ponytail` (smallest-change governor) · `run-intake` core mechanics from
