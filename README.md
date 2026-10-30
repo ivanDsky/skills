@@ -37,9 +37,11 @@ mattpocock/skills · `tdd` (fakes-over-mocks payload) from obra/superpowers ·
 `design-taste-frontend` · `archify` · `ponytail-review` / `-audit` / `-debt` ·
 `ui-ux-pro-max`
 
-Design knowledge (apple-design, emil-design-eng, animation pack, ...) stays
-installed separately; flow skills name the moment to reach for it and
-descriptions route the rest.
+Design knowledge ships here too — `apple-design`, `emil-design-eng`,
+`animation-vocabulary` (vendored from emilkowalski/skills, MIT), plus
+`ui-ux-pro-max` for stack-specific guidelines. Flow skills name the moment to
+reach for expertise and descriptions route the rest; the repo is
+self-sufficient — no other skills need to be installed.
 
 ## Configuration
 
