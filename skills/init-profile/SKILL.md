@@ -61,6 +61,11 @@ layer do not already answer.
 5. Tracker location — default `.scratch/<slug>/tickets/`; lands in PROFILE.md
    only when the project points elsewhere.
 6. Platform override — only when the project differs from the user default.
+7. Product frame — the agent proposes from the ask, the user confirms or
+   edits: purpose in one line (what the app is for, what it says), who it is
+   for, and the core loop (the main flow a user repeats). Understanding pain
+   points and what users care about starts here — every later spec builds on
+   this frame instead of re-asking it.
 
 Send the batch and stop. Never a second batch.
 
@@ -70,6 +75,12 @@ Send the batch and stop. Never a second batch.
 
 ```markdown
 # PROFILE.md — written by init-profile, read by /start
+
+## Product (frame)
+# purpose: <one line — what this app is for and says>
+# users: <who it is for>
+# core loop: <the main flow a user repeats>
+# pain points: <what users struggle with that this addresses>
 
 ## Care-axes (ranked: what quality means here)
 1. architecture/SOLID

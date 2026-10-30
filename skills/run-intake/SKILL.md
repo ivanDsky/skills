@@ -31,7 +31,17 @@ never a second batch.
      money, deletions.
 3. Build ONE batch in frontier order: a question joins only if nothing else in
    the batch must be answered first. In a prototype run the batch always
-   includes the deploy question (`deploy: main | standalone | none`).
+   includes the deploy question (`deploy: main | standalone | none`). Two
+   more always-join rules:
+   - **DoD** — every feature ask gets one definition-of-done question ("what
+     must be true for you to call this done?"), recommended default = review
+     passes + build green + the happy path demos. It seeds the spec's success
+     criteria and every ticket's DoD.
+   - **UI surface** — asks that touch screens get a visual-direction question:
+     references (apps or screens whose look/feel the user wants), theme
+     constraints (existing app theme vs new tokens), and feel words for motion
+     (resolve feel-words per animation-vocabulary). Build on the PROFILE.md
+     Product frame — never re-ask purpose the frame already answers.
 4. Format every question so a one-word reply answers it: number it, word it so
    "yes" accepts your recommendation, and put the recommendation on an arrow
    line. Then send the batch and stop — the reply "1-4 yes, 5: no" must be a

@@ -29,12 +29,16 @@ autonomous. The intake batch was the interview — never ask again.
 
 Write `.scratch/<slug>/spec.md`, exactly these sections:
 
-1. **Problem** — from the user's side: what hurts, who feels it.
+1. **Problem** — from the user's side: what hurts, who feels it. Grounded in
+   the PROFILE.md Product frame (purpose, users, core loop) when present.
 2. **Solution** — what gets built, stated as behavior.
 3. **Assumptions** — every A-item from intake plus your own fills, each one
    concrete and checkable ("A1: single tenant, Postgres only"). This section is
    what the checkpoint sells; no silent gaps, nothing unnumbered.
-4. **Success criteria** — checkable outcomes; they seed the tickets' DoD.
+4. **Success criteria** — checkable outcomes; they seed the tickets' DoD. UI
+   features also record the visual direction here: the references the user
+   named (apps/screens), theme constraints, and feel words — or the explicit
+   assumption "no direction given: house style + design-skill judgment".
 5. **Out of scope** — explicit non-goals, so review can reject creep.
 6. **Deploy** — prototype runs only: the intake `deploy:` answer
    (`main | standalone | none`).
