@@ -1,0 +1,22 @@
+{
+  "skill": "diagnose-bug",
+  "positive": [
+    "The swipe gesture sometimes flickers and drops the card - fix it",
+    "App crashes when I open the gallery twice fast",
+    "The saved screen shows the wrong count after rotating"
+  ],
+  "negative": [
+    {
+      "prompt": "Build and ship this to my testers",
+      "owner": "deliver"
+    },
+    {
+      "prompt": "Write a failing test first for this feature",
+      "owner": "tdd"
+    },
+    {
+      "prompt": "Refactor this module into clean architecture",
+      "owner": "design-architecture"
+    }
+  ]
+}

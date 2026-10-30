@@ -34,6 +34,10 @@ first `/start` — never via a separate command the user had to remember.
 1. **Quick task** — ALL true: ≤3 files touched, no new public interface, no
    irreversible op, no deploy → inline ponytail run, zero artifacts, no
    chain; the reply ends with `skipped:` and `residual risk:` lines.
+1b. **Bug report** — the ask reports broken behavior (crash, glitch, wrong
+   result) rather than requesting new behavior → `diagnose-bug` owns the
+   intake and evidence gathering; its output ticket re-enters the normal
+   chain for the fix.
 2. **Unmapped codebase** — chain work ahead + no orientation artifacts →
    run `map-codebase`, fill PROFILE.md care-axes from the map, re-triage.
 3. **Prototype** — user flag ("prototype", "quick sketch", "just a demo") or
@@ -85,6 +89,7 @@ log. The per-run ledger (`.scratch/<slug>/ledger.md`) is a different file.
 | deliver | `deliver` | review passes |
 | support | `graduate-prototype` | prototype promoted to feature work |
 | support | `assess-teardown` | teardown gate: 2 failed fix rounds or reviewer discretion |
+| support | `diagnose-bug` | bug report: evidence ladder, user-time-last |
 
 `map-codebase`, `fan-out-research`, `graduate-prototype`, `assess-teardown`
 are the chain contract and land separately — when one fires and the skill is

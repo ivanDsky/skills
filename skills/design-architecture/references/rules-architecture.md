@@ -85,6 +85,21 @@ ciembor/agent-rules-books, plus the books cited below):
     second responsibility or a growing symbol table is the split signal —
     split by responsibility, not by line count alone. MUST. (user bar,
     2026-10-29; SRP per Clean Code)
+18. Dispatchers, clocks, and scopes are injected, never hardcoded: classes
+    take a DispatcherProvider (or injected `Dispatchers` values) so tests run
+    virtual time deterministically. `Dispatchers.IO` / `Dispatchers.Default`
+    appear only in the composition root that builds the provider. MUST.
+    (kotlinx-coroutines-test guidance; user bar)
+19. ViewModels expose read-only state: a private `MutableStateFlow`/field per
+    concern, exposed as `StateFlow`/`State`; no public mutable fields, no raw
+    `var` state. One exposed stream per concern, combined in one data class
+    when the screen needs several. MUST. (Android state-holders guidance;
+    user bar)
+20. One public type per file in the UI layer: a composable file holds ONE
+    public composable (plus its private helpers and its previews). Multiple
+    public composables or classes sharing a file — however idiomatic the
+    language — is the split signal; split by feature slice before stacking a
+    fifth type. MUST. (user bar; sharpens rule 17 for UI files)
 
 ## Trigger rules
 
