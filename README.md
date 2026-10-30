@@ -26,7 +26,12 @@ round, an independent architect decides fix-forward vs teardown.
 **Flow (fresh, authored):**
 `start` · `run-intake` · `draft-spec` · `write-tickets` · `implement` ·
 `review-change` · `deliver` · `map-codebase` · `fan-out-research` ·
-`graduate-prototype` · `assess-teardown` · `init-profile` · `integrate-skill`
+`graduate-prototype` · `assess-teardown` · `init-profile` · `integrate-skill` ·
+`diagnose-bug` (bug reports: evidence ladder, user-time-last) ·
+`design-architecture` (SOLID payload, wired into spec/implement/review) ·
+`preview-compose` (previews + animation preview verification) ·
+`deploy-firebase` (test users + APK distribution) ·
+`deploy-tailscale` (device registry + APK sharing)
 
 **Adapted (owned text, credited sources):**
 `ponytail` (smallest-change governor) · `run-intake` core mechanics from

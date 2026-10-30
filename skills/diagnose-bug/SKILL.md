@@ -5,8 +5,11 @@ description: >-
   time last: one batch of assumption questions, then remote evidence from the
   user's own device (wireless adb, Crashlytics, user screenshots) before any
   emulator repro, and screen-recording frame analysis only as the last
-  resort. Use when the user reports broken behavior, a crash, a visual glitch,
-  or a test keeps failing for unclear reasons.
+  resort. Use when the user reports broken behavior - "this is broken", "X
+  doesn't work", "it flickers/crashes/shows the wrong result", a crash, a
+  visual glitch, a regression after an update, or a test keeps failing for
+  unclear reasons - even mid-conversation with no /start, before any fix is
+  attempted.
 interaction: hitl
 requires: []
 ---
