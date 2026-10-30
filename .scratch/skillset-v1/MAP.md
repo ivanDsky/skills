@@ -32,6 +32,7 @@ labels: [wayfinder:map]
 - [Adopt? impeccable](tickets/T015-adopt-impeccable.md) — adopt as external self-updating tool (`npx impeccable install`), not vendored; complements apple-design/emil-design-eng.
 - [Adopt? archify](tickets/T016-adopt-archify.md) — install-as-is for brownfield orientation + spec viz; ship with update-check disabled; heaviest skill carried (5.4 MB, ~5k tok/invocation).
 - [Position the flow](tickets/T005-position-the-flow.md) — one flow with conditional stages; `/start` entry (alias /build); two-gear batched intake; prototype as flag; teardown gate via independent architect; effort level in PROFILE.md; DoD mandatory.
+- [Set authoring standards](tickets/T008-set-authoring-standards.md) — smallness first (<=~1.5k tok bodies, references for depth); flat layout; kebab-case verb-first; `interaction`/`requires` frontmatter; trigger-case evals per skill with rank-1 ratchet; preferences as swappable rules payloads; GLOSSARY.md yes.
 
 ## Not yet specified
 
