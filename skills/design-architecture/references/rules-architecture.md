@@ -62,6 +62,29 @@ ciembor/agent-rules-books, plus the books cited below):
 12. Keep behavior changes, structural refactoring, and cleanup separate;
     before redesigning a touched seam, control it with characterization
     tests. MUST. (Working Effectively with Legacy Code)
+13. Separate data, domain, and UI. The domain layer holds business rules and
+    models and MUST NOT import data-source or UI types; data sources implement
+    domain-owned interfaces; UI renders state and delegates operations. MUST.
+    (Clean Architecture)
+14. Non-trivial business operations become use cases: one operation each,
+    thin, dependencies injected as interfaces — so each tests with fakes
+    alone, no UI, no framework. A use case is born when orchestration (two or
+    more sources/policies) appears inside a ViewModel or Composable. MUST.
+    (Clean Architecture interactors)
+15. Non-trivial interactive UI (multi-step flows, gestures, async-driven
+    screens) is modeled as an explicit state machine: states, events,
+    transitions in a plain testable class; the Composable renders state and
+    never owns transition logic; every transition is unit-tested without
+    composing UI. MUST. (GoF State; user bar)
+16. Use a named pattern (repository, use case, state machine, adapter, factory)
+    only when its forcing function is present; when it fits, follow its
+    canonical shape instead of inventing a variant. MUST NOT pattern-drop.
+    (Patterns of Enterprise Application Architecture)
+17. File discipline (user bar, overrides rule 3's scope note where they
+    conflict): a file holds one task or one abstraction and stays short; a
+    second responsibility or a growing symbol table is the split signal —
+    split by responsibility, not by line count alone. MUST. (user bar,
+    2026-10-29; SRP per Clean Code)
 
 ## Trigger rules
 
@@ -71,6 +94,10 @@ ciembor/agent-rules-books, plus the books cited below):
   the caller's seam (rules 1–2) before any other fix. (Clean Architecture)
 - Two call sites need different implementations at one point → real seam:
   introduce the interface at the caller side, one adapter per side. (DIP)
+- Adding a variant of an existing behavior (new card type, new source, new
+  payment flow) → extend by adding a subtype/adapter behind the existing
+  interface; editing the dispatcher or the sibling implementations to accept
+  the variant is an OCP violation. (Clean Architecture)
 - A test must reach past an interface → shape problem, not test problem:
   deepen or re-place the seam (rules 8–9). (APoSD)
 - Naming a module Manager, Helper, Util, ServiceImpl → language gap: name it
@@ -91,3 +118,8 @@ ciembor/agent-rules-books, plus the books cited below):
 - No business rule imports a framework type.
 - Module names speak the domain glossary; context edges translate, not share.
 - Load-bearing decisions live in a spec contract or an ADR.
+- data / domain / UI edges hold: domain imports none of them.
+- Orchestrations are use cases; each tests against fakes only.
+- Interactive screens have an explicit state machine; transitions tested headless.
+- Patterns in the diff carry their forcing function in the decision note.
+- No file serves two responsibilities; the split signal was acted on.
