@@ -59,7 +59,7 @@ recollection.
    views — ui-ux-pro-max for stack-specific guidelines, apple-design and
    emil-design-eng for principles. Architecture-heavy tickets (new module,
    new boundary, dependency direction in play) apply `design-architecture`
-   first and grade the diff against its `references/rules-architecture.md`.
+   first and grade the diff against its `../design-architecture/references/rules-architecture.md`.
    Brownfield work reuses the map-codebase project map; diagrams via archify.
 5. Every worker reply ends `skipped: … / residual risk: …`.
 

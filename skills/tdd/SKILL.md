@@ -39,6 +39,7 @@ Only discarded throwaway prototypes, generated code, and pure config changes ski
 - Each test would fail under a realistic mutation: wrong branch, missing side effect, missing input validation.
 
 Read [testing-rules](references/testing-rules.md) when writing or changing tests, choosing fakes over mocks, or checking what a test really catches.
+Read [android-testing](references/android-testing.md) when testing Android or Compose apps — choosing JVM-unit vs Robolectric vs instrumented tests, or mapping what to test at each layer.
 
 ---
 

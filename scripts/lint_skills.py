@@ -60,7 +60,7 @@ INLINE_CODE = re.compile(r"`[^`\n]+`")
 TEMPLATE_PLACEHOLDER = re.compile(r"<([a-z][a-z0-9'’,—-]*(?: [a-z0-9'’,—.…-]+)+[^>]*)>")
 TODO_MARKER = re.compile(r"\b(TODO|FIXME|XXX|TBD)\b")
 MD_LINK = re.compile(r"\]\(([^)\s#]+)\)")
-BARE_PATH = re.compile(r"\b((?:scripts|references|assets|evals)/[\w.\-*]+)")
+BARE_PATH = re.compile(r"(?<![\w./-])((?:scripts|references|assets|evals)/[\w.\-*]+)")
 BACKSLASH_PATH = re.compile(r"(?:scripts|references|assets|evals)\\")
 
 

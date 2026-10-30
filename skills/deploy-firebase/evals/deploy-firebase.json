@@ -1,0 +1,23 @@
+{
+  "skill": "deploy-firebase",
+  "positive": [
+    "Build the release APK and distribute it to our Firebase qa-team testers with release notes from the last three tickets.",
+    "Set up Firebase distribution for our new Android app: create a 'Family testers' group, add these three emails, and make accounts they can log in with.",
+    "Where do I check who accepted the invitation and downloaded the latest Firebase build?",
+    "Add dana@example.com to the testers right now so she can install today's build."
+  ],
+  "negative": [
+    {
+      "prompt": "Deploy the web admin panel to Firebase Hosting.",
+      "owner": "deliver"
+    },
+    {
+      "prompt": "Share the debug APK with my colleague over our tailnet, no store involved.",
+      "owner": "deploy-tailscale"
+    },
+    {
+      "prompt": "Run the app locally on port 8080 so I can poke at it.",
+      "owner": "deliver"
+    }
+  ]
+}

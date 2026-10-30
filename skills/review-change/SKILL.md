@@ -42,7 +42,7 @@ chat carries only the user-facing report.
    Critical / Important / Minor; each axis ≤400 words.
 5. Architecture in the diff (new/boundary-crossing modules, dependency
    direction) → thorough tier grades against `design-architecture`'s
-   `references/rules-architecture.md` payload; findings are Critical when the
+   `../design-architecture/references/rules-architecture.md` payload; findings are Critical when the
    dependency rule breaks.
 6. UI in the diff → load [review-ux.md](references/review-ux.md) and run the UX
    axis at every tier; check against `design-taste-frontend` when installed.

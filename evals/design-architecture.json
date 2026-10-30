@@ -1,0 +1,31 @@
+{
+  "skill": "design-architecture",
+  "positive": [
+    {
+      "prompt": "We're about to spec the offline-sync feature. Before we write tickets, design the module structure: where the seams go, who owns the interfaces, and which way dependencies point."
+    },
+    {
+      "prompt": "My LoginViewModel calls Retrofit, Room, and Firebase directly and every screen repeats it. Fix the coupling: propose the modules and seams, and record the decision as an ADR."
+    },
+    {
+      "prompt": "Grade the architecture of the checkout refactor before review \u2014 check the dependency direction of every new import edge and whether any new module is shallow."
+    },
+    {
+      "prompt": "I'm adding a payments module to the Android app. Where should the seams be, what do the callers see, and does this break the dependency rule anywhere?"
+    }
+  ],
+  "negative": [
+    {
+      "prompt": "Run the full review gate over my branch before I ship \u2014 lint, screenshots, the works.",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "Draw the architecture diagram of this repo as an explorable standalone HTML page.",
+      "owner": "archify"
+    },
+    {
+      "prompt": "Implement ticket 07: add the retry button to the error screen.",
+      "owner": "implement"
+    }
+  ]
+}
