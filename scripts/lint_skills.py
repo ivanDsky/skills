@@ -42,7 +42,8 @@ BODY_WARN_LINES = 400
 BODY_MAX_LINES = 500
 BODY_TOKEN_BUDGET = 5000
 
-KNOWN_KEYS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
+# T008 extension keys (interaction/requires) are repo-owned, linter-accepted:
+KNOWN_KEYS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools", "interaction", "requires"}
 
 WHEN_SIGNALS = re.compile(
     r"\b(use (this skill )?when|use (it |this )?for|when the user|when working"
