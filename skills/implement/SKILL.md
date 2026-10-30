@@ -62,7 +62,7 @@ recollection.
    first and grade the diff against its `../design-architecture/references/rules-architecture.md`.
    Brownfield work reuses the map-codebase project map; diagrams via archify.
 5. Style while writing, not after: `design-architecture`'s
-   `references/rules-code-style.md` governs comments (self-explanatory code;
+   `rules-code-style.md` (in design-architecture) governs comments (self-explanatory code;
    comments only for WHY) and names the AI-slop patterns a worker must not
    emit; review grades against the same file.
 6. Every worker reply ends `skipped: … / residual risk: …`.
