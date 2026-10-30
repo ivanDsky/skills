@@ -1,0 +1,24 @@
+{
+  "skill": "preview-compose",
+  "positive": [
+    "Add previews for ProfileScreen in my Compose app. It currently takes a ProfileViewModel directly — make it previewable with sample data, plus light and dark variants.",
+    "The @Preview for CheckoutScreen shows a red error in the Android Studio preview pane while the app builds and runs fine. Diagnose and fix it.",
+    "Set up Compose preview screenshot tests for the :core:designsystem module so visual regressions fail in CI — give me the Gradle setup and how to refresh reference images.",
+    "How can I verify that the loading spinner animation in my Compose preview actually plays, and pin its end state in a test?",
+    "Add font-scale and tablet-size preview variants to every button state in my design system without copy-pasting @Preview annotations everywhere."
+  ],
+  "negative": [
+    {
+      "prompt": "Write an instrumented UI test that launches the emulator, taps the login button, and asserts the home screen appears.",
+      "owner": "tdd"
+    },
+    {
+      "prompt": "Implement a spring-based entrance animation for the hero card in Jetpack Compose — scale up and fade in when the screen opens.",
+      "owner": "apple-design"
+    },
+    {
+      "prompt": "Unit-test my CheckoutViewModel with a fake repository so the price-total logic is covered.",
+      "owner": "tdd"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "skill": "deploy-tailscale",
+  "positive": [
+    "Send the freshly built debug APK to my Pixel over tailscale",
+    "Deploy the build to the tailscale target \u2014 the device mapping is in PROFILE.md",
+    "Share the APK to my test device on the tailnet and give me evidence it landed",
+    "Serve the builds directory over tailscale so I can grab the APK on my phone"
+  ],
+  "negative": [
+    {
+      "prompt": "Serve the running dev server on port 3000 to the tailnet so the team can look at it",
+      "owner": "deliver"
+    },
+    {
+      "prompt": "Distribute the APK to the external tester group via Firebase App Distribution",
+      "owner": "deploy-firebase"
+    },
+    {
+      "prompt": "Run the app locally on port 8080 and give me the local URL",
+      "owner": "deliver"
+    }
+  ]
+}

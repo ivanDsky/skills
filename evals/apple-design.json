@@ -1,0 +1,18 @@
+{
+  "skill": "apple-design",
+  "positive": [
+    "Make this screen feel premium with spring-driven motion",
+    "Review this sheet transition against Apple's interaction principles",
+    "How should this list drag-reorder feel on iOS?"
+  ],
+  "negative": [
+    {
+      "prompt": "Name this animation effect",
+      "owner": "animation-vocabulary"
+    },
+    {
+      "prompt": "Design a landing page",
+      "owner": "design-taste-frontend"
+    }
+  ]
+}

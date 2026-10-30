@@ -1,0 +1,18 @@
+{
+  "skill": "animation-vocabulary",
+  "positive": [
+    "What's the name of the bouncy thing when a popover opens?",
+    "What do you call the iOS rubber-band scroll effect?",
+    "Name this animation: the element slides in while fading"
+  ],
+  "negative": [
+    {
+      "prompt": "Implement a spring animation for this card",
+      "owner": "apple-design"
+    },
+    {
+      "prompt": "Write the docs page for our motion system",
+      "owner": "none"
+    }
+  ]
+}

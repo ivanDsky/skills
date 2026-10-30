@@ -1,0 +1,18 @@
+{
+  "skill": "emil-design-eng",
+  "positive": [
+    "Polish this component's micro-interactions",
+    "Review this UI for the small details that make it feel great",
+    "Make this toast and its animation feel right"
+  ],
+  "negative": [
+    {
+      "prompt": "Design the module boundaries for this feature",
+      "owner": "design-architecture"
+    },
+    {
+      "prompt": "Distribute this build to testers",
+      "owner": "deploy-firebase"
+    }
+  ]
+}

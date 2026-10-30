@@ -39,7 +39,8 @@ mattpocock/skills · `tdd` (fakes-over-mocks payload) from obra/superpowers ·
 
 Design knowledge ships here too — `apple-design`, `emil-design-eng`,
 `animation-vocabulary` (vendored from emilkowalski/skills, MIT), plus
-`ui-ux-pro-max` for stack-specific guidelines. Flow skills name the moment to
+`ui-ux-pro-max` for stack-specific guidelines. Every skill carries routing
+trigger cases in `evals/` (29/29). Flow skills name the moment to
 reach for expertise and descriptions route the rest; the repo is
 self-sufficient — no other skills need to be installed.
 
