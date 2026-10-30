@@ -40,12 +40,16 @@ chat carries only the user-facing report.
    spec-compliance ✅ / ❌ / ⚠️ cannot-verify, every claim backed by quoted
    evidence; and quality Approved / Needs-fixes. Findings graded
    Critical / Important / Minor; each axis ≤400 words.
-5. UI in the diff → load [review-ux.md](references/review-ux.md) and run the UX
+5. Architecture in the diff (new/boundary-crossing modules, dependency
+   direction) → thorough tier grades against `design-architecture`'s
+   `references/rules-architecture.md` payload; findings are Critical when the
+   dependency rule breaks.
+6. UI in the diff → load [review-ux.md](references/review-ux.md) and run the UX
    axis at every tier; check against `design-taste-frontend` when installed.
-6. Fix loop: findings go back to the same implementer as a resumed brief;
+7. Fix loop: findings go back to the same implementer as a resumed brief;
    re-review is scoped to the fix diff only. Minors are ledgered as deferred —
    never silently fixed. Count failed fix rounds per module in the ledger.
-7. Teardown gate: 2 failed fix rounds on the same module (fire before round 3),
+8. Teardown gate: 2 failed fix rounds on the same module (fire before round 3),
    or reviewer discretion once with a logged reason → invoke `assess-teardown`.
    The architect decides fix-forward vs clean redesign; a redesign carries
    forward only root cause, interface contracts, and surviving tests.

@@ -12,8 +12,10 @@ host, port) — ask or leave the target undeployed.
 - Capture output to `.scratch/<slug>/deploy-local.log`.
 - Evidence: the command output plus the URL or port the app serves on.
 
-## firebase
+## firebase (web targets: hosting, functions, rules)
 
+- Android app distribution lives in the dedicated `deploy-firebase` skill
+  (test users, tester groups, APK/AAB) — this section is web hosting only.
 - Requires the firebase CLI. Missing → stop and hand the user the pointer:
   `npm install -g firebase-tools`, then `firebase login`.
 - From PROFILE.md `firebase:` entry: the project id.
@@ -23,8 +25,10 @@ host, port) — ask or leave the target undeployed.
 - Evidence: the Hosting URL from the deploy output.
 - Note the hosting rules in the summary: public or authenticated.
 
-## tailscale
+## tailscale (web serving)
 
+- APK/device sharing lives in the dedicated `deploy-tailscale` skill — this
+  section serves a running web app over the tailnet only.
 - Requires the tailscale CLI, installed and logged in (`tailscale status`
   answers). Missing → stop with the pointer: https://tailscale.com/download.
 - From PROFILE.md `tailscale:` entry: the host, plus the app's local port.

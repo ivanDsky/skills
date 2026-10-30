@@ -37,8 +37,13 @@ passed; this stage adds no code.
    `.scratch/<slug>/build.log`. A failed build stops everything — a deploy
    never starts on a red build.
 
-4. Deploy per target, in listed order, following the checklist in
-   [Deploy targets](references/deploy-targets.md). Decision rules:
+4. Deploy per target, in listed order. Mobile distribution has dedicated
+   playbooks — dispatch, don't improvise: `firebase` target on an Android
+   build -> `deploy-firebase` (test users, tester groups, APK/AAB
+   distribution); `tailscale` target -> `deploy-tailscale` (device
+   registry + APK sharing). Everything else follows the checklist in
+   [Deploy targets](references/deploy-targets.md) (local run, web hosting).
+   Decision rules:
    - Target CLI missing or not logged in → stop with the install pointer
      from the checklist. Never improvise a deploy path or swap in another
      target.

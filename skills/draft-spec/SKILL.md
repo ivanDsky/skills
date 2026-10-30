@@ -50,9 +50,12 @@ Decision rules:
 - Reach for the knowledge layer before writing Solution and Success criteria:
   a UI surface means consulting the installed design skills (apple-design,
   emil-design-eng; ui-ux-pro-max for stack-specific guidelines) instead of
-  inventing principles; an architecture discussion means offering a diagram
-  (archify when installed, else inline mermaid). PROFILE.md care-axes rank
-  what to pull; skill descriptions route the rest.
+  inventing principles. An architecture decision means running
+  `design-architecture` — module boundaries, dependency direction, and the
+  SOLID payload get settled there and land in the spec as interface
+  contracts, never as file paths. An architecture discussion also earns a
+  diagram (archify when installed, else inline mermaid). PROFILE.md
+  care-axes rank what to pull; skill descriptions route the rest.
 
 ## 3. Post the checkpoint
 
