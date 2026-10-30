@@ -62,7 +62,9 @@ passed; this stage adds no code.
 6. Post the delivery summary — the run's last message, always this shape:
 
    - **Shipped**: one line per ticket, behavior only, no paths.
-   - **Evidence**: build log path, deploy URL or output, closed ticket ids.
+   - **Evidence**: build log path, deploy URL or output, closed ticket ids,
+     and the visual review doc path (`.scratch/<slug>/review/REVIEW.md`)
+     when a review doc exists.
    - **Test on the deploy target**: 1-3 checks to do by hand, with the URL
      or start command.
    - **Skipped**: what was deferred or left unbuilt.

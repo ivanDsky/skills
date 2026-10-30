@@ -46,10 +46,16 @@ chat carries only the user-facing report.
    dependency rule breaks.
 6. UI in the diff → load [review-ux.md](references/review-ux.md) and run the UX
    axis at every tier; check against `design-taste-frontend` when installed.
-7. Fix loop: findings go back to the same implementer as a resumed brief;
+7. Visual review doc — at verdict time produce `.scratch/<slug>/review/REVIEW.md`
+   per [review-doc.md](references/review-doc.md): numbered screenshots (reuse
+   JVM captures), motion clips from the wireless-adb device when reachable,
+   archify diagram for structure changes, the vetoable assumptions, and the
+   id-based feedback contract. The user reviews without testing; their
+   artifact-id replies re-enter this fix loop.
+8. Fix loop: findings go back to the same implementer as a resumed brief;
    re-review is scoped to the fix diff only. Minors are ledgered as deferred —
    never silently fixed. Count failed fix rounds per module in the ledger.
-8. Teardown gate: 2 failed fix rounds on the same module (fire before round 3),
+9. Teardown gate: 2 failed fix rounds on the same module (fire before round 3),
    or reviewer discretion once with a logged reason → invoke `assess-teardown`.
    The architect decides fix-forward vs clean redesign; a redesign carries
    forward only root cause, interface contracts, and surviving tests.
