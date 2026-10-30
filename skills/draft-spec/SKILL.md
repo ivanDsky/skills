@@ -50,7 +50,9 @@ Decision rules:
 - Reach for the knowledge layer before writing Solution and Success criteria:
   a UI surface means consulting the installed design skills (apple-design,
   emil-design-eng; ui-ux-pro-max for stack-specific guidelines) instead of
-  inventing principles. An architecture decision means running
+  inventing principles. Motion anywhere in the spec is named with canonical
+  animation terms — resolve "the bouncy thing" via `animation-vocabulary`,
+  never as adjectives. An architecture decision means running
   `design-architecture` — module boundaries, dependency direction, and the
   SOLID payload get settled there and land in the spec as interface
   contracts, never as file paths. An architecture discussion also earns a

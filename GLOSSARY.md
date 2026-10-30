@@ -1,5 +1,7 @@
 # GLOSSARY
 
+Motion effects are named with canonical animation terms — `animation-vocabulary` resolves vague descriptions to names; do not invent adjectives.
+
 Canonical vocabulary for this skillset. Use these terms in tickets, specs, and replies; the Avoid column lists words NOT to use (they mean something else or blur distinctions). Source: T006 spec §6.
 
 Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoid:_` synonyms. Seed:

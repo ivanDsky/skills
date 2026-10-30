@@ -20,7 +20,10 @@ never a second batch.
 1. Read first: PROFILE.md (care-axes, effort, deploy targets), the tracker
    frontier, and the ask. Facts are your job, decisions are the user's: look up
    in the repo whatever the repo answers (stack, patterns, test setup). Lookups
-   are never questions.
+   are never questions. Vague feel-words in a UI ask ("smooth", "the bouncy
+   thing when you overscroll") are lookups too: resolve them to canonical
+   animation names via `animation-vocabulary` and confirm the name inside the
+   batch — one word answers it.
 2. Pick the gear and say so in one line:
    - **Focused** (default): 5-8 highest-impact questions.
    - **Deep**: 20-30 questions, when the user asks for it or stakes are high —
