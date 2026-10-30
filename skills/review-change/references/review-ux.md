@@ -16,6 +16,12 @@ layers, cheapest first; stop adding layers once one exposes systemic issues.
    Web-only surfaces add the taste gates: `design-taste-frontend`'s
    real-browser inspector and impeccable's critique, each when installed.
 
+Screenshot evidence follows the UI verification ladder
+(`tdd` skill, references/android-testing.md): JVM screenshot tests
+(Roborazzi / AGP preview suites) are the default per-review evidence; a real
+device or emulator screenshot is acceptance evidence, taken once at delivery —
+not the per-review default.
+
 UX findings land in the same review file, graded like any finding and tagged
 `ux`. UX passes on screenshots, not descriptions — no screenshot of a surface,
 no ✅ for it.

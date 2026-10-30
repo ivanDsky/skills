@@ -59,3 +59,32 @@ Android adds: doubles live in the test source set and never ship; make big tests
 - https://developer.android.com/training/testing/fundamentals/strategies
 - https://developer.android.com/training/testing/fundamentals/what-to-test
 - https://developer.android.com/training/testing/fundamentals
+
+
+## UI verification ladder (device last)
+
+The emulator is the LAST rung, not the default. Each rung applies only when
+the cheaper one cannot see the failure class. (Sources: robolectric.org;
+Roborazzi README - Robolectric Native Graphics 4.10+; developer.android.com
+studio/test/gradle-managed-devices; AGP Compose preview screenshot testing.)
+
+1. **Compile + previews** — SKILL.md of UI code is its compile; previews must
+   render (preview-compose skill). Catches broken composition. Zero devices.
+2. **Semantic JVM tests** — Compose UI tests on the JVM (`createComposeRule`
+   + Robolectric, `@GraphicsMode(NATIVE)`): assert the semantic tree - text,
+   contentDescription, enabled states, and UI state-machine transitions.
+   Seconds, no device, runs on every commit.
+3. **JVM screenshot tests** — pixel truth without any device: Roborazzi
+   (Robolectric RNG) or AGP Compose Preview Screenshot Test suites (Layoutlib).
+   One capture per state/size/dark variant; diff in CI. Catches what semantics
+   miss: overflow, spacing, alignment, theme breakage.
+4. **Instrumented UI tests on a Gradle Managed Device** — headless ATD images
+   (API 27+), configured in Gradle for reproducibility. Only for what the JVM
+   cannot see: real input pipeline, window insets/focus, density, text shaping.
+5. **Human acceptance on the real target** — install the APK
+   (`deploy-tailscale` / `deploy-firebase`), feel the animations, judge
+   premium. The emulator lives HERE - as one optional device, never the
+   default evidence.
+
+Review rule: screenshots as evidence mean JVM screenshots (rung 3) by
+default; device/emulator screenshots appear only at acceptance (rung 5).

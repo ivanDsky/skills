@@ -92,3 +92,10 @@ JDK 17+):
 - IDE integration (gutter icons to run/update, built-in diff viewer) needs
   Android Studio Panda 1 Canary 4+ with AGP 9.0+; bare Gradle tasks need only
   AGP 8.5+.
+
+## Alternative: Roborazzi
+
+AGP preview suites are the first choice; when the project prefers plain JVM
+tests over the AGP suite, Roborazzi (Robolectric Native Graphics) captures the
+same previews with `captureRoboImage()` in Robolectric tests - same ladder, no
+device. https://github.com/takahirom/roborazzi
