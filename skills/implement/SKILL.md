@@ -55,7 +55,11 @@ recollection.
    non-trivial logic leaves one small test behind.
 3. Guard: skills/scope-creep-detector the moment a diff touches files the
    ticket never named — its keep / split / justify verdicts decide.
-4. Every worker reply ends `skipped: … / residual risk: …`.
+4. Knowledge: UI/view tickets consult the installed UX skills before writing
+   views — ui-ux-pro-max for stack-specific guidelines, apple-design and
+   emil-design-eng for principles; architecture-heavy tickets reuse the
+   map-codebase project map and may offer an archify diagram.
+5. Every worker reply ends `skipped: … / residual risk: …`.
 
 ## 4. Status handling
 

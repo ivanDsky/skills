@@ -1,0 +1,27 @@
+{
+  "skill": "map-codebase",
+  "positive": [
+    "We're starting feature work in a repo I've never seen \u2014 map the codebase first",
+    "The project map's pinned commit is behind HEAD, refresh it",
+    "Orient in this codebase before you plan anything: layout, entry points, where the tests attach",
+    "Create docs/agents/project-map.md for this unfamiliar codebase"
+  ],
+  "negative": [
+    {
+      "prompt": "Draw an architecture diagram of our checkout flow as an explorable HTML page",
+      "owner": "archify"
+    },
+    {
+      "prompt": "Triage this ask and print the run plan",
+      "owner": "start"
+    },
+    {
+      "prompt": "Draft the spec for the billing export from yesterday's intake notes",
+      "owner": "draft-spec"
+    },
+    {
+      "prompt": "Run the review gate over this diff before we ship",
+      "owner": "review-change"
+    }
+  ]
+}

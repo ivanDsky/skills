@@ -1,0 +1,23 @@
+{
+  "skill": "assess-teardown",
+  "positive": [
+    "Decide fix-forward vs clean redesign for the twice-failed payments module",
+    "The parser module just failed its second fix round — run the teardown gate",
+    "This auth module is stuck; assess whether to tear it down and rebuild clean",
+    "Fire the teardown gate on the export module at reviewer discretion, and log the reason"
+  ],
+  "negative": [
+    {
+      "prompt": "Run another fix round on the review findings for the export module",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "Fix the failing CSV export module — try a different approach this time",
+      "owner": "implement"
+    },
+    {
+      "prompt": "Review the diff after the second fix round and tell me if it passes now",
+      "owner": "review-change"
+    }
+  ]
+}

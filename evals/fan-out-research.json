@@ -1,0 +1,23 @@
+{
+  "skill": "fan-out-research",
+  "positive": [
+    "Research this unknown: does Postgres row-level locking fit our write pattern?",
+    "Ticket 04 has two Unknowns — fan them out to research subagents before coding starts",
+    "Research whether SQLite or DuckDB fits before any coding starts",
+    "The spec declares an Unknown about the auth provider's token refresh flow — dispatch research on it"
+  ],
+  "negative": [
+    {
+      "prompt": "Ask me whether the export should include archived rows — that's a product call",
+      "owner": "run-intake"
+    },
+    {
+      "prompt": "Start implementing ticket 02 — its research findings are already linked",
+      "owner": "implement"
+    },
+    {
+      "prompt": "Break the approved spec into tickets and put the open questions in an Unknowns field",
+      "owner": "write-tickets"
+    }
+  ]
+}

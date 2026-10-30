@@ -1,12 +1,61 @@
 # ivandsky-skills
 
-My personal skillset for AI coding agents — small, composable skills in the
-open [Agent Skills](https://agentskills.io/specification) format, written to
-give greenfield and brownfield work a predictable, reliable flow.
+My personal skillset for AI coding agents — one flow, 22 small composable
+skills in the open [Agent Skills](https://agentskills.io/specification)
+format. Install it, run `/start`, and the right stages fire: intake asks the
+few questions worth asking, specs get drafted with marked assumptions, tickets
+carry checkable definitions of done, implementation runs per-ticket subagents,
+review is tiered by effort, and delivery produces build/deploy evidence.
 
-> **Status:** v1 is being charted. The plan of record lives in
-> [`.scratch/skillset-v1/MAP.md`](.scratch/skillset-v1/MAP.md) (wayfinder map,
-> local markdown tracker).
+## The flow
+
+```
+/start ──> intake ──> spec (+ one checkpoint) ──> tickets ──> [research]
+       ──> implement ──> review ──> deliver (build | deploy)
+conditional: map-codebase (unmapped repo) · prototype mode · teardown gate
+```
+
+Stages are conditional and effort-scaled: the effort level (fast / standard /
+thorough, set per project in `PROFILE.md`, overridable per session) maps to
+subagent thinking, review depth, and which gates block. Prototypes are a flag
+on the same flow, not a second process. When a module fails its second fix
+round, an independent architect decides fix-forward vs teardown.
+
+## Skills
+
+**Flow (fresh, authored):**
+`start` · `run-intake` · `draft-spec` · `write-tickets` · `implement` ·
+`review-change` · `deliver` · `map-codebase` · `fan-out-research` ·
+`graduate-prototype` · `assess-teardown` · `init-profile` · `integrate-skill`
+
+**Adapted (owned text, credited sources):**
+`ponytail` (smallest-change governor) · `run-intake` core mechanics from
+mattpocock/skills · `tdd` (fakes-over-mocks payload) from obra/superpowers ·
+`scope-creep-detector` from awesome-llm-apps
+
+**Installed as-is (vendored, attributed — see skills/ATTRIBUTION.md):**
+`design-taste-frontend` · `archify` · `ponytail-review` / `-audit` / `-debt` ·
+`ui-ux-pro-max`
+
+Design knowledge (apple-design, emil-design-eng, animation pack, ...) stays
+installed separately; flow skills name the moment to reach for it and
+descriptions route the rest.
+
+## Configuration
+
+- **Global user layer** (`~/.agents/AGENTS.md`): preferred stack, default
+  platform, UI taste, hard style rules — written once, checked by `init-profile`.
+- **Project** (`PROFILE.md` + `docs/agents/*.md`): deltas only — deploy
+  targets, testing style, effort default, tracker config.
+- **Feedback loop**: corrections end with `Save this? [p]roject config |
+  [s]kill update | [n]o` — project-local exceptions or durable skill fixes
+  (which land only through `integrate-skill`'s lint + trigger-case gate).
+- **Debug run log**: `debug: on` makes every skill append a ≤4-line entry to
+  `.scratch/run-log.md` — what fired, what it contributed, what went too deep
+  and why.
+
+Precedence: session > project > global user > skill defaults.
+Vocabulary: [GLOSSARY.md](GLOSSARY.md).
 
 ## Layout
 
@@ -15,7 +64,9 @@ skills/<name>/          # one directory per skill
 ├── SKILL.md            # required: YAML frontmatter + instructions
 ├── references/         # optional: detail docs, loaded only when needed
 └── scripts/            # optional: helper scripts the instructions call
+evals/<name>.json       # routing trigger cases (>=3 positive, >=2 near-miss)
 docs/skill-template/    # copy to skills/<name>/ to start a new skill
+scripts/lint_skills.py  # ported from awesome-llm-apps (Apache-2.0)
 ```
 
 ## Writing a skill
@@ -27,33 +78,23 @@ docs/skill-template/    # copy to skills/<name>/ to start a new skill
    |---|---|
    | `name` | required; lowercase `a-z`, `0-9`, hyphens; matches the directory |
    | `description` | required; say what it does **and** when to use it ("Use when..."). Empty description = the skill silently never loads. |
-   | `disable-model-invocation` | `true` hides it from the agent — only explicit invocation fires it. Use for skills only you summon. |
+   | `interaction` | our extension: `hitl` (stops for the human), `afk` (runs alone), `mixed` |
+   | `requires` | our extension: external tools the skill needs; `/start` checks before routing |
 
-3. Keep `SKILL.md` short: decision flow, common commands, contract. Push long
-   detail into `references/*.md` behind context pointers. Steps end in
-   checkable completion criteria.
-4. Say whether a skill is **HITL** (needs a live human) or **AFK** (agent
-   drives alone) — in the body, explicitly.
-
-Python-backed skills (agent calls `await my_skill(...)` directly) follow the
-Prime Agent contract: `pyproject.toml` at the skill root, `src/<import_name>/`
-layout, a documented `run()`. Decide per skill; see Prime Agent's
-`skill-creator` docs for the full contract.
+3. Keep `SKILL.md` small (≤ ~1.5k tokens): decision rules, not prose. Push
+   detail into `references/*.md` behind "read X when Y" pointers.
+4. Every skill gets `evals/<name>.json` trigger cases; routing failures are
+   fixed by editing the description, never the eval.
+5. New and changed skills land through `integrate-skill` — lint PASS required.
 
 ## Distribution
-
-Once v1 lands, install from any project:
 
 ```bash
 npx skills add ivanDsky/skills
 ```
 
-Until then, skills are installed by hand (copy a skill directory into the
-agent's skills location, e.g. `~/.agents/skills/`).
-
-## Planning process
+## Planning
 
 This repo plans its own evolution with the **wayfinder** skill: a shared map
-plus decision tickets on a **local markdown tracker** — issues live as files
-under `.scratch/<effort>/`. See `docs/agents/issue-tracker.md` for the
-conventions.
+plus decision tickets on a private local markdown tracker (`.scratch/`, kept
+out of the repo). Conventions: `docs/agents/issue-tracker.md`.

@@ -1,0 +1,27 @@
+{
+  "skill": "graduate-prototype",
+  "positive": [
+    "The prototype answered the question \u2014 keep the state machine module and turn it into real tickets with full review",
+    "Graduate the importer prototype: list the modules and I'll pick the ones worth shipping",
+    "The demo sold it \u2014 promote the prototype's working parts to feature work so they go through the normal gates",
+    "Throw the canvas prototype away, but write down what we learned and archive the branch"
+  ],
+  "negative": [
+    {
+      "prompt": "Sketch a throwaway prototype of the timeline as one big canvas so we can see if it works",
+      "owner": "start"
+    },
+    {
+      "prompt": "Start implementing the tickets that came out of the graduated prototype",
+      "owner": "implement"
+    },
+    {
+      "prompt": "Review the prototype branch before we decide what to keep from it",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "Deploy the prototype standalone so I can try it on my phone",
+      "owner": "deliver"
+    }
+  ]
+}

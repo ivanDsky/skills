@@ -1,0 +1,23 @@
+{
+  "skill": "integrate-skill",
+  "positive": [
+    "Onboard the skill I just wrote at skills/triage-drift — run the evals, size report, and register it with start",
+    "The intake skill asked me questions one at a time instead of one batch — take the skill-update path and fix it",
+    "Add a new skill to this repo for checking deploy evidence, and lint it before it lands",
+    "Integrate this fix into review-change: the fix loop must scope re-review to the fix diff only — update its trigger cases too"
+  ],
+  "negative": [
+    {
+      "prompt": "Save that correction to this project's AGENTS.md so reviews here always run the UI axis first",
+      "owner": "start"
+    },
+    {
+      "prompt": "Set up this new project — write PROFILE.md and add the /start entry line",
+      "owner": "init-profile"
+    },
+    {
+      "prompt": "Install design-taste-frontend into my agent's skills directory",
+      "owner": "init-profile"
+    }
+  ]
+}

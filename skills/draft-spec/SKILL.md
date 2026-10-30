@@ -47,6 +47,12 @@ Decision rules:
 - Use GLOSSARY.md terms throughout; respect existing ADRs in the area.
 - Keep it buildable by a fresh context: a competent builder plans from it
   without asking the user anything the spec should have answered.
+- Reach for the knowledge layer before writing Solution and Success criteria:
+  a UI surface means consulting the installed design skills (apple-design,
+  emil-design-eng; ui-ux-pro-max for stack-specific guidelines) instead of
+  inventing principles; an architecture discussion means offering a diagram
+  (archify when installed, else inline mermaid). PROFILE.md care-axes rank
+  what to pull; skill descriptions route the rest.
 
 ## 3. Post the checkpoint
 
