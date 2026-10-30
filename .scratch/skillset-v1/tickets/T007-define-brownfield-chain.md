@@ -2,7 +2,7 @@
 id: T007
 title: Spec the conditional stages - orientation, research, prototype, deploy targets
 labels: [wayfinder:task]
-status: open
+status: closed
 assignee: none
 blocked-by: []
 ---
@@ -13,4 +13,4 @@ Per T005's resolution: spec the conditional stages of the one flow — orientati
 
 ## Resolution
 
-(appended on close)
+Spec delivered and verified: ../specs/T007-conditional-stages.md (10.7k chars). Four mechanisms as skills (map-codebase, fan-out-research, graduate-prototype, adjudicate-teardown) + two thin contracts (prototype-flag deltas, teardown trigger) honored by the T006 chain skills. Skill names to be reconciled with the T018 roster before build.
