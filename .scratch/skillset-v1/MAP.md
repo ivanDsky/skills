@@ -33,6 +33,9 @@ labels: [wayfinder:map]
 - [Adopt? archify](tickets/T016-adopt-archify.md) — install-as-is for brownfield orientation + spec viz; ship with update-check disabled; heaviest skill carried (5.4 MB, ~5k tok/invocation).
 - [Position the flow](tickets/T005-position-the-flow.md) — one flow with conditional stages; `/start` entry (alias /build); two-gear batched intake; prototype as flag; teardown gate via independent architect; effort level in PROFILE.md; DoD mandatory.
 - [Set authoring standards](tickets/T008-set-authoring-standards.md) — smallness first (<=~1.5k tok bodies, references for depth); flat layout; kebab-case verb-first; `interaction`/`requires` frontmatter; trigger-case evals per skill with rank-1 ratchet; preferences as swappable rules payloads; GLOSSARY.md yes.
+- [Spec the /start core chain](tickets/T006-define-greenfield-chain.md) — 9 skills + effort mapping table; gates = intake batch + spec checkpoint only; entry-line bootstrap; feedback capture + debug run log (§10-11).
+- [Spec conditional stages](tickets/T007-define-brownfield-chain.md) — map-codebase / fan-out-research / graduate-prototype / assess-teardown + prototype-flag & teardown-trigger contracts; archify soft-required.
+- [Skill inventory](tickets/T018-skill-inventory.md) — roster v2: 21 skills (5 install / 4 adapt / 12 fresh); scope-creep-detector in; commit-archaeologist + thinking-out-loud out for v1.
 
 ## Not yet specified
 
@@ -40,7 +43,7 @@ labels: [wayfinder:map]
 
 ## Fog
 
-- **Skill inventory & disposition** — sharpened into T018 (blocked by the chain spec + authoring standards); adoption verdicts decided (see T017).
+- Design phase complete; build tickets T019-T021 created. Open fog: multi-harness manifests beyond the entry line; resume across machines (flagged in T006 §9).
 - **User priorities & wants** — the user will spec what they care about once the repo is deploy-ready; may redraw parts of the map.
 - **Multi-harness distribution** — plugin manifests (Claude Code / Codex / etc.) like superpowers and mattpocock maintain; hangs on positioning + ecosystem research.
 - **v1 porting plan** — sequencing of writing/adapting skills once chains are defined; hangs on T006/T007/T008.

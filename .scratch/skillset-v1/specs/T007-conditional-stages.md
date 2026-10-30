@@ -12,7 +12,7 @@ One flow (T005): `intake → [orientation] → spec → tickets → [research] �
 | 1 | Orientation | codebase not yet mapped, or map stale | between intake and spec | `map-codebase` |
 | 2 | Research fan-out | a ticket declares `Unknowns:` | between tickets and implement | `fan-out-research` |
 | 3 | Prototype mode | `/start` triage sets the prototype flag | flag bends spec/tickets/review/deliver | `graduate-prototype` (exit step) |
-| 4 | Teardown gate | 2 failed fix rounds on one module, or reviewer discretion | inside the implement/review loop | `adjudicate-teardown` |
+| 4 | Teardown gate | 2 failed fix rounds on one module, or reviewer discretion | inside the implement/review loop | `assess-teardown` |
 
 Shared rules, all four mechanisms:
 
@@ -108,7 +108,7 @@ Body:
 
 Est: ~700 tok.
 
-## 4. Teardown gate — trigger contract + `adjudicate-teardown`
+## 4. Teardown gate — trigger contract + `assess-teardown`
 
 ### 4.1 Trigger contract (lives in the implement/review loop)
 
@@ -116,12 +116,12 @@ Est: ~700 tok.
 2. Reviewer discretion: any reviewer may fire the gate once, with a logged reason. Discretion verdicts go through the same architect, so the architect is the check against abuse.
 3. Every trigger is a ledger line (`Ruling:` format).
 
-### 4.2 Skill: `adjudicate-teardown`
+### 4.2 Skill: `assess-teardown`
 
 Purpose: decide fix-forward vs clean redesign for a failing module with an independent architect; on redesign, rebuild carries only extracted findings.
 
 ```yaml
-name: adjudicate-teardown
+name: assess-teardown
 description: >-
   Decides fix-forward vs clean redesign for a twice-failed module using an
   independent fresh-context architect, then extracts findings before any

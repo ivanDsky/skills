@@ -2,7 +2,7 @@
 id: T018
 title: Skill inventory and disposition
 labels: [wayfinder:grilling]
-status: open
+status: closed
 assignee: coordinator
 blocked-by: [T006, T008]
 ---
@@ -17,4 +17,4 @@ Draft v1 at ../specs/T018-inventory-draft.md; reconcile with T006/T007 specs bef
 
 ## Resolution
 
-(appended on close)
+Roster v2 final: ../specs/T018-inventory-draft.md — 21 skills (5 install / 4 adapt / 12 fresh); port verdicts: scope-creep-detector adopted, commit-archaeologist + thinking-out-loud declined for v1; knowledge layer stays installed; names reconciled with T006/T007 specs.
