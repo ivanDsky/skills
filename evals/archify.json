@@ -1,0 +1,18 @@
+{
+  "skill": "archify",
+  "positive": [
+    "Visualize this codebase architecture as an interactive diagram",
+    "Turn this spec workflow into a sequence diagram",
+    "Create an explainer page for this module"
+  ],
+  "negative": [
+    {
+      "prompt": "Design a landing page for my product",
+      "owner": "design-taste-frontend"
+    },
+    {
+      "prompt": "Review the change against the spec",
+      "owner": "review-change"
+    }
+  ]
+}

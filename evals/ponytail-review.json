@@ -1,0 +1,18 @@
+{
+  "skill": "ponytail-review",
+  "positive": [
+    "Review this change with the ponytail lens",
+    "Did this PR do the smallest thing that fully works?",
+    "Check this branch for over-building"
+  ],
+  "negative": [
+    {
+      "prompt": "Implement the next ticket",
+      "owner": "implement"
+    },
+    {
+      "prompt": "Write the failing test first",
+      "owner": "tdd"
+    }
+  ]
+}

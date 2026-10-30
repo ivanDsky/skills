@@ -1,0 +1,18 @@
+{
+  "skill": "ui-ux-pro-max",
+  "positive": [
+    "Design this screen in Compose following Material guidelines",
+    "Generate a design system for a fintech app in SwiftUI",
+    "Make this mobile e-commerce UI feel premium"
+  ],
+  "negative": [
+    {
+      "prompt": "Generate an architecture diagram",
+      "owner": "archify"
+    },
+    {
+      "prompt": "Review this backend service",
+      "owner": "review-change"
+    }
+  ]
+}

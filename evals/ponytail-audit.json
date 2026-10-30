@@ -1,0 +1,18 @@
+{
+  "skill": "ponytail-audit",
+  "positive": [
+    "Audit this module for over-engineering",
+    "Where did we build more than the task needed?",
+    "Audit whether these abstractions earn their keep"
+  ],
+  "negative": [
+    {
+      "prompt": "Review code quality of this diff",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "Find tech debt here",
+      "owner": "ponytail-debt"
+    }
+  ]
+}

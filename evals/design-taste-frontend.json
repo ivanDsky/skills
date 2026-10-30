@@ -1,0 +1,18 @@
+{
+  "skill": "design-taste-frontend",
+  "positive": [
+    "Build a landing page for my portfolio",
+    "Make this marketing site feel art-directed instead of generic AI slop",
+    "Design a distinctive product page for this app"
+  ],
+  "negative": [
+    {
+      "prompt": "Review this diff for bugs",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "Visualize this architecture as a diagram",
+      "owner": "archify"
+    }
+  ]
+}

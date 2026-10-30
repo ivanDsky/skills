@@ -1,0 +1,18 @@
+{
+  "skill": "ponytail-debt",
+  "positive": [
+    "Find the tech debt in this module",
+    "What shortcuts did we take and what do they cost?",
+    "List the debt we accrued this sprint"
+  ],
+  "negative": [
+    {
+      "prompt": "Fix this bug",
+      "owner": "implement"
+    },
+    {
+      "prompt": "Audit for over-engineering",
+      "owner": "ponytail-audit"
+    }
+  ]
+}
