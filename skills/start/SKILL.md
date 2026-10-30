@@ -14,6 +14,8 @@ requires: []
 
 Classify the ask, read project state, print the run plan, fire the chain.
 One run = one classification; the chain skills own everything after the plan.
+Setup is part of this run: an unset project gets configured here, inside the
+first `/start` — never via a separate command the user had to remember.
 
 ## Read first
 
