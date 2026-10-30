@@ -1,0 +1,23 @@
+{
+  "skill": "ponytail",
+  "positive": [
+    "Add dark mode to the settings page, ponytail style",
+    "Fix this bug, be lazy — smallest change that fully works",
+    "Implement CSV export, but yagni everything we don't need",
+    "Build the simplest solution that fully solves this, no extras"
+  ],
+  "negative": [
+    {
+      "prompt": "Review this PR for bugs and bloat",
+      "owner": "ponytail-review"
+    },
+    {
+      "prompt": "Audit the whole repo for security holes and dead code",
+      "owner": "ponytail-audit"
+    },
+    {
+      "prompt": "List every shortcut comment as a debt ledger",
+      "owner": "ponytail-debt"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 id: T019
 title: Build the install + adapt tier (10 skills)
 labels: [wayfinder:task]
-status: open
+status: closed
 assignee: none
 blocked-by: []
 ---
@@ -13,4 +13,4 @@ Author the 6 install-as-is skills (incl. ui-ux-pro-max, T022) (vendored per adop
 
 ## Resolution
 
-(appended on close)
+10/10 skills built and lint-clean (2026-10-29): 6 install-as-is vendored with licenses + ATTRIBUTION.md (taste, archify+NOTICE, 3 ponytail lenses, ui-ux-pro-max), 4 adapt authored (ponytail, run-intake, tdd, scope-creep-detector) each with references/, credit footer, and central evals/<name>.json trigger cases. scripts/lint_skills.py ported (Apache-2.0). Follow-up: lint allowlist for interaction/requires keys lands with the T020 runner.

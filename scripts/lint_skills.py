@@ -283,6 +283,10 @@ def check_body(body, skill_dir, strict, errors, warnings):
             continue
         if "\\" in cand:
             continue  # already reported as a backslash-path error
+        if "<" in cand:
+            continue  # parameterized path pattern (e.g. assets/scenes/demo/<id>.html), generated at runtime
+        if cand.endswith("/") and os.path.isdir(os.path.dirname(os.path.join(skill_dir, cand.rstrip("/")))):
+            continue  # documents a generated subtree inside an existing dir (e.g. demo/<id>.html outputs)
         if not os.path.exists(os.path.join(skill_dir, cand)):
             errors.append(
                 "SKILL.md references %r but no such file exists in the skill "

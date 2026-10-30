@@ -1,0 +1,23 @@
+{
+  "skill": "run-intake",
+  "positive": [
+    "Gather requirements for the new CSV export feature before we write the spec",
+    "Ask me what you need to know to build the billing prototype",
+    "We're adding multi-tenant support \u2014 scope it with me, ask your questions in one go",
+    "Run intake on this feature request"
+  ],
+  "negative": [
+    {
+      "prompt": "Grill me relentlessly about this design until we reach shared understanding",
+      "owner": "grilling"
+    },
+    {
+      "prompt": "Draft the spec for the export feature from yesterday's notes",
+      "owner": "draft-spec"
+    },
+    {
+      "prompt": "Write the implementation tickets for this spec",
+      "owner": "write-tickets"
+    }
+  ]
+}

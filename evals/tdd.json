@@ -1,0 +1,23 @@
+{
+  "skill": "tdd",
+  "positive": [
+    "Add pagination to the API client — write the failing test first",
+    "Fix this null-deref bug using TDD",
+    "Implement the retry logic red-green-refactor style",
+    "We need tests for this new parser before you write the implementation"
+  ],
+  "negative": [
+    {
+      "prompt": "Review this PR and flag risky logic that has no tests",
+      "owner": "ponytail-review"
+    },
+    {
+      "prompt": "Explain what this existing test suite covers",
+      "owner": "none"
+    },
+    {
+      "prompt": "Set up CI to run the test suite on every push",
+      "owner": "none"
+    }
+  ]
+}

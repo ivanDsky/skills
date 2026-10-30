@@ -35,7 +35,8 @@ labels: [wayfinder:map]
 - [Set authoring standards](tickets/T008-set-authoring-standards.md) — smallness first (<=~1.5k tok bodies, references for depth); flat layout; kebab-case verb-first; `interaction`/`requires` frontmatter; trigger-case evals per skill with rank-1 ratchet; preferences as swappable rules payloads; GLOSSARY.md yes.
 - [Spec the /start core chain](tickets/T006-define-greenfield-chain.md) — 9 skills + effort mapping table; gates = intake batch + spec checkpoint only; entry-line bootstrap; feedback capture + debug run log (§10-11).
 - [Spec conditional stages](tickets/T007-define-brownfield-chain.md) — map-codebase / fan-out-research / graduate-prototype / assess-teardown + prototype-flag & teardown-trigger contracts; archify soft-required.
-- [Skill inventory](tickets/T018-skill-inventory.md) — roster v2: 21 skills (5 install / 4 adapt / 12 fresh); scope-creep-detector in; commit-archaeologist + thinking-out-loud out for v1.
+- [Skill inventory](tickets/T018-skill-inventory.md) — roster v2.1: 22 skills (6 install / 4 adapt / 12 fresh); scope-creep-detector in; commit-archaeologist + thinking-out-loud out for v1.
+- [Build install + adapt tier](tickets/T019-build-adapt-tier.md) — 10/10 lint-clean; central evals/ dir keeps upstream dirs re-vendorable; linter ported.
 
 ## Not yet specified
 

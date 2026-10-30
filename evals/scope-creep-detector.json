@@ -1,0 +1,23 @@
+{
+  "skill": "scope-creep-detector",
+  "positive": [
+    "Did my change grow beyond the parser fix I intended?",
+    "Is this PR too broad? It started as a one-line fix",
+    "Check my staged diff for scope creep before I open the PR",
+    "What unrelated files did I touch in this branch?"
+  ],
+  "negative": [
+    {
+      "prompt": "Review this change for correctness and security issues",
+      "owner": "ponytail-review"
+    },
+    {
+      "prompt": "Audit the whole repo for bugs, bloat, and things to delete",
+      "owner": "ponytail-audit"
+    },
+    {
+      "prompt": "Run the formatter and write a commit message for these changes",
+      "owner": "none"
+    }
+  ]
+}
