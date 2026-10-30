@@ -281,9 +281,9 @@ Project root, written by `init-profile`, read by `start` (and every chain skill,
 ## Effort
 - level: standard            # fast | standard | thorough; per-session override: /start <level>
 
-## Platform
+## Platform & stack (global-first)
 
-Primary surface + stack (e.g., mobile-first, Android / Jetpack Compose). Routes three things: the UI rules payload (`references/rules-ui-<platform>.md`), the platform review axes (mobile: touch targets, density, safe areas, state restoration, offline), and the screenshot source for fast-tier review (emulator/device for mobile, browser for web).
+Preferred stack and default platform are USER-level and stored once globally in `~/.agents/AGENTS.md` (AGENTS.md global convention) — e.g., mobile-first, Kotlin / Jetpack Compose. `init-profile` checks and offers to create it. Project `PROFILE.md` holds only deltas: deploy targets, testing style, effort default, and a platform override only when the project differs from the user default. Platform routes: the UI rules payload (`references/rules-ui-<platform>.md`, seedable from ui-ux-pro-max's design-system generation), the platform review axes (mobile: touch targets, density, safe areas, state restoration, offline), and the screenshot source for fast-tier review (emulator/device for mobile, browser for web).
 
 ## Deploy targets (in order; empty list = build-only)
 - local: <run command>
@@ -375,9 +375,9 @@ Applies at every HITL gate and to in-flight corrections; never applied silently.
 
 **How skills compose.** Skills are not function calls; they apply on different axes and are selected by `start` + their `Use when` descriptions. Two composition kinds: (a) *sequenced* — chain stages hand artifacts to each other; (b) *layered* — skills governing different axes apply inside the same stage. Example: `implement` runs the `tdd` procedure (process axis: red-green-refactor, fakes) while `ponytail` governs scope (how much to build, new code last). When they tension (tests want scaffolding, ponytail wants minimal), ponytail's own never-cut list keeps validation — scope shrinks, tests never.
 
-**Precedence** (same everywhere): user/project config (`docs/agents/AGENTS.md`, `PROFILE.md`) > skill body > skill defaults. Project overrides global; feedback-capture writes are dated, newest wins. `references/rules-*.md` payloads are the shared layer multiple skills read.
+**Precedence** (same everywhere): session override > project config (`docs/agents/AGENTS.md`, `PROFILE.md`) > global user layer (`~/.agents/AGENTS.md`: preferred stack, default platform, UI taste, hard style rules) > skill body > skill defaults. Feedback-capture writes are dated, newest wins; the two-way capture decides project-local exception vs global fix. `references/rules-*.md` payloads are the shared layer multiple skills read.
 
-**UX review axis.** `review-change` references include `review-ux.md`: platform-agnostic principles via the knowledge layer (apple-design, emil-design-eng) + the platform rules payload + impeccable/taste gates *when the surface is web*. No separate reviewer skills in the roster (smallness); the axis is a reference any review tier can load.
+**UX review axis.** `review-change` references include `review-ux.md`: platform-agnostic principles via the knowledge layer (apple-design, emil-design-eng) + stack-specific guidelines via ui-ux-pro-max (22 stacks incl. Jetpack Compose/SwiftUI — the mobile source; T022) + the platform rules payload + impeccable/taste gates *when the surface is web*. No separate reviewer skills in the roster (smallness); the axis is a reference any review tier can load.
 
 **Parallelism.** Research: fan-out parallel by design (one subagent per unknown; effort mapping caps the count; >3 flags depth). Implementation: tickets run in order by default; `write-tickets` may mark independent tickets (declared disjoint file scopes) as parallel-safe, each getting its own fresh subagent. Shared-surface work gets blocking edges instead.
 

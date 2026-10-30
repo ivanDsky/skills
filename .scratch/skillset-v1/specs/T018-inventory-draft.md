@@ -1,17 +1,18 @@
-# Skillset inventory — roster v2 FINAL (T018)
+# Skillset inventory — roster v2.1 FINAL (T018, +T022)
 
 Reconciled with the T006/T007 specs (2026-10-29). Two layers:
-1. **Flow layer (this repo)** — 21 skills below; `npx skills add ivanDsky/skills`.
+1. **Flow layer (this repo)** — 22 skills below; `npx skills add ivanDsky/skills`.
 2. **Knowledge layer (already installed, stays)** — apple-design, emil-design-eng, animation pack, pick-ui-library, ... `PROFILE.md` care-axes route to them; never copied here.
 External tools (not skills): impeccable (`npx impeccable install`), archify CLI. Naming: fresh tier verb-first per T008; install/adapt tiers keep source-derived names for provenance.
 
-## A. Install-as-is (5)
+## A. Install-as-is (6)
 
 | Skill | Source | Why |
 |---|---|---|
 | design-taste-frontend | Leonxlnx/taste-skill | art direction + measurable browser gate |
 | archify | tt-a1i/archify | source-linked diagrams; orientation + spec viz (update-check off) |
 | ponytail-review / ponytail-audit / ponytail-debt | DietrichGebert/ponytail | read-only review lenses (~400 tok descriptions via skills route) |
+| ui-ux-pro-max | nextlevelbuilder/ui-ux-pro-max-skill | stack-specific design intelligence, 22 stacks incl. Jetpack Compose/SwiftUI — the mobile UX source (T022) |
 
 ## B. Adapt (4)
 
