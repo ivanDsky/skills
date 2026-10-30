@@ -1,0 +1,28 @@
+{
+  "skill": "start",
+  "positive": [
+    "/start — add CSV export to the billing page",
+    "build: make the dashboard widgets shareable, plan the stages first",
+    "Start work in this repo — triage the ask and show me the run plan",
+    "Sketch a quick prototype: would one big canvas work for the timeline?",
+    "/start fast — the login redirect loop needs fixing"
+  ],
+  "negative": [
+    {
+      "prompt": "Ask me the load-bearing questions about this feature in one batch",
+      "owner": "run-intake"
+    },
+    {
+      "prompt": "Draft the working spec with the numbered assumptions for the export feature",
+      "owner": "draft-spec"
+    },
+    {
+      "prompt": "Break this approved spec into tracer-bullet tickets",
+      "owner": "write-tickets"
+    },
+    {
+      "prompt": "Execute the next ready ticket on the frontier",
+      "owner": "implement"
+    }
+  ]
+}

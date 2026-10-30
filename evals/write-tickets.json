@@ -1,0 +1,27 @@
+{
+  "skill": "write-tickets",
+  "positive": [
+    "The spec passed review \u2014 break it into tickets in the tracker",
+    "Turn this plan into dependency-ordered tickets, each with a checkable done condition and evidence",
+    "We're building the export feature next; write the tickets so each one fits a single fresh subagent run",
+    "Split the approved spec into tracer-bullet tickets, walking skeleton first"
+  ],
+  "negative": [
+    {
+      "prompt": "Draft the spec with a numbered assumptions section from yesterday's intake answers",
+      "owner": "draft-spec"
+    },
+    {
+      "prompt": "Pick the first ticket off the frontier and implement it in a fresh subagent",
+      "owner": "implement"
+    },
+    {
+      "prompt": "Research this unknown: does Postgres row-level locking fit our write pattern?",
+      "owner": "fan-out-research"
+    },
+    {
+      "prompt": "Classify this ask and print the run plan for the session",
+      "owner": "start"
+    }
+  ]
+}

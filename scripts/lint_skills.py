@@ -60,7 +60,7 @@ INLINE_CODE = re.compile(r"`[^`\n]+`")
 TEMPLATE_PLACEHOLDER = re.compile(r"<([a-z][a-z0-9'’,—-]*(?: [a-z0-9'’,—.…-]+)+[^>]*)>")
 TODO_MARKER = re.compile(r"\b(TODO|FIXME|XXX|TBD)\b")
 MD_LINK = re.compile(r"\]\(([^)\s#]+)\)")
-BARE_PATH = re.compile(r"\b((?:scripts|references|assets|evals)/[\w.\-/]+)")
+BARE_PATH = re.compile(r"\b((?:scripts|references|assets|evals)/[\w.\-*]+)")
 BACKSLASH_PATH = re.compile(r"(?:scripts|references|assets|evals)\\")
 
 
@@ -284,8 +284,8 @@ def check_body(body, skill_dir, strict, errors, warnings):
             continue
         if "\\" in cand:
             continue  # already reported as a backslash-path error
-        if "<" in cand:
-            continue  # parameterized path pattern (e.g. assets/scenes/demo/<id>.html), generated at runtime
+        if "<" in cand or "*" in cand:
+            continue  # parameterized/glob pattern (e.g. demo/<id>.html, rules-*.md), not a literal path
         if cand.endswith("/") and os.path.isdir(os.path.dirname(os.path.join(skill_dir, cand.rstrip("/")))):
             continue  # documents a generated subtree inside an existing dir (e.g. demo/<id>.html outputs)
         if not os.path.exists(os.path.join(skill_dir, cand)):

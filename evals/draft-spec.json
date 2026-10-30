@@ -1,0 +1,27 @@
+{
+  "skill": "draft-spec",
+  "positive": [
+    "Draft the spec for the CSV export feature from yesterday's intake notes",
+    "We finished intake — write the spec and show me what you're assuming before you build",
+    "Turn my answers into a working spec, then give me one chance to correct you before you go",
+    "Spec out the billing prototype and post your correct-me-or-I-go summary"
+  ],
+  "negative": [
+    {
+      "prompt": "Ask me the questions you need answered before we spec the billing feature",
+      "owner": "run-intake"
+    },
+    {
+      "prompt": "Break the approved spec into implementation tickets with DoD",
+      "owner": "write-tickets"
+    },
+    {
+      "prompt": "Grill me relentlessly about this architecture decision until we settle it",
+      "owner": "grilling"
+    },
+    {
+      "prompt": "Implement the first ticket from the spec",
+      "owner": "implement"
+    }
+  ]
+}

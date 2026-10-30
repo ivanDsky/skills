@@ -1,0 +1,23 @@
+{
+  "skill": "deliver",
+  "positive": [
+    "Review passed — build it and deploy to the firebase target, then close out the run",
+    "Ship it: wrap up the run with evidence and the delivery summary",
+    "The prototype question is answered; deploy it standalone so the main site stays untouched",
+    "Run /deliver — build only for now, no deploy targets in this project"
+  ],
+  "negative": [
+    {
+      "prompt": "Review the change against the spec before we ship anything",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "The build broke on ticket 03 — fix the implementation",
+      "owner": "implement"
+    },
+    {
+      "prompt": "Add a ticket for writing the production deploy runbook",
+      "owner": "write-tickets"
+    }
+  ]
+}

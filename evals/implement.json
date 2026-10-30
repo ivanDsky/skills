@@ -1,0 +1,27 @@
+{
+  "skill": "implement",
+  "positive": [
+    "The tickets are written — start implementing, one subagent per ticket",
+    "Work the frontier: execute the ready tickets in tracer-bullet order",
+    "Resume implementation after that interruption — the ledger has our progress",
+    "Run implement on ticket 03 and keep the ledger current"
+  ],
+  "negative": [
+    {
+      "prompt": "Review the change we just implemented against the spec before we ship",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "Break this spec into tickets, each with a DoD and evidence",
+      "owner": "write-tickets"
+    },
+    {
+      "prompt": "Research whether SQLite or DuckDB fits before any coding starts",
+      "owner": "fan-out-research"
+    },
+    {
+      "prompt": "Fix the null deref in the parser — smallest change that works",
+      "owner": "ponytail"
+    }
+  ]
+}
