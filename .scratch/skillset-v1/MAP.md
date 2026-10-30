@@ -31,10 +31,15 @@ labels: [wayfinder:map]
 - [Adopt? taste-skill](tickets/T014-adopt-taste-skill.md) — install-as-is design-taste-frontend; fills art-direction gap; browser check is zero-dep CDP; heavy per page (30-45 min).
 - [Adopt? impeccable](tickets/T015-adopt-impeccable.md) — adopt as external self-updating tool (`npx impeccable install`), not vendored; complements apple-design/emil-design-eng.
 - [Adopt? archify](tickets/T016-adopt-archify.md) — install-as-is for brownfield orientation + spec viz; ship with update-check disabled; heaviest skill carried (5.4 MB, ~5k tok/invocation).
+- [Position the flow](tickets/T005-position-the-flow.md) — one flow with conditional stages; `/start` entry (alias /build); two-gear batched intake; prototype as flag; teardown gate via independent architect; effort level in PROFILE.md; DoD mandatory.
 
 ## Not yet specified
 
-- **Skill inventory & disposition** — which of the user's installed skills stay as-is, which get ported, which gaps need new skills; hangs on T005 (positioning) and on the user's priorities. Adoption verdicts for the four candidates are decided (see T017); the rest of the inventory waits.
+- **User's personal priorities** — resolved 2026-10-29 (captured in T005's resolution; care-list drives T018).
+
+## Fog
+
+- **Skill inventory & disposition** — sharpened into T018 (blocked by the chain spec + authoring standards); adoption verdicts decided (see T017).
 - **User priorities & wants** — the user will spec what they care about once the repo is deploy-ready; may redraw parts of the map.
 - **Multi-harness distribution** — plugin manifests (Claude Code / Codex / etc.) like superpowers and mattpocock maintain; hangs on positioning + ecosystem research.
 - **v1 porting plan** — sequencing of writing/adapting skills once chains are defined; hangs on T006/T007/T008.

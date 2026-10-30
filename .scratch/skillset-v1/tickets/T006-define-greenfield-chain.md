@@ -1,15 +1,15 @@
 ---
 id: T006
-title: Define the greenfield chain
-labels: [wayfinder:grilling]
+title: Spec the /start entry skill and core flow chain
+labels: [wayfinder:task]
 status: open
-assignee: None
-blocked-by: [T005]
+assignee: none
+blocked-by: []
 ---
 
 ## Question
 
-Specify the greenfield path end to end: which skills run, in what order, what artifact each produces and hands to the next (idea -> grilled requirements -> spec -> tickets -> implementation -> review), which steps are HITL vs AFK, and what the human approves at each gate. Reuse existing skills where they fit; write new ones only for gaps.
+Per T005's resolution: spec the `/start` entry skill (triage rules, profile + frontier read, HITL/AFK markings) and the core chain skills it routes to — intake (two-gear batched questions), draft spec with marked assumptions, ticket set, implementation (ponytail ordering), review, deliver. Define the artifact handoffs between stages and each stage's gates per effort level.
 
 ## Resolution
 
