@@ -99,6 +99,9 @@ Send the batch and stop. Never a second batch.
 # platform: <only when this project differs from the user default>
 # stack: <only when this project diverges from the preferred stack>
 
+## Version
+- version: 0.1.0             # semver major.minor.patch; bump per run: breaking → major, feature → minor, fix/step → patch (deliver writes it back)
+
 ## Deploy targets (in order; empty list = build-only)
 - local: <run command>
 # - firebase: <project id>
@@ -111,7 +114,10 @@ Send the batch and stop. Never a second batch.
 ```
 
 The four contract sections are Care-axes, Effort, Deploy targets, Testing
-style — extra sections are allowed, never required. The effective platform
+style — extra sections are allowed, never required. `## Version` is seeded
+(`0.1.0`) when missing so every project ships named artifacts
+(`<app_name>-<sem_ver>-<debug|release>.apk`); missing sections are asked
+about once. The effective platform
 (override, else user default) routes the UI rules payload
 (`rules-ui-<platform>.md`), the platform review axes, and the screenshot
 source for fast-tier review — the UI verification ladder

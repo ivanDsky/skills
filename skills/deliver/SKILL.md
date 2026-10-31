@@ -38,7 +38,14 @@ passed; this stage adds no code.
 
 3. Build first, always. Run the project build and capture the log to
    `.scratch/<slug>/build.log`. A failed build stops everything — a deploy
-   never starts on a red build.
+   never starts on a red build. The artifact then gets its canonical name
+   before any deploy target touches it: copy to
+   `<app_name>-<sem_ver>-<debug|release>.apk` (variant from the build type).
+   The semver comes from PROFILE.md `version:` (fallback: Gradle
+   `versionName`); bump it per the run's change — breaking → major, feature →
+   minor, fix/step → patch — and write the new value back to PROFILE.md.
+   Deploy targets and evidence lines reference the canonical name, never
+   Gradle's `app-<variant>.apk`.
 
 4. Deploy per target, in listed order. Mobile distribution has dedicated
    playbooks — dispatch, don't improvise: `firebase` target on an Android
