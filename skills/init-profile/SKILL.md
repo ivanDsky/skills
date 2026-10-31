@@ -111,7 +111,9 @@ The four contract sections are Care-axes, Effort, Deploy targets, Testing
 style — extra sections are allowed, never required. The effective platform
 (override, else user default) routes the UI rules payload
 (`rules-ui-<platform>.md`), the platform review axes, and the screenshot
-source for fast-tier review (emulator/device for mobile, browser for web).
+source for fast-tier review — the UI verification ladder
+(`tdd`/references/android-testing.md): JVM screenshot suites
+(Roborazzi / AGP preview tests) first; emulator/device only at acceptance.
 
 Then, in order:
 
