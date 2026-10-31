@@ -57,7 +57,14 @@ environment config — run it during onboarding, `init-profile`/`map-codebase`).
   READY. Verify the READY entry's path matches the worktree under review
   before running any studio command, and pin every studio call with
   `--project <name-or-path>` so results never attach to a different open
-  project.
+  project. Trust dialog: the first open of an untrusted folder blocks on a
+  modal. Fix once per machine by adding `-Didea.trust.all.projects=true` to
+  the Studio `studio.vmoptions` (macOS:
+  `~/Library/Application Support/Google/AndroidStudio<version>/`) — trusts
+  every project, acceptable on a dev-only machine; per-project trust via
+  `options/trusted-settings.xml` is the conservative alternative. Flag takes
+  effect on the next Studio launch; if Studio is already running, restart it
+  or approve the dialog by hand once.
 - **Documentation images from previews** — `android preview render
   --output <dir> --fqn <fqn>` builds the target and writes per-preview PNGs
   (plus optional `--component-tree` JSON: bounds, semantics, parameters,
