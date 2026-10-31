@@ -47,10 +47,14 @@ chat carries only the user-facing report.
    ladder — reviewers cite JVM screenshot-test captures as proof and never boot
    an emulator to gather evidence. On Android diffs the reviewer runs the
    Android CLI checks itself (`android-cli` skill, mandatory, not delegated to
-   the implementer): `android studio analyze-file` on touched files when the
-   IDE is open, `android preview render` for any preview claim it grades,
-   `android layout --output hierarchy.json` for touch-target/density verdicts,
-   and `android studio version-lookup` before accepting any dependency change.
+   the implementer). **`android studio analyze-file` comes first** — run it on
+   every touched Kotlin/Java file before reading the diff; its inspections
+   catch what eyeballing misses, and it needs the IDE open (`android studio
+   check` for READY; closed IDE → say so and fall back to lint-only, never
+   skip silently). Then: `android preview render` for any preview claim it
+   grades, `android layout --output hierarchy.json` for touch-target/density
+   verdicts, and `android studio version-lookup` before accepting any
+   dependency change.
    An Android finding graded without the applicable CLI check is
    `cannot-verify`, not ✅. Never session history — the reviewer judges
    the work product, not the process.

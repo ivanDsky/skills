@@ -43,10 +43,15 @@ environment config — run it during onboarding, `init-profile`/`map-codebase`).
 
 ## Verified strengths (checked against `android help`, CLI 1.1)
 
-- **File-level static analysis** — `android studio analyze-file <path>` runs
-  Android Studio's editor inspections on one file. It *supplements* Gradle
-  lint on the touched files; it does not replace `./gradlew lint` (different
-  check sets). Useful in the review fast gate and while writing.
+- **File-level static analysis (the reviewer's first tool)** —
+  `android studio analyze-file <path>` runs Android Studio's editor
+  inspections on one file. Reviewers run it on every touched Kotlin/Java
+  file *before* reading the diff; it catches unused symbols, nullability
+  issues, API misuse and deprecations that eyeballing the diff misses. It
+  *supplements* Gradle lint on the touched files; it does not replace
+  `./gradlew lint` (different check sets). Needs the IDE open with the
+  project (`android studio check` → READY); closed IDE → fall back to
+  lint-only and say so.
 - **Documentation images from previews** — `android preview render
   --output <dir> --fqn <fqn>` builds the target and writes per-preview PNGs
   (plus optional `--component-tree` JSON: bounds, semantics, parameters,
