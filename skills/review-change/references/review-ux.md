@@ -7,6 +7,12 @@ layers, cheapest first; stop adding layers once one exposes systemic issues.
    targets, density, safe areas, state restoration, offline behavior on
    mobile; focus order, keyboard access, empty and error states on web.
    Platform review axes come from the platform routes in PROFILE.md.
+   Android UI in the diff also passes preview coverage (`preview-compose`):
+   every new or changed composable has `@Preview`s with state and
+   light/dark/font-scale variants (multipreview annotations), and any animated
+   component is verifiable in Animation Preview — a component without preview
+   evidence is a finding, not a preference. Flag-backed UI (`wire-dev-settings`)
+   must show both flag branches in previews or tests.
 2. **Stack guidelines** (ui-ux-pro-max; 22 stacks incl. Jetpack Compose and
    SwiftUI): load the stack's guideline set and check the diff's screens
    against it. When `references/rules-ui-<platform>.md` is empty, seed it from
