@@ -41,6 +41,24 @@ environment config — run it during onboarding, `init-profile`/`map-codebase`).
 | Natural-language E2E journeys | Journeys tools/skills (`android skills find journey`) | `tdd` ladder — between instrumented tests and human acceptance |
 | APK/AAB metadata | `android analyze <apk>` — versions, permissions, size | `deliver` DoD check, release naming verification |
 
+## Verified strengths (checked against `android help`, CLI 1.1)
+
+- **File-level static analysis** — `android studio analyze-file <path>` runs
+  Android Studio's editor inspections on one file. It *supplements* Gradle
+  lint on the touched files; it does not replace `./gradlew lint` (different
+  check sets). Useful in the review fast gate and while writing.
+- **Documentation images from previews** — `android preview render
+  --output <dir> --fqn <fqn>` builds the target and writes per-preview PNGs
+  (plus optional `--component-tree` JSON: bounds, semantics, parameters,
+  modifiers). This is the pipeline for README/docs screenshots of UI
+  components and for `review-site` images — real renders, not mockups.
+- **Dependency/version suggestion verification** — `android studio
+  version-lookup <artifacts...>` returns latest available versions of Maven
+  artifacts, Android versions, and SDK tools. Verify any "you should
+  upgrade X" suggestion here before applying it. It does not validate other
+  kinds of suggestions (refactors, lint fixes) — those need
+  `analyze-file`/inspection runs.
+
 ## Placement rules
 
 - `android preview render` is device-free JVM evidence: it counts on the
