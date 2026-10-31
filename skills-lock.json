@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "skills": {
+    "animation-vocabulary": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "db8d75be4476de0519707144233bc9d1b3b080283fc60dfb2ac310d010746888"
+    },
+    "apple-design": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "b1e95692fccbc58dfed00562d0e2c9a327f0e1474dd8e81aeb2d5fefb86c2fa7"
+    },
+    "archify": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "e9ef0923cda908886e667eb48e36b29e81d0a7a7b9fe2bc05f3779be271e5119"
+    },
+    "assess-teardown": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "bbcad2a64a3a39c0d52b47f63661e9b69a6c1eb1fe8c8e2ccca9bbb9d35b84b1"
+    },
+    "deliver": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "f6761b7c78c8ca7e905557272a41b22b02ed218901dc449e364c9c7a63586d2a"
+    },
+    "deploy-firebase": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "5d038f4d82e73c0b06ea5f2b68e870249b9c0a341c502cfd1f32144784afe1f7"
+    },
+    "deploy-tailscale": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "4f21485e5e145d63c2d6fbb4c9167d7cfa052a9977347fa2001111c81e810ae6"
+    },
+    "design-architecture": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "b21d530a7c598a534ddc4ce4093a14f93217ee4194086b47412648261a51d2b6"
+    },
+    "design-taste-frontend": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "49cfcaa0a8966f4900dbc45868e75de8f2ead66bec2c92ee91363b37c7e96a0c"
+    },
+    "diagnose-bug": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "88bb83189b114367e119d1b952c35f072e226ebf048e53dfe340af5176738971"
+    },
+    "draft-spec": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "d034d62feb6508a0ea7aeba2eae6a0c94f719683811e83b640789af6275d7bb6"
+    },
+    "emil-design-eng": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "2b8e6a0b2f7c6566ed831ca3b0e4f82fa688c423abd14097a64cb75db136c35a"
+    },
+    "fan-out-research": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "b03ca666aa37041977f56ca341a44d2b9c6dae47cd86b0ffb420dea874523abe"
+    },
+    "graduate-prototype": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "8571e97f75802f945be69502f5493ebcf2a79ff419dd756080f6d9f9212fe50d"
+    },
+    "implement": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "b528f2602938ea5fde5b71ced209330880ed6f2bf57e2eba384ad78cc091bc79"
+    },
+    "init-profile": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "7dbb93da76015e2ce5852d2641ed4c8b9ec4dbe7442ee0975a56ee784cf88836"
+    },
+    "integrate-skill": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "679d7077e4870bf36e0c28b8b307fcccdbedd1eeee3b900a24a6e575f70c43b5"
+    },
+    "map-codebase": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "0a70fe7cda020ce815b1e4980a0346755a8c7ddc01c421526c25b3a7ecdcee7a"
+    },
+    "ponytail": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "d57bf03c11ef55bd6dbbafc0833d50fbb389123a8a745762f8cf48064245f33d"
+    },
+    "ponytail-audit": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "f255f0bc077a3e77e246d69a8ecc98d39428309b759e708b01016de21bffc28b"
+    },
+    "ponytail-debt": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "5cb4711ea407ce53099a87ecc5f7fe88f2ac5d6827e26ca890bfa8d5af8f1164"
+    },
+    "ponytail-review": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "edbba550e9044c6a1e4f810e83f593c60f1c145043247ea04d9009dce85fa54e"
+    },
+    "preview-compose": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "3599b5b883d070c0aaf29e60b0e6da3bfb9da28b099a9de0a1daa5ea750479c4"
+    },
+    "review-change": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "33a870eae31b8b6541b2a5e9328ff33377b4eba44396d4063bad26a84a8d64bb"
+    },
+    "run-intake": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "6da59876715a2f1f92c492e37af17d8e1349777271373d847c57756e6604c7e5"
+    },
+    "scope-creep-detector": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "7864a6ce6781240e3c0fd2717428931394a05b0a68bf50d40927ce184a4ab452"
+    },
+    "start": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "07bece5f108b82661065a76bd1b7951c40692c2793b5f1e19a9bb6d5445e7185"
+    },
+    "tdd": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "17aa651f9b5af55a7de32d0b47137cd5882bcdc73c6aa4415f30b461c522f70d"
+    },
+    "ui-ux-pro-max": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "e9220ee1a49e967511ac7dd1c658cf9d2cdb9aa0715ca7bc1197dd5fa0907548"
+    },
+    "wire-dev-settings": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "033aadca4cba945f427b3e597ba731e37ad31ac519370020c53db26b5f6ffb9c"
+    },
+    "write-tickets": {
+      "source": "./skills",
+      "sourceType": "local",
+      "computedHash": "a7075b038fa977833a39509f00073eca4c890f9fd6c53fe56b24d247b5239a55"
+    }
+  }
+}

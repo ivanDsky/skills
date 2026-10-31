@@ -13,6 +13,9 @@ description: >-
   people work in, with their own run and rules.
 ---
 
+> **TL;DR** Art direction for public-facing web pages from curated gallery research, with a no-slop house style and screenshot fix loop; fires on any landing-page work.
+> **Related**: skill://ui-ux-pro-max (design data), skill://emil-design-eng (component polish), skill://apple-design (interaction foundations)
+
 # tasteskill v2
 
 A page built by a model usually looks like the average of every page the model has seen: a centred

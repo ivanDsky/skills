@@ -10,6 +10,9 @@ interaction: afk
 requires: [archify]
 ---
 
+> **TL;DR** Maps an unmapped codebase into docs/agents/project-map.md — layout, entry points, seams, test commands; fires when a repo has no map.
+> **Related**: skill://start (triage trigger), skill://archify (diagram recipe), skill://design-architecture (seam vocabulary)
+
 # Map the codebase
 
 Turn an unmapped codebase into `docs/agents/project-map.md`: layout, entry

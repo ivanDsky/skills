@@ -8,6 +8,9 @@ interaction: afk
 requires: []
 ---
 
+> **TL;DR** Spawns one research subagent per declared unknown until cited findings exist on disk; fires when a ticket carries an Unknowns block.
+> **Related**: skill://write-tickets (declares Unknowns), skill://implement (fans research)
+
 # Fan out research
 
 Resolve declared Unknowns with parallel fresh-context subagents. One file per

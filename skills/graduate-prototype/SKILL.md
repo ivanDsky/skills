@@ -10,6 +10,9 @@ interaction: hitl
 requires: []
 ---
 
+> **TL;DR** Cherry-picks working prototype modules into real tracker tickets or ends in clean discard; fires when a prototype answered its question.
+> **Related**: skill://implement (re-entry flow), skill://write-tickets (tracker tickets), skill://start (prototype runs)
+
 # Graduate a prototype
 
 Every prototype ends in graduate or discard — never in limbo. Graduation is a

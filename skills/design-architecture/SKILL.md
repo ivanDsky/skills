@@ -13,6 +13,9 @@ interaction: afk
 requires: []
 ---
 
+> **TL;DR** Designs and judges module architecture — seams, coupling, dependency rule, ADRs; fires when a spec needs its architecture section or review grades structure.
+> **Related**: skill://draft-spec (architecture section), skill://archify (architecture diagrams), skill://review-change (dependency grading)
+
 # Design architecture
 
 Shape deep modules at honest seams before code exists; grade existing

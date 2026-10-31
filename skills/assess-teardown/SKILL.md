@@ -10,6 +10,9 @@ interaction: afk
 requires: []
 ---
 
+> **TL;DR** Decides fix-forward vs clean redesign for a twice-failed module via a fresh-context architect; fires when a module fails its second fix round.
+> **Related**: skill://review-change (fires teardown gate), skill://implement (rebuild work), skill://diagnose-bug (failure evidence)
+
 # Assess teardown
 
 The teardown gate decides one thing: is this module still fixable, or does the

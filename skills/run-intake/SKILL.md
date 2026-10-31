@@ -11,6 +11,9 @@ interaction: hitl
 requires: []
 ---
 
+> **TL;DR** Interviews the user in one batch of highest-impact questions with defaults, turning the rest into numbered assumptions; fires before a spec.
+> **Related**: skill://draft-spec (spec next), skill://start (chain entry)
+
 # Run intake
 
 Extract the load-bearing decisions in ONE batch. Everything you do not ask

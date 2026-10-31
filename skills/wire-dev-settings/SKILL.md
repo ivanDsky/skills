@@ -11,6 +11,9 @@ interaction: afk
 requires: []
 ---
 
+> **TL;DR** Wires a debug-only developer settings screen with reactive Firebase Remote Config flags, overrides, and a playground; fires when adding feature flags.
+> **Related**: skill://preview-compose (prototype screens)
+
 # Wire dev settings & flags
 
 Flags change behavior without shipping; dev settings surface them (and the

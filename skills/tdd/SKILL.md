@@ -5,6 +5,9 @@ interaction: afk
 requires: []
 ---
 
+> **TL;DR** Implements every change test-first — failing test, minimal passing code, refactor while green; fires on TDD, red-green-refactor, or bug repro as test.
+> **Related**: skill://implement (ticket execution), skill://diagnose-bug (bug repro), skill://preview-compose (screenshot tests)
+
 # TDD
 
 No production code without a failing test you have watched fail. A test written after the code passes immediately, which proves nothing.

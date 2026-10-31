@@ -10,6 +10,9 @@ interaction: afk
 requires: []
 ---
 
+> **TL;DR** Executes tracker tickets one fresh subagent per ticket in tracer-bullet order, fanning out research first; fires when the frontier has ready tickets.
+> **Related**: skill://write-tickets (upstream tickets), skill://fan-out-research (declared unknowns), skill://review-change (downstream gate), skill://graduate-prototype (prototype re-entry)
+
 # Implement
 
 You coordinate; workers code. Briefs and reports travel as files, the ledger

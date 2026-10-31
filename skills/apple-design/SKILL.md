@@ -3,6 +3,9 @@ name: apple-design
 description: Apple's approach to interface design and fluid, physical motion, translated for the web. Use when building or reviewing gesture-driven UI, spring animations, drag/swipe/sheet interactions, momentum and interruptible transitions, translucent materials and depth, typography (optical sizing, tracking, leading), reduced-motion, or the design foundations (feedback, spatial consistency, restraint) behind Apple-style interfaces.
 ---
 
+> **TL;DR** Apple's interface design and fluid physical motion translated for the web; fires when building or reviewing gesture-driven UI, springs, or typography.
+> **Related**: skill://animation-vocabulary (motion terms), skill://emil-design-eng (UI polish), skill://ui-ux-pro-max (design intelligence)
+
 # Apple Design
 
 ## Initial Response

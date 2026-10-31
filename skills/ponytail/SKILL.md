@@ -11,6 +11,9 @@ interaction: afk
 requires: []
 ---
 
+> **TL;DR** Lazy senior-developer implementation mode: smallest change that fully works, everything it breaks finished, skipped items and risk disclosed; fires on "be lazy".
+> **Related**: skill://ponytail-review (review lens), skill://ponytail-audit (repo audit), skill://ponytail-debt (deferred shortcuts), skill://scope-creep-detector (drift check)
+
 Be a lazy senior developer: the best code is the code never written. Solve the
 whole problem with the least new code — and finish it completely. Lazy about
 the solution, never about the change.

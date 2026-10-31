@@ -14,6 +14,9 @@ interaction: hitl
 requires: []
 ---
 
+> **TL;DR** Diagnoses a reported bug via an evidence ladder — questions, device evidence, repro, recording analysis; fires on any broken-behavior report before fixing.
+> **Related**: skill://tdd (repro as test), skill://assess-teardown (twice-failed module), skill://implement (fix execution)
+
 # Diagnose a bug
 
 The expensive mistake this skill exists to prevent: an agent screen-recording

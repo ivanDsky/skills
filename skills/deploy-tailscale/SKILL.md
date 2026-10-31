@@ -11,6 +11,9 @@ interaction: afk
 requires: [tailscale]
 ---
 
+> **TL;DR** Ships the built APK to the registered tailnet device via Taildrop or serve, checksum-verified; fires on the PROFILE.md tailscale target.
+> **Related**: skill://deliver (dispatches targets), skill://deploy-firebase (sibling target)
+
 # Deploy Tailscale
 
 Deliver built first — never rebuild here; the APK path comes from the build

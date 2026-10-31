@@ -11,6 +11,9 @@ interaction: afk
 requires: []
 ---
 
+> **TL;DR** Runs the effort-tiered review gate — scripted checks, screenshots, code review, dual-verdict subagent — and owns the fix loop; fires before deliver.
+> **Related**: skill://implement (upstream tickets), skill://deliver (downstream ship), skill://assess-teardown (teardown escalation), skill://scope-creep-detector (drift catch)
+
 # Review change
 
 Run the review gate over the whole change, then own what follows: fix rounds,

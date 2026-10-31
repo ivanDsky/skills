@@ -11,6 +11,9 @@ interaction: afk
 requires: [firebase CLI when target=firebase, tailscale CLI when target=tailscale]
 ---
 
+> **TL;DR** Builds the change and deploys to PROFILE.md targets with output attached as evidence; fires when review passes and the run ships.
+> **Related**: skill://review-change (gate before delivery), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://implement (tickets to close)
+
 # Deliver
 
 Produce the evidence that closes the run: a green build, a deploy when a
@@ -59,9 +62,24 @@ passed; this stage adds no code.
    Resolution, add the ledger line. A ticket without evidence stays open,
    and the summary names it.
 
-6. Post the delivery summary — the run's last message, always this shape:
+6. Write the user-facing report — `.scratch/<slug>/report/REPORT.md`, small
+   (≈1 screen), so the user never reverse-engineers what happened:
+   - **What changed & how**: per ticket, one or two sentences, behavior level.
+   - **Screenshots**: embed the JVM capture images (`preview-compose`
+     suites / review doc assets) — reuse existing captures, never re-shoot.
+   - **Verify it yourself**: 2–4 numbered manual steps with exact entry
+     points (deep link, `adb shell am start` command from `wire-dev-settings`,
+     or tap path), each naming the expected result.
+   - **Architecture changes** (new/boundary-crossing modules, dependency
+     direction): replace prose with a diagram via `archify` (the matching
+     diagram type), linked inline, plus ≤5 bullets of high-level decisions.
+   Read the referenced skills for their output formats; do not improvise a
+   new report shape.
+
+7. Post the delivery summary — the run's last message, always this shape:
 
    - **Shipped**: one line per ticket, behavior only, no paths.
+   - **Report**: path to `REPORT.md` (the user-facing evidence write-up).
    - **Evidence**: build log path, deploy URL or output, closed ticket ids,
      and the visual review doc path (`.scratch/<slug>/review/REVIEW.md`)
      when a review doc exists.

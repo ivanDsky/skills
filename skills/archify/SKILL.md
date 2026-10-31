@@ -7,6 +7,9 @@ metadata:
   author: tt-a1i
 ---
 
+> **TL;DR** Creates validated diagrams and one-page explainers as standalone HTML; fires when visualizing systems or when the user asks for a shareable page.
+> **Related**: skill://design-architecture (architecture rules), skill://map-codebase (codebase diagrams)
+
 # Archify
 
 Create checked standalone HTML as a native diagram or a one-page explainer that answers a question.

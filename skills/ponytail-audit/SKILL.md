@@ -8,6 +8,9 @@ description: >
   "find bloat", "what can I delete", /ponytail-audit.
 ---
 
+> **TL;DR** One-shot whole-repo quality audit — bugs, security, load risks, untested risky code, deletion candidates — ranked and explained; changes nothing.
+> **Related**: skill://ponytail (philosophy source), skill://ponytail-review (change review), skill://ponytail-debt (deferred shortcuts)
+
 Audit the whole repo like the senior developer who just inherited it and
 will be paged when it breaks. Order of importance: correct, safe, holds under
 load, tested, fast, lean. Lean still matters: every extra line must be read,

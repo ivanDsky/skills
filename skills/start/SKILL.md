@@ -10,6 +10,9 @@ interaction: mixed
 requires: []
 ---
 
+> **TL;DR** Triages an ask — quick task, prototype, feature, unmapped codebase — prints the run plan, and fires the matching chain; use on /start.
+> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage)
+
 # Start
 
 Classify the ask, read project state, print the run plan, fire the chain.
@@ -103,6 +106,13 @@ log. The per-run ledger (`.scratch/<slug>/ledger.md`) is a different file.
 `map-codebase`, `fan-out-research`, `graduate-prototype`, `assess-teardown`
 are the chain contract and land separately — when one fires and the skill is
 absent, say so and stop that branch instead of improvising.
+
+Direct paths for knowledge skills the chain mandates mid-run (do not wait to
+be asked): Compose UI → `preview-compose`; flags/dev settings →
+`wire-dev-settings`; animations → `animation-vocabulary` + `apple-design`;
+principles → `emil-design-eng`, `ui-ux-pro-max`; diagrams → `archify`;
+architecture → `design-architecture`; screenshots/tests → `tdd`
+(`references/android-testing.md`).
 
 Close calls (quick vs feature vs prototype): read
 [Triage cases](references/triage-cases.md).

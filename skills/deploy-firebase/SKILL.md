@@ -11,6 +11,9 @@ interaction: afk
 requires: [firebase-cli]
 ---
 
+> **TL;DR** Distributes an Android APK/AAB build to Firebase App Distribution test users; fires on the PROFILE.md firebase target for Android builds.
+> **Related**: skill://deliver (dispatches targets), skill://deploy-tailscale (sibling target)
+
 # Deploy to Firebase App Distribution
 
 Distribute an Android build to real-device testers, set up the humans —

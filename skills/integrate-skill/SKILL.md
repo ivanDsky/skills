@@ -11,6 +11,9 @@ interaction: hitl
 requires: []
 ---
 
+> **TL;DR** Onboards new skills and lands skill updates through the frontmatter, evals, and lint gate; fires when adding or updating a skill.
+> **Related**: skill://init-profile (project onboarding)
+
 # Integrate skill
 
 One gate for the two ways a skill changes: onboarding a new skill (path A) and

@@ -13,6 +13,9 @@ interaction: afk
 requires: []
 ---
 
+> **TL;DR** Writes, fixes, and verifies Jetpack Compose @Preview code — stateless composables, variants, multipreview, screenshot tests; fires on any Compose preview work.
+> **Related**: skill://wire-dev-settings (Android debug screens), skill://tdd (screenshot tests)
+
 # Preview compose
 
 Write Compose previews that compile, cover every meaningful UI state, and are

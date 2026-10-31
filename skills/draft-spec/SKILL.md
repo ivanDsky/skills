@@ -10,6 +10,9 @@ interaction: mixed
 requires: []
 ---
 
+> **TL;DR** Writes the working spec with numbered Assumptions and posts the single correct-me-or-I-go checkpoint; fires after intake answers exist.
+> **Related**: skill://run-intake (intake answers), skill://design-architecture (architecture section), skill://write-tickets (next stage)
+
 # Draft the spec
 
 Turn the intake answers into the working spec, then spend ONE checkpoint message

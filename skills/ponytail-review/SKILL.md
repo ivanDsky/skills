@@ -8,6 +8,9 @@ description: >
   the last commit", "review my PR", "is this over-engineered", /ponytail-review.
 ---
 
+> **TL;DR** Plain-English quality review of a change — logic, safety, load, tests, speed, necessity — reading the connected code, not just the diff.
+> **Related**: skill://ponytail (philosophy source), skill://ponytail-audit (repo-wide), skill://review-change (orchestrated gate)
+
 Review a change like the senior developer who will be paged when it breaks.
 Order of importance: correct, safe, holds under load, tested, fast, lean.
 Lean still matters: every extra line must be read, tested and fixed later.

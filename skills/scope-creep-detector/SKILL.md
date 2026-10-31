@@ -11,6 +11,9 @@ interaction: afk
 requires: [python3, git]
 ---
 
+> **TL;DR** Compares a diff against its one-line intent and flags scope creep with keep/split/justify verdicts; local, offline, read-only.
+> **Related**: skill://ponytail-review (plain review), skill://review-change (review gate), skill://ponytail (minimal change)
+
 A one-line fix should not force a reviewer through fourteen files in three subsystems. This
 skill diffs the change against its stated intent, surfaces scope signals, and turns them into
 keep, split, or justify decisions. It is the tracer-bullet scope guard for the implement and

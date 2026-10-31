@@ -12,6 +12,9 @@ interaction: hitl
 requires: []
 ---
 
+> **TL;DR** Interviews once with recommended one-word defaults, then writes PROFILE.md and seeds tracker and scratch; fires on a project's first start.
+> **Related**: skill://start (first run), skill://integrate-skill (repo onboarding)
+
 # Init profile
 
 One-time per-project setup. `npx skills add ivanDsky/skills` places files and

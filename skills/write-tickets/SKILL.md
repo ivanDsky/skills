@@ -11,6 +11,9 @@ interaction: afk
 requires: []
 ---
 
+> **TL;DR** Breaks an approved spec into dependency-ordered tracer-bullet tickets with DoD and evidence in the local tracker; fires after a spec passes checkpoint.
+> **Related**: skill://draft-spec (upstream spec), skill://implement (downstream execution), skill://fan-out-research (Unknowns research)
+
 # Write tickets
 
 Turn the spec into tracer-bullet tickets in the wayfinder tracker, each

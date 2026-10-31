@@ -6,6 +6,9 @@ description: >
   shortcuts", /ponytail-debt.
 ---
 
+> **TL;DR** Lists every `shortcut:` comment as a debt ledger, one-shot and read-only; fires on "what did ponytail defer".
+> **Related**: skill://ponytail (creates shortcuts), skill://ponytail-audit (repo-wide sweep)
+
 Every deliberate ponytail shortcut is marked with a `shortcut:` comment naming
 its ceiling and upgrade path (older code may say `ponytail:`). This collects them into one ledger so a deferral
 can't quietly become permanent.
