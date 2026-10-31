@@ -102,6 +102,9 @@ Send the batch and stop. Never a second batch.
 ## Version
 - version: 0.1.0             # semver major.minor.patch; bump per run: breaking → major, feature → minor, fix/step → patch (deliver writes it back)
 
+## Review site
+- publish: ask               # ask (default: start asks each run) | always | off
+
 ## Deploy targets (in order; empty list = build-only)
 - local: <run command>
 # - firebase: <project id>
@@ -116,7 +119,9 @@ Send the batch and stop. Never a second batch.
 The four contract sections are Care-axes, Effort, Deploy targets, Testing
 style — extra sections are allowed, never required. `## Version` is seeded
 (`0.1.0`) when missing so every project ships named artifacts
-(`<app_name>-<sem_ver>-<debug|release>.apk`); missing sections are asked
+(`<app_name>-<sem_ver>-<debug|release>.apk`); `## Review site` is seeded
+(`ask`) so each run can opt into the localhost review dashboard; missing
+sections are asked
 about once. The effective platform
 (override, else user default) routes the UI rules payload
 (`rules-ui-<platform>.md`), the platform review axes, and the screenshot

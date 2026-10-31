@@ -75,6 +75,11 @@ normally either way.
 Print one line per stage: fires/skips · HITL or AFK (read each skill's
 `interaction` frontmatter, effort overrides applied) · gate · artifact path.
 Ask at most one question, only if triage is genuinely ambiguous — then fire.
+Exception: the review-site publish decision. PROFILE.md `Review site
+publish:` decides — `always` → the plan lists `review-site` firing after
+deliver; `off` → skip silently; `ask` (the default) → one yes/no bundled
+into the plan ("publish the review dashboard when this run ships?") and the
+answer routes deliver's report step for this run only.
 
 ## Debug run log
 
@@ -99,6 +104,7 @@ log. The per-run ledger (`.scratch/<slug>/ledger.md`) is a different file.
 | implement | `implement` | ready frontier ticket |
 | review | `review-change` | implement done |
 | deliver | `deliver` | review passes |
+| report | `review-site` | run's publish decision = yes (PROFILE `Review site publish:` or session answer) |
 | support | `graduate-prototype` | prototype promoted to feature work |
 | support | `assess-teardown` | teardown gate: 2 failed fix rounds or reviewer discretion |
 | support | `diagnose-bug` | bug report: evidence ladder, user-time-last |
