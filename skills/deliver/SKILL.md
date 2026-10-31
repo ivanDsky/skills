@@ -86,7 +86,9 @@ passed; this stage adds no code.
 7. Post the delivery summary — the run's last message, always this shape:
 
    - **Shipped**: one line per ticket, behavior only, no paths.
-   - **Report**: path to `REPORT.md` (the user-facing evidence write-up).
+   - **Report**: path to `REPORT.md` (the user-facing evidence write-up);
+     when the user wants it browsable, publish via `review-site` and give the
+     localhost URL instead of the file path.
    - **Evidence**: build log path, deploy URL or output, closed ticket ids,
      and the visual review doc path (`.scratch/<slug>/review/REVIEW.md`)
      when a review doc exists.

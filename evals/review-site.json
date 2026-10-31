@@ -1,0 +1,22 @@
+{
+  "skill": "review-site",
+  "positive": [
+    "Publish the review on localhost so I can browse the screenshots and changes",
+    "Build the review dashboard for this run — test report, diagrams, UI captures",
+    "Show me the delivery report in the browser instead of markdown files"
+  ],
+  "negative": [
+    {
+      "prompt": "Deploy the app build to my phone over Tailscale",
+      "owner": "deploy-tailscale"
+    },
+    {
+      "prompt": "Write the visual review doc with numbered screenshots for the fix loop",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "Create an architecture diagram of the new module boundary",
+      "owner": "archify"
+    }
+  ]
+}
