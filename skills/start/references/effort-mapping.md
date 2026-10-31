@@ -28,5 +28,9 @@ Rules:
 - A prototype flag caps gates at the fast tier at any effort (subagent
   thinking still follows the table).
 - The quality-vs-speed knob is the effort level.
+- Review-site publish: `thorough` defaults to yes (the review doc is the
+  primary human review surface); fast/standard follow the run's decision
+  (PROFILE `Review site publish:` or the session answer in start's plan).
+  An explicit user no always wins.
 - `implement` reads the same table at dispatch time; `start` does not
   re-derive it per stage.

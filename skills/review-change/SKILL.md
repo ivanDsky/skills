@@ -59,7 +59,11 @@ chat carries only the user-facing report.
    JVM captures), motion clips from the wireless-adb device when reachable,
    archify diagram for structure changes, the vetoable assumptions, and the
    id-based feedback contract. The user reviews without testing; their
-   artifact-id replies re-enter this fix loop.
+   artifact-id replies re-enter this fix loop. Publish it browsable via
+   `review-site` when the run's review-site decision is yes — thorough tier
+   defaults to yes (the doc is the primary review surface at that depth);
+   fast/standard follow the PROFILE `Review site publish:` setting or the
+   session answer, and the doc itself is always written either way.
 8. Fix loop: findings go back to the same implementer as a resumed brief;
    re-review is scoped to the fix diff only. Minors are ledgered as deferred —
    never silently fixed. Count failed fix rounds per module in the ledger.
