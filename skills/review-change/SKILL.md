@@ -45,7 +45,14 @@ chat carries only the user-facing report.
 3. Brief reviewers minimally: diff command, commit list, spec excerpt,
    care-axes with their rules payloads, relevant ledger lines, and the evidence
    ladder — reviewers cite JVM screenshot-test captures as proof and never boot
-   an emulator to gather evidence. Never session history — the reviewer judges
+   an emulator to gather evidence. On Android diffs the reviewer runs the
+   Android CLI checks itself (`android-cli` skill, mandatory, not delegated to
+   the implementer): `android studio analyze-file` on touched files when the
+   IDE is open, `android preview render` for any preview claim it grades,
+   `android layout --output hierarchy.json` for touch-target/density verdicts,
+   and `android studio version-lookup` before accepting any dependency change.
+   An Android finding graded without the applicable CLI check is
+   `cannot-verify`, not ✅. Never session history — the reviewer judges
    the work product, not the process.
 4. Dual verdict (thorough) — two axes, reported separately, never merged:
    spec-compliance ✅ / ❌ / ⚠️ cannot-verify, every claim backed by quoted
