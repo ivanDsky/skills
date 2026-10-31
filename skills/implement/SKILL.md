@@ -59,7 +59,11 @@ recollection.
    ticket never named — its keep / split / justify verdicts decide.
 4. Knowledge: UI/view tickets consult the installed UX skills before writing
    views — ui-ux-pro-max for stack-specific guidelines, apple-design and
-   emil-design-eng for principles. Architecture-heavy tickets (new module,
+   emil-design-eng for principles. Jetpack Compose UI tickets read
+   `preview-compose` before writing any composable and author its `@Preview`s
+   with it; tickets touching feature flags, remote config, or dev-facing
+   settings read `wire-dev-settings` before touching configuration code.
+   Architecture-heavy tickets (new module,
    new boundary, dependency direction in play) apply `design-architecture`
    first and grade the diff against its `../design-architecture/references/rules-architecture.md`.
    Brownfield work reuses the map-codebase project map; diagrams via archify.
