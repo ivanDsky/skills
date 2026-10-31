@@ -141,7 +141,7 @@ figure {{ margin: 0; }} figcaption {{ font-size: 12px; opacity: .7; word-break: 
 <h1>Review — {html.escape(title)}</h1>
 {body}""")
     print(f"site ready: {out / 'index.html'}")
-    print(f"serve: python3 -m http.server 8765 --directory {out}")
+    print(f"serve: python3 -m http.server 8765 --bind 0.0.0.0 --directory {out}")
     return 0
 
 

@@ -50,15 +50,15 @@ anytime; it overwrites in place.
 ## 3. Serve
 
 ```bash
-python3 -m http.server 8765 --directory .scratch/<slug>/site
+python3 -m http.server 8765 --bind 0.0.0.0 --directory .scratch/<slug>/site
 ```
 
-Localhost only, by design. Reply with the URL
-(`http://localhost:8765`) and one line per section saying what's on the
-page. `--out <dir>` relocates the site (e.g. a shared folder); the user
-asking for anything beyond localhost — a public URL, a tunnel — is a
-one-way door: confirm before exposing, same rule as `deploy-tailscale`
-funnel.
+Bound to all interfaces so the page opens from any device on the LAN/tailnet —
+reply with the machine's LAN URL, not localhost: `http://<lan-ip>:8765`
+(LAN IP: `ipconfig getifaddr en0` on macOS, `hostname -I | awk '{print $1}'`
+on Linux; the generator prints the serve command). Reachable only inside the
+local network — anything beyond (public URL, tunnel) is a one-way door:
+confirm before exposing, same rule as `deploy-tailscale` funnel.
 
 ## 4. Keep it small
 
