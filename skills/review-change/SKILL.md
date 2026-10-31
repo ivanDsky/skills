@@ -49,9 +49,13 @@ chat carries only the user-facing report.
    Android CLI checks itself (`android-cli` skill, mandatory, not delegated to
    the implementer). **`android studio analyze-file` comes first** — run it on
    every touched Kotlin/Java file before reading the diff; its inspections
-   catch what eyeballing misses, and it needs the IDE open (`android studio
-   check` for READY; closed IDE → say so and fall back to lint-only, never
-   skip silently). Then: `android preview render` for any preview claim it
+   catch what eyeballing misses. Project-open protocol (`android-cli` skill):
+   if `android studio check` shows no READY project or the wrong one, open
+   this worktree (`open -a "Android Studio Preview" <repo-root>`), poll
+   `check` until READY, verify the path matches this worktree, and pin every
+   studio call with `--project`; unresolvable (no Studio installed) → fall
+   back to lint-only, never skip silently. Then: `android preview render` for
+   any preview claim it
    grades, `android layout --output hierarchy.json` for touch-target/density
    verdicts, and `android studio version-lookup` before accepting any
    dependency change.

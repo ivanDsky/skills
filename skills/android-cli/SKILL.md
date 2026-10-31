@@ -49,9 +49,15 @@ environment config — run it during onboarding, `init-profile`/`map-codebase`).
   file *before* reading the diff; it catches unused symbols, nullability
   issues, API misuse and deprecations that eyeballing the diff misses. It
   *supplements* Gradle lint on the touched files; it does not replace
-  `./gradlew lint` (different check sets). Needs the IDE open with the
-  project (`android studio check` → READY); closed IDE → fall back to
-  lint-only and say so.
+  `./gradlew lint` (different check sets).
+  Project-open protocol (mandatory): if `android studio check` shows no
+  READY project (or the wrong one), open this worktree first — macOS:
+  `open -a "Android Studio Preview" <repo-root>` (or `open -a "Android
+  Studio" ...`), then poll `android studio check` until the project lists
+  READY. Verify the READY entry's path matches the worktree under review
+  before running any studio command, and pin every studio call with
+  `--project <name-or-path>` so results never attach to a different open
+  project.
 - **Documentation images from previews** — `android preview render
   --output <dir> --fqn <fqn>` builds the target and writes per-preview PNGs
   (plus optional `--component-tree` JSON: bounds, semantics, parameters,
