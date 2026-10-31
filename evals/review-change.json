@@ -4,7 +4,9 @@
     "Implementation is done on the settings screen — run the review gate before we deliver",
     "Review the change against the spec and give me the dual verdict, we're at thorough effort",
     "The reviewer sent findings back — run the fix loop and re-review just the fix diff",
-    "Check the diff before shipping: scripted checks, screenshots, and a reviewer pass"
+    "Check the diff before shipping: scripted checks, screenshots, and a reviewer pass",
+    "Ticket is marked effort: fast — run its review gate (expect lint/compile plus JVM-capture evidence, no emulator, no dual-verdict subagent)",
+    "Review this fix round — re-review only the fix diff, JVM screenshot-test captures are the evidence"
   ],
   "negative": [
     {

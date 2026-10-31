@@ -5,7 +5,9 @@
     "build: make the dashboard widgets shareable, plan the stages first",
     "Start work in this repo — triage the ask and show me the run plan",
     "Sketch a quick prototype: would one big canvas work for the timeline?",
-    "/start fast — the login redirect loop needs fixing"
+    "/start fast — the login redirect loop needs fixing",
+    "Add a tiny helper function to the settings screen — triage it, expect a fast-tier run, not a full chain",
+    "Plan a new module boundary across three services — expect thorough effort for the architecture work"
   ],
   "negative": [
     {
