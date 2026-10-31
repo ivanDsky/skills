@@ -33,7 +33,8 @@ round, an independent architect decides fix-forward vs teardown.
 `deploy-firebase` (test users + APK distribution) ·
 `deploy-tailscale` (device registry + APK sharing)
 `wire-dev-settings` (reactive Firebase flags, dev menu, Showkase playground) ·
-`review-site` (one-file localhost review dashboard: changes, screenshots, diagrams, test report)
+`review-site` (one-file localhost review dashboard: changes, screenshots, diagrams, test report) ·
+`android-cli` (Android CLI routing: device-free preview renders, Studio analysis, docs, emulator/device control, Journeys, Crashlytics signals)
 
 **Adapted (owned text, credited sources):**
 `ponytail` (smallest-change governor) · `run-intake` core mechanics from

@@ -32,8 +32,11 @@ chat carries only the user-facing report.
    - **Fast**: lint + typecheck/compile, plus visual evidence of every touched UI
      surface following the UI verification ladder (`tdd` skill,
      references/android-testing.md): JVM screenshot tests (Roborazzi / AGP
-     preview suites) first; emulator/device only when no JVM capture exists for
-     that surface, and never inside a fix round. A prototype run caps
+     preview suites) or `android preview render` first; emulator/device only
+     when no JVM capture exists for
+     that surface, and never inside a fix round. On Android,
+     `android studio analyze-file` (when the IDE is open) supplements lint on
+     the touched files. A prototype run caps
      here plus the demo, at any effort.
    - **Standard**: plus one reviewer subagent on a stronger tier than the
      implementer.

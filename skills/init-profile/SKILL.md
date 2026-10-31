@@ -131,6 +131,10 @@ source for fast-tier review — the UI verification ladder
 
 Then, in order:
 
+1. Android project → `android init` (Android CLI: env setup + official
+   android-cli skill) once, and note the CLI in PROFILE.md; skip on
+   non-Android platforms.
+
 1. `.scratch/` seed: create the directory if absent; `tickets/` under the
    tracker location from the batch.
 2. The entry line: append exactly one line to the harness config from step 1 —

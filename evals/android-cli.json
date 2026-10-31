@@ -1,0 +1,31 @@
+{
+  "skill": "android-cli",
+  "positive": [
+    "Render the new composables' previews as images so I can check the layout",
+    "Find every usage of this ViewModel across the app",
+    "Check whether the Compose BOM has a newer stable version",
+    "Search the Android docs for predictive back handling",
+    "Start an emulator and install the debug APK on it",
+    "Pull the crash-free rate for the settings screen from Crashlytics",
+    "Capture the current screen with element annotations",
+    "Dump the UI hierarchy so we can check the touch targets"
+  ],
+  "negative": [
+    {
+      "prompt": "Set up Roborazzi screenshot tests for the design system module",
+      "owner": "preview-compose"
+    },
+    {
+      "prompt": "Pair wireless debugging with my phone and read logcat",
+      "owner": "diagnose-bug"
+    },
+    {
+      "prompt": "Ship this APK to the Firebase testers",
+      "owner": "deploy-firebase"
+    },
+    {
+      "prompt": "Write an instrumented test that taps through onboarding",
+      "owner": "tdd"
+    }
+  ]
+}

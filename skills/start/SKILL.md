@@ -118,7 +118,8 @@ be asked): Compose UI → `preview-compose`; flags/dev settings →
 `wire-dev-settings`; animations → `animation-vocabulary` + `apple-design`;
 principles → `emil-design-eng`, `ui-ux-pro-max`; diagrams → `archify`;
 architecture → `design-architecture`; screenshots/tests → `tdd`
-(`references/android-testing.md`).
+(`references/android-testing.md`); Android tooling (renders, analysis, docs,
+emulators, deploys, signals) → `android-cli`.
 
 Close calls (quick vs feature vs prototype): read
 [Triage cases](references/triage-cases.md).

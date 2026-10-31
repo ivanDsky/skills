@@ -70,6 +70,11 @@ recollection.
    new boundary, dependency direction in play) apply `design-architecture`
    first and grade the diff against its `../design-architecture/references/rules-architecture.md`.
    Brownfield work reuses the map-codebase project map; diagrams via archify.
+   Android CLI (`android-cli` skill) where it beats raw tooling: renames and
+   blast-radius via `android studio find-usages` (IDE open) or LSP;
+   dependency bumps verified with `android studio version-lookup`; Android
+   API questions via `android docs search`; preview renders via
+   `android preview render` when no Roborazzi suite exists.
 5. Style while writing, not after: `design-architecture`'s
    `rules-code-style.md` (in design-architecture) governs comments (self-explanatory code;
    comments only for WHY) and names the AI-slop patterns a worker must not

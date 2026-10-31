@@ -46,8 +46,9 @@ than ten shell commands. Only reproduce what remains unexplained.
 1. **User's answers + screenshot** (rung 0, from the batch).
 2. **Crash + telemetry you already have**: Crashlytics dashboard (stack
    traces, breadcrumbs, affected users), existing analytics events around the
-   reported action. Zero user time. If the project has no Crashlytics and the
-   bug is a crash, adding it is the first fix ticket.
+   reported action — or `android signals` (Android CLI) to query Crashlytics
+   stability straight from the terminal. Zero user time. If the project has no
+   Crashlytics and the bug is a crash, adding it is the first fix ticket.
 3. **Wireless adb to the user's physical device** - the user keeps testing on
    their phone; you read logs over Wi-Fi:
    - One-time pairing: Developer options -> Wireless debugging -> pair with
@@ -56,6 +57,9 @@ than ten shell commands. Only reproduce what remains unexplained.
    - Then: `adb -s <device> logcat` filtered by package/tag;
      `adb bugreport bugreport.zip` (logs + dumps in one file) when the picture
      is murky.
+   - Prefer Android CLI where it covers the action: `android layout --output
+     hierarchy.json` (UI tree as JSON), `android screen capture --annotate`
+     (element-labeled capture), `android install`/`android run` for deploys.
    - Note in PROFILE.md so the next run skips discovery.
 4. **Temporary in-app instrumentation** - when remote logs are too thin:
    add a debug-only event ring buffer (file or logcat tag) around the

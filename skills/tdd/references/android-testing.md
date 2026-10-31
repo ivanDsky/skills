@@ -75,12 +75,17 @@ studio/test/gradle-managed-devices; AGP Compose preview screenshot testing.)
    contentDescription, enabled states, and UI state-machine transitions.
    Seconds, no device, runs on every commit.
 3. **JVM screenshot tests** — pixel truth without any device: Roborazzi
-   (Robolectric RNG) or AGP Compose Preview Screenshot Test suites (Layoutlib).
+   (Robolectric RNG) or AGP Compose Preview Screenshot Test suites (Layoutlib),
+   or `android preview render` (Android CLI — renders @Previews to PNG, no
+   device, no IDE, no Gradle test setup; ideal when the project lacks a
+   Roborazzi suite).
    One capture per state/size/dark variant; diff in CI. Catches what semantics
    miss: overflow, spacing, alignment, theme breakage.
 4. **Instrumented UI tests on a Gradle Managed Device** — headless ATD images
    (API 27+), configured in Gradle for reproducibility. Only for what the JVM
    cannot see: real input pipeline, window insets/focus, density, text shaping.
+   Complement: Journeys (`android` CLI) — natural-language user-path checks on
+   a device; acceptance-layer, one per critical path, never per-commit.
 5. **Human acceptance on the real target** — install the APK
    (`deploy-tailscale` / `deploy-firebase`), feel the animations, judge
    premium. The emulator lives HERE - as one optional device, never the

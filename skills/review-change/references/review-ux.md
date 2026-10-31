@@ -7,6 +7,8 @@ layers, cheapest first; stop adding layers once one exposes systemic issues.
    targets, density, safe areas, state restoration, offline behavior on
    mobile; focus order, keyboard access, empty and error states on web.
    Platform review axes come from the platform routes in PROFILE.md.
+   On Android, `android layout --output hierarchy.json` gives the machine-
+   checkable tree for touch-target/density checks.
    Android UI in the diff also passes preview coverage (`preview-compose`):
    every new or changed composable has `@Preview`s with state and
    light/dark/font-scale variants (multipreview annotations), and any animated
