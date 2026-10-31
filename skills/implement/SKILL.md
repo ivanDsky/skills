@@ -24,7 +24,8 @@ recollection.
 2. Claim: set `status: claimed` before any work.
 3. A ticket with `Unknowns` gets research subagents first, one per unknown, in
    parallel; link every findings file into the ticket before coding starts.
-   Fan-out per effort level: fast = none (research only when a ticket is
+   Fan-out per ticket effort level (ticket `effort:` field, run default as
+   fallback): fast = none (research only when a ticket is
    blocked), standard = cap 3, thorough = full parallel.
 
 ## 2. Dispatch
@@ -43,8 +44,9 @@ recollection.
 4. Workers never spawn subagents — no helpers, no reviewers. Review belongs
    to review-change.
 5. Knobs, enforced at dispatch: implementer on the cheapest capable tier;
-   subagent thinking follows effort — low / medium / high for fast /
-   standard / thorough.
+   subagent thinking follows the ticket's `effort:` field (fall back to the
+   run default when absent) — low / medium / high for fast / standard /
+   thorough.
 
 ## 3. Inside the ticket — layered skills
 

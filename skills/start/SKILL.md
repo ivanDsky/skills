@@ -52,6 +52,15 @@ normally either way.
 
 ## Effort level
 
+- Per task, not per run: triage classifies the *run default*, but each task or
+  ticket gets its own effort chosen from its shape — `thorough` only for
+  architecture, planning, and other big-view work; `standard` for ordinary
+  features; `fast` for contained fixes. Full rules:
+  [Effort mapping](references/effort-mapping.md).
+- Downgrade ask: picking a lower level than the run default is stated in one
+  line ("downgraded to fast: <reason>"); when the agent believes a different
+  level would accelerate development, it asks the user rather than deciding
+  silently.
 - Precedence: session override (`/start fast|standard|thorough`) >
   `docs/agents/AGENTS.md` > PROFILE.md; default `standard`.
 - Map the level to subagent knobs, gates, and stage behavior with

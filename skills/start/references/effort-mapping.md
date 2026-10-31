@@ -11,8 +11,20 @@ run plan; `implement` enforces the subagent knobs at dispatch.
 
 Rules:
 
-- Per-session override (`/start fast|standard|thorough`) wins over PROFILE.md;
-  default is `standard`.
+- **Per-task effort is the rule; run-wide effort is the default.** Every task
+  and ticket gets its own effort level, chosen at triage/ticketing from task
+  shape — not inherited from the run default.
+  - `thorough` only for big-view work: architecture, new module design,
+    cross-cutting refactors, planning, irreversible or data-loss-risk changes.
+  - `standard` for ordinary feature tickets.
+  - `fast` for contained fixes, config, copy, single-file changes, quick tasks.
+- Downgrade ask: when the agent picks a lower level than the run default for a
+  task, it says so in the run plan / ticket list in one line ("ticket 3 downgraded
+  to fast: single-file fix") — if it believes a different level would accelerate
+  development, it asks the user instead of silently deciding.
+- Per-session override (`/start fast|standard|thorough`) still wins for the run
+  default; per-ticket effort overrides the run default unless the user set the
+  override explicitly.
 - A prototype flag caps gates at the fast tier at any effort (subagent
   thinking still follows the table).
 - The quality-vs-speed knob is the effort level.

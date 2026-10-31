@@ -23,19 +23,24 @@ chat carries only the user-facing report.
    Care-axes are ranked — the rank is the review priority order and selects
    which `references/rules-*.md` payloads load. Write findings to
    `.scratch/<slug>/review.md`; that file is the handoff to the fix loop.
-2. Run the tier gates for the effort level, in order, accumulating; a failed
+2. Run the tier gates for the ticket's `effort:` level (fall back to the run
+   default when absent), in order, accumulating; a failed
    tier goes to the fix loop (step 6):
-   - **Fast**: lint + typecheck/compile, plus screenshots of every touched UI
-     surface taken from the platform source in PROFILE.md (emulator/device for
-     mobile; browser for web — the zero-dep CDP loop). A prototype run caps
+   - **Fast**: lint + typecheck/compile, plus visual evidence of every touched UI
+     surface following the UI verification ladder (`tdd` skill,
+     references/android-testing.md): JVM screenshot tests (Roborazzi / AGP
+     preview suites) first; emulator/device only when no JVM capture exists for
+     that surface, and never inside a fix round. A prototype run caps
      here plus the demo, at any effort.
    - **Standard**: plus one reviewer subagent on a stronger tier than the
      implementer.
    - **Thorough**: plus one fresh-context dual-verdict subagent on the most
      capable model.
 3. Brief reviewers minimally: diff command, commit list, spec excerpt,
-   care-axes with their rules payloads, relevant ledger lines. Never session
-   history — the reviewer judges the work product, not the process.
+   care-axes with their rules payloads, relevant ledger lines, and the evidence
+   ladder — reviewers cite JVM screenshot-test captures as proof and never boot
+   an emulator to gather evidence. Never session history — the reviewer judges
+   the work product, not the process.
 4. Dual verdict (thorough) — two axes, reported separately, never merged:
    spec-compliance ✅ / ❌ / ⚠️ cannot-verify, every claim backed by quoted
    evidence; and quality Approved / Needs-fixes. Findings graded

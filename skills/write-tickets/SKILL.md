@@ -61,9 +61,14 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
    natively and use its real blocking links.
 7. Prototype sets: DoD = the question answered or the thing demoable; the
    last ticket carries the `deploy:` flag (`main | standalone | none`).
-8. Confirm by effort: fast/standard — publish and report the numbered list
-   (title, blocked-by, what it delivers). Thorough — show the list and wait:
-   confirm granularity, blocking edges, and split/merge before publishing.
+8. Confirm by effort: each ticket carries an `effort:` frontmatter field
+   (`fast | standard | thorough`) per the per-task rules in `start`'s effort
+   mapping — thorough only for architecture/planning/big-view tickets. List
+   every downgrade below the run default with a reason; if a different level
+   would likely accelerate development, ask the user. fast/standard — publish
+   and report the numbered list (title, effort, blocked-by, what it delivers).
+   Thorough — show the list and wait: confirm granularity, blocking edges, and
+   split/merge before publishing.
 
 Adapted from mattpocock/skills (`to-tickets`) and obra/superpowers
 (`writing-plans`), MIT.
