@@ -45,7 +45,10 @@ five times in one audited session. This checklist replaces that loop. The
    synthetic project output before calling it adopted; report the observable
    result (URL, image, command output).
 8. **Ship from repo, never local.** Edit the repo → commit → push →
-   `npx skills update -g -y`. Installed copies under `~/.agents/skills` are
+   `npx skills add ivanDsky/skills -g -y -a '*'` (**`add`, not `update`** —
+   `update` only refreshes already-installed skills and silently skips new
+   ones; `add` is idempotent for existing ones). Installed copies under
+   `~/.agents/skills` are
    build outputs; never edit them (audited cost of ignoring this: a full
    redo plus a 445-file accidental commit). Keep `.gitignore` covering
    install artifacts.
