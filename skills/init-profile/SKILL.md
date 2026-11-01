@@ -105,6 +105,15 @@ Send the batch and stop. Never a second batch.
 ## Review site
 - publish: ask               # ask (default: start asks each run) | always | off
 
+## Consent ledger            # what the agent may do without asking
+- pre-approved: merge to main after green review; lint fixes; dependency bumps; secret-free fixture redaction; commit+push to the project repo
+- always ask: public pushes; publish/delete; runs longer than ~30 min of dispatch; anything touching user data
+
+## Environment facts         # stated once, never re-derived
+- (device topology, e.g. tablet on LAN via tailscale, has no terminal)
+- (review site must be LAN-exposed, not localhost)
+- (artifact naming, theming defaults, version policy — project specifics)
+
 ## Deploy targets (in order; empty list = build-only)
 - local: <run command>
 # - firebase: <project id>
@@ -120,7 +129,12 @@ The four contract sections are Care-axes, Effort, Deploy targets, Testing
 style — extra sections are allowed, never required. `## Version` is seeded
 (`0.1.0`) when missing so every project ships named artifacts
 (`<app_name>-<sem_ver>-<debug|release>.apk`); `## Review site` is seeded
-(`ask`) so each run can opt into the localhost review dashboard; missing
+(`ask`) so each run can opt into the localhost review dashboard; `## Consent
+ledger` is seeded with the defaults above (merge-to-main after green review
+is the standard stop point — the agent never infers consent from silence)
+and `## Environment facts` is seeded empty so one-time facts (device
+topology, LAN exposure, naming) are captured instead of re-derived every
+session; missing
 sections are asked
 about once. The effective platform
 (override, else user default) routes the UI rules payload

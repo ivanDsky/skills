@@ -66,7 +66,10 @@ than ten shell commands. Only reproduce what remains unexplained.
    suspected path, ship a debug build via `deploy-tailscale`, have the user
    reproduce once, pull the log file back. Cheap, targeted, disposable.
 5. **Emulator repro** - only for what rungs 1-4 cannot explain, typically
-   only-input behaviors. Never as the first look.
+   only-input behaviors. Never as the first look. On-device verification is
+   done by the USER on their phone (or only when they explicitly ask) —
+   agents burning tap/screencap cycles on the device produced screenshots
+   that were discarded in every audited session.
 6. **Screen recording + frame analysis** - LAST and with the user in the
    loop: ask the USER to record the phone (they see it live) and, if frame
    analysis is truly needed, to mark the moment ("it flickers right after the

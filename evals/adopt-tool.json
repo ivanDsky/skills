@@ -1,0 +1,23 @@
+{
+  "skill": "adopt-tool",
+  "positive": [
+    "A new version of the Android CLI shipped — add its new commands to our workflow",
+    "We just adopted this tool, make sure the reviewer uses it",
+    "Wire this new capability into the skills",
+    "I found a new agent tool, integrate it everywhere it fits"
+  ],
+  "negative": [
+    {
+      "prompt": "Run analyze-file on the changed Kotlin files",
+      "owner": "android-cli"
+    },
+    {
+      "prompt": "The adb path is missing again this session",
+      "owner": "android-env"
+    },
+    {
+      "prompt": "Run lint and screenshots before pushing",
+      "owner": "review-change"
+    }
+  ]
+}

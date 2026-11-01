@@ -37,7 +37,10 @@ chat carries only the user-facing report.
      that surface, and never inside a fix round. On Android,
      `android studio analyze-file` (when the IDE is open) supplements lint on
      the touched files. A prototype run caps
-     here plus the demo, at any effort.
+     here plus the demo, at any effort. Plus, before anything is pushed:
+     one secret scan over the diff and new fixtures (keys, tokens,
+     session IDs, connection strings) — audited cost of skipping: a
+     JSESSIONID shipped to GitHub and had to be redacted.
    - **Standard**: plus one reviewer subagent on a stronger tier than the
      implementer.
    - **Thorough**: plus one fresh-context dual-verdict subagent on the most

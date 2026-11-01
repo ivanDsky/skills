@@ -1,0 +1,26 @@
+{
+  "skill": "android-env",
+  "positive": [
+    "adb: command not found",
+    "the build can't find the Android SDK",
+    "gradle is failing but I didn't touch those files",
+    "adb doesn't see my tablet",
+    "git is acting weird inside this worktree",
+    "Android Studio seems stuck, maybe a dialog is open",
+    "what gradle task do I run to build the debug APK"
+  ],
+  "negative": [
+    {
+      "prompt": "Render the composables' previews as images",
+      "owner": "android-cli"
+    },
+    {
+      "prompt": "Run analyze-file on every file we touched",
+      "owner": "android-cli"
+    },
+    {
+      "prompt": "Wire the new lint rule into all the skills",
+      "owner": "adopt-tool"
+    }
+  ]
+}

@@ -13,7 +13,7 @@ requires: [android CLI 1.x (brew install android-cli)]
 ---
 
 > **TL;DR** The `android` CLI is the terminal entry to Android tooling — device-free preview renders, Studio analysis, docs, emulators, deploys, Journeys, Crashlytics signals; this skill routes each need to its command and the workflow skill that owns it.
-> **Related**: skill://preview-compose (preview rendering ladder), skill://diagnose-bug (layout/screen/signals evidence), skill://tdd (testing ladder + Journeys), skill://deliver (build/deploy targets)
+> **Related**: skill://preview-compose (preview rendering ladder), skill://diagnose-bug (layout/screen/signals evidence), skill://tdd (testing ladder + Journeys), skill://deliver (build/deploy targets), skill://android-env (session bootstrap, Gradle triage, Studio modal handling), skill://adopt-tool (adoption checklist)
 
 # Android CLI — adopted commands and routing
 
@@ -57,7 +57,12 @@ environment config — run it during onboarding, `init-profile`/`map-codebase`).
   READY. Verify the READY entry's path matches the worktree under review
   before running any studio command, and pin every studio call with
   `--project <name-or-path>` so results never attach to a different open
-  project. Trust dialog: the first open of an untrusted folder blocks on a
+  project. **Coverage proof:** the reviewer lists every touched
+  Kotlin/Java file with its analyze-file result (clean / findings) in the
+  review — "lint passed" or APK analysis does not count as coverage
+  (audited miss: reviewer ran lint+APK only and the user had to ask "did
+  you run analyze-file on everything?"). Trust dialog: the first open of an
+  untrusted folder blocks on a
   modal. Fix once per machine by adding `-Didea.trust.all.projects=true` to
   the Studio `studio.vmoptions` (macOS:
   `~/Library/Application Support/Google/AndroidStudio<version>/`) — trusts

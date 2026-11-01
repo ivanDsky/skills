@@ -34,7 +34,9 @@ round, an independent architect decides fix-forward vs teardown.
 `deploy-tailscale` (device registry + APK sharing)
 `wire-dev-settings` (reactive Firebase flags, dev menu, Showkase playground) ·
 `review-site` (one-file localhost review dashboard: changes, screenshots, diagrams, test report) ·
-`android-cli` (Android CLI routing: device-free preview renders, Studio analysis, docs, emulator/device control, Journeys, Crashlytics signals)
+`android-cli` (Android CLI routing: device-free preview renders, Studio analysis, docs, emulator/device control, Journeys, Crashlytics signals) ·
+`android-env` (session bootstrap: PATH, local.properties, worktree git, device connect, Gradle triage, Studio modal handling) ·
+`adopt-tool` (one-pass capability adoption checklist: verify → route → wire → mandate → navigate → eval → demo → ship from repo)
 
 **Adapted (owned text, credited sources):**
 `ponytail` (smallest-change governor) · `run-intake` core mechanics from

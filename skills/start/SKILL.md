@@ -104,6 +104,8 @@ log. The per-run ledger (`.scratch/<slug>/ledger.md`) is a different file.
 | implement | `implement` | ready frontier ticket |
 | review | `review-change` | implement done |
 | deliver | `deliver` | review passes |
+| support | `android-env` | first Android command of a session fails, or before the first build/device action (bootstrap checklist) |
+| support | `adopt-tool` | a new tool/capability is being adopted into the workflow |
 | report | `review-site` | run's publish decision = yes (PROFILE `Review site publish:` or session answer) |
 | support | `graduate-prototype` | prototype promoted to feature work |
 | support | `assess-teardown` | teardown gate: 2 failed fix rounds or reviewer discretion |
@@ -119,7 +121,9 @@ be asked): Compose UI → `preview-compose`; flags/dev settings →
 principles → `emil-design-eng`, `ui-ux-pro-max`; diagrams → `archify`;
 architecture → `design-architecture`; screenshots/tests → `tdd`
 (`references/android-testing.md`); Android tooling (renders, analysis, docs,
-emulators, deploys, signals) → `android-cli`.
+emulators, deploys, signals) → `android-cli`; environment bootstrap (PATH,
+local.properties, worktree git, device connect, Gradle triage, Studio
+modals) → `android-env`; capability adoption checklist → `adopt-tool`.
 
 Close calls (quick vs feature vs prototype): read
 [Triage cases](references/triage-cases.md).
