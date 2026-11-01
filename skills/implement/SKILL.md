@@ -61,6 +61,9 @@ recollection.
 3. Guard: skills/scope-creep-detector the moment a diff touches files the
    ticket never named — its keep / split / justify verdicts decide.
 4. Knowledge: UI/view tickets consult the installed UX skills before writing
+   UI code — method from `senior-ux` (evaluation framework, computed floors,
+   A/B on the user's hardware); taste from `emil-design-eng`,
+   `ui-ux-pro-max`, `apple-design`, `animation-vocabulary`.
    views — ui-ux-pro-max for stack-specific guidelines, apple-design and
    emil-design-eng for principles. Jetpack Compose UI tickets read
    `preview-compose` before writing any composable and author its `@Preview`s

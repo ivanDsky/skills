@@ -1,0 +1,25 @@
+{
+  "skill": "senior-ux",
+  "positive": [
+    "The board feels off but I can't say why — evaluate it properly",
+    "I'm not sure whether to copy this app's look — help me decide",
+    "The numbers are hard to see on the biggest board",
+    "Give me a few dark/light style options I can flip between on my tablet",
+    "Is this screen accessible? Check it like a senior designer would",
+    "The error message says check your connection but my connection works"
+  ],
+  "negative": [
+    {
+      "prompt": "Split the settings feature into parallel files",
+      "owner": "micro-architecture"
+    },
+    {
+      "prompt": "Render the previews as screenshots for the review page",
+      "owner": "preview-compose"
+    },
+    {
+      "prompt": "Don't add anything beyond the ticket scope",
+      "owner": "senior-dev"
+    }
+  ]
+}

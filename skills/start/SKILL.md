@@ -107,6 +107,7 @@ log. The per-run ledger (`.scratch/<slug>/ledger.md`) is a different file.
 | support | `android-env` | first Android command of a session fails, or before the first build/device action (bootstrap checklist) |
 | support | `adopt-tool` | a new tool/capability is being adopted into the workflow |
 | spec/tickets | `micro-architecture` | designing a feature's file split before tickets — parallel-safe decomposition, OCP extension points |
+| spec/review | `senior-ux` | UI/UX design or review work — evaluation framework, A/B-on-hardware, tokens-with-floors method |
 | always-on | `senior-dev` | every coding session — judgment defaults alongside the stage skills |
 | report | `review-site` | run's publish decision = yes (PROFILE `Review site publish:` or session answer) |
 | support | `graduate-prototype` | prototype promoted to feature work |
@@ -127,7 +128,9 @@ emulators, deploys, signals) → `android-cli`; environment bootstrap (PATH,
 local.properties, worktree git, device connect, Gradle triage, Studio
 modals) → `android-env`; capability adoption checklist → `adopt-tool`;
 feature file-split design (parallel-safe, open/closed, one responsibility
-per file) → `micro-architecture`; judgment defaults → `senior-dev`.
+per file) → `micro-architecture`; judgment defaults → `senior-dev`; UX
+method (framework-judged pixels, A/B on hardware, tokens with floors) →
+`senior-ux`.
 
 Close calls (quick vs feature vs prototype): read
 [Triage cases](references/triage-cases.md).
