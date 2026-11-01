@@ -2,7 +2,7 @@
   "skill": "micro-architecture",
   "positive": [
     "Split this feature so the agents can work in parallel",
-    "Design how we add new game modes without touching the engine",
+    "Design how we add new provider types without touching the engine",
     "This screen file keeps causing merge conflicts — restructure it",
     "Before writing tickets, figure out the file layout for this feature",
     "We need to add a third provider — design it so it's just a new file"

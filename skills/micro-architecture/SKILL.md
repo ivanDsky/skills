@@ -47,7 +47,7 @@ Adding part N+1 must mean: new file + at most one-line registration. Never
 modifying part N's logic.
 
 - Prefer **registries, maps, and sealed hierarchies with per-entry files**
-  over `when`/`if` ladders inside shared files. A new game mode, palette,
+  over `when`/`if` ladders inside shared files. A new variant, provider,
   tool, or screen = a new class/file implementing the interface; the engine
   (the dispatcher that iterates the registry) does not change.
 - The **engine/plugin seam**: common, stable core owns iteration and
@@ -89,9 +89,9 @@ agents; (c) testable without scaffolding for unrelated concerns.
 
 - **Hot file**: every ticket touches the same screen/viewmodel — split the
   screen into per-feature composable files or serialize honestly.
-- **Breadth-first prototypes**: three fonts × three palettes of variants
-  built before a narrow-down gate (audited: ~7 tickets of churn, user kept
-  two). Build one variant per axis, let the user pick, then fill.
+- **Breadth-first prototypes**: many variants of every axis built before a
+  narrow-down gate (audited: ~7 tickets of churn, user kept two). Build
+  one variant per axis, let the user pick, then fill.
 - **Interface by conversation**: signatures negotiated in agent messages
   instead of written in a file both tickets cite — the audited source of
   merge conflicts and stale handoffs.

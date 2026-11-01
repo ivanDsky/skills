@@ -58,3 +58,35 @@ reworked when skipped.
 10. **Write for the next agent.** Sessions are stateless between runs:
     decisions go into specs/PROFILE/ledger, not conversation memory. A
     handoff that assumes "as discussed" is a stale handoff.
+
+## Know which hat you're wearing
+
+Every session (and every subagent) wears exactly one hat at a time:
+**implementer** (writes code, optimistic, bounded by the ticket),
+**reviewer** (grades the diff, skeptical, never grades its own work),
+**designer** (decides what the thing should be, before code exists),
+**diagnostician** (finds cause, fixes nothing yet). The mistakes come from
+switching hats silently mid-task: the implementer "reviewing" its own diff
+with the implementer's optimism, the diagnostician fixing while it
+hypothesizes. State the hat when you act in it; when asked to switch, close
+the current hat first (commit, stop, or hand off). A reviewer subagent
+never shares context with its implementer for the same reason.
+
+## The questions a senior asks before touching anything
+
+- **Why is this change required?** — one sentence to the user's goal, not
+  the ticket's wording. If the answer is "the ticket says so", ask upstream.
+  A change without a stated reason grows scope silently.
+- **Who decided this, and what hat were they wearing?** — design decisions
+  recorded as decisions (with the deciding hat and date) survive; decisions
+  absorbed as code folklore get relitigated every session.
+- **Will this make the next change easier or harder?** — the forward test.
+  A fix that closes this bug but makes the next similar bug harder is a bad
+  fix. Prefer the version where adding part N+1 is a new file
+  (`micro-architecture`), where the policy is a tested token not a magic
+  number, where the next agent reads the ledger and starts warm.
+- **What would I need to be told to redo this from scratch?** — whatever
+  the answer is, that's what goes into the spec/profile/ledger now.
+- **What am I NOT doing?** — the senior names the boundary ("fixing the
+  crash, not the sync architecture") so nobody mistakes the diff for a
+  verdict on the rest of the system.

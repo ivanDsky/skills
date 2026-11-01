@@ -16,14 +16,14 @@ interaction: afk
 
 # Senior UX engineering method
 
-Distilled from a reviewed session where this method produced a board
-overhaul the user approved with corrections folded in — including what was
-corrected.
+Distilled from reviewed product-surface work where this method produced
+approvals with corrections folded in — including what was corrected.
+Examples are generic; any product surface (screen, page, view) applies.
 
 ## Judge with a framework, not vibes
 
-A report like "numbers are hard to see" gets a senior question back: which
-job is this pixel failing? Evaluation axis, outer to inner:
+A report like "the numbers are hard to see" gets a senior question back:
+which job is this pixel failing? Evaluation axis, outer to inner:
 
 1. **Four human needs**: safety, understanding, achievement, joy.
 2. **Seven lenses**, in order: perception → motor → cognitive → state →
@@ -32,28 +32,28 @@ job is this pixel failing? Evaluation axis, outer to inner:
    mood-based walkthrough.
 
 "Deeper, not bigger" is the direction of travel: a P0–P3 list of non-obvious
-findings (magnetic trace-start capture; a deuteranopia clash where the halo
+findings (magnetic gesture-start capture; a color clash where the halo
 turns out to be an accessibility device; 1:1 drag with mid-gesture
-interruptibility; computed label floors at n-max) beats more surfaces.
+interruptibility; computed minimum sizes at the content's worst case)
+beats more surfaces.
 
 ## Measure, don't eyeball
 
-- User taste references ("feels like Duolingo") become **prototype axes**;
-  the reference's shipped product gets **measured and cited** (dot = 0.60
-  of cell, glyph ≈ 0.4 of dot, gridline 0.032–0.037 of pitch) before
-  adopting its look.
+- User taste references ("feels like <app X>") become **prototype axes**;
+  the reference's shipped product gets **measured and cited** (proportions,
+  sizes, weights — numbers, not adjectives) before adopting its look.
 - Design values are **computed**: WCAG contrast math (≥4.5:1 labels), 48dp
-  targets, minimum sizes computed at the worst case (n-max board: dot 27dp,
-  glyph ~10dp) — the legibility floor exists **before** the user has to say
-  "I can't see the numbers".
+  targets, minimum sizes computed at the content's maximum (the densest
+  state, the longest label) — the legibility floor exists **before** the
+  user has to say "I can't see it".
 - Values become **named tokens** ("zero ad-hoc colors"), and the floors
-  become **JVM tests** — contrast bars as test assertions.
+  become **tests** — contrast bars as test assertions.
 
 ## Decide with the user's hardware, not argument
 
 - Taste disputes get a **debug-only A/B switcher** on the user's device
-  (3 typography × 3 palettes, user flips, verdict is final); losers and
-  their bytes are deleted, no shims.
+  (e.g. 3 typography × 3 palettes; user flips, verdict is final); losers
+  and their bytes are deleted, no shims.
 - The **variant matrix is the prototype**: real components across sizes ×
   states × themes, published to the review site so a remote user judges
   before implementation locks.
@@ -62,20 +62,43 @@ interruptibility; computed label floors at n-max) beats more surfaces.
 
 ## Policies, states, and truth
 
-- Design decisions become **measurable policies, JVM-tested**: "two-pane
-  requires Expanded width AND landscape; portrait is always single-pane";
-  "board caps at ~480dp". Layout policy keys on width **and** orientation —
-  width-class-only shipped two-pane on portrait tablets once.
+- Design decisions become **measurable policies, tested**: "two-pane
+  requires large width AND landscape; portrait is always single-pane";
+  "content caps at a readable maximum". Layout policy keys on size **and**
+  orientation — width-class-only layouts break on large portrait screens.
 - **Walk every state on a real device** before changing any — including the
-  states that look broken but are correct ("No entries yet today" on Nov 1
-  is by design). Every walk stop is green before work starts.
+  states that look broken but are correct ("No entries yet" on day one is
+  by design). Every walk stop is green before work starts.
 - **Error copy tells the truth about the cause**: "Check your connection"
   while the network demonstrably works is a UX defect in itself, ticketed
   like any other.
-- **Motion**: minimal, tokenized, exit faster than enter (200ms in /
+- **Motion**: minimal, tokenized, exit faster than enter (e.g. 200ms in /
   140ms out, not 700ms defaults), justified per surface, reduced-motion
   fallbacks, previews stay resting-state. Delight is the beat, not
   particles.
+
+## Ask what a senior asks
+
+Before designing or judging a surface, the questions come first:
+
+- **Why is this change required — what user need fails today?** A change
+  starts as a named failure on the evaluation framework (which of the seven
+  jobs is this pixel failing), not as "redesign the screen". No named
+  failure → the first deliverable is the deep review that finds one,
+  deeper not bigger.
+- **Which hat is this?** Designer, reviewer, and implementer are different
+  hats. The designer picks parameters before implementation locks (the
+  variant matrix exists for exactly that); the reviewer judges against the
+  framework, never grades its own design; the implementer builds the locked
+  decision. Announce the hat; don't let one hat silently do another's job
+  (the audited "all done" → full rework shipped because the implementer
+  never handed the design to the user's eyes).
+- **Will this make the next surface easier to build?** The forward test:
+  fixes land in the shared layer as named tokens and tested policies so
+  every future screen inherits them (a size cap, contrast bars as tests, a
+  shared motion vocabulary) — not as one-off values tuned into a single
+  screen. If the second surface can't reuse it, it was decoration, not
+  design.
 
 ## Refuse, integrate, serve
 
