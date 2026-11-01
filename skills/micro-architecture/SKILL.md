@@ -58,6 +58,28 @@ modifying part N's logic.
   wrong: extract the variation point first (that refactor is its own
   ticket, done before the fan-out).
 
+### Patterns that buy this (reach for these first)
+
+| Pattern | Use it when | Why it simplifies agent work |
+|---|---|---|
+| **Strategy** | one behavior, many interchangeable implementations (validators, sorters, pricing rules) | each strategy is one file, parallel-writable; swap without touching callers |
+| **Factory / Abstract Factory** | object creation scatters `if`-branches by type or platform | creation lives in one file; adding a type touches only the factory's registry |
+| **Registry (plugin map)** | many self-contained units discovered by key | the canonical OCP shape: part N+1 = new file + one registration line |
+| **Command** | user actions / undoable operations / queued work | each command is one file with one `execute`; history, undo, queue come free |
+| **Facade** | a subsystem with many parts behind one call site | consumers code to the facade; you can rewrite the subsystem without breaking agents working on consumers |
+| **Adapter** | third-party or legacy API doesn't match your interface | the mismatch is quarantined in one file; swapping the dependency = new adapter |
+| **Observer / Flow** | state changes must reach several unrelated listeners | producers and consumers are file-disjoint; new listener = new file, zero producer edits |
+| **Template Method** | several variants share a skeleton but differ in steps | skeleton owned once; each variant overrides only its steps in its own file |
+| **Chain of Responsibility** | a request passes through optional stages (middleware, interceptors, validation steps) | each stage is one file; insert/reorder without touching stages |
+| **Specification** | business rules as composable predicates | rules are one-line-testable files; combine instead of nesting ifs |
+| **Repository** | data access behind an interface | UI/domain code never touches the data source; fakes for tests are one file |
+
+Rules of use: pick the **simplest pattern that makes part N+1 a new file** —
+a registry beats Abstract Factory when one map line suffices; don't stack
+patterns (Facade over Repository is common and fine; Factory inside
+Strategy inside Command is a smell). In Kotlin, sealed classes + enums often
+replace Factory/Registry entirely — one file, compiler-checked coverage.
+
 ## 3. Single responsibility — small enough to state as one sentence
 
 Every file/class gets a one-sentence job description. If the sentence

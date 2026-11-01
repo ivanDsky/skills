@@ -92,6 +92,19 @@ PROFILE.md `debug: on`, or "debug on" said this session → create
 fan-out tops 3 subagents, or a gate re-ran — always with the cause. Off = no
 log. The per-run ledger (`.scratch/<slug>/ledger.md`) is a different file.
 
+## Hats — pick one per session, per subagent
+
+Before dispatching anything, name the hat: **implementer** (writes to the
+ticket, optimistic), **reviewer** (grades a diff it didn't write, never its
+own), **designer** (decides what the thing should be, before code),
+**diagnostician** (finds cause, fixes nothing yet). The dispatch table
+below is hat-routed: `implement` dispatches implementers, `review-change`
+dispatches a reviewer on a stronger tier, `diagnose-bug` stays
+diagnostician until the fix is a ticket. Never let one agent wear two hats
+on the same work product — the implementer "reviewing" its own diff is the
+audited source of "all done" → full-rework incidents. Switching hats means
+closing the current one first (commit, stop, or hand off).
+
 ## Stage → skill dispatch
 
 | Stage | Skill | Fires when |
