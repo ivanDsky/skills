@@ -51,7 +51,9 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
      path, or deploy output that will prove it. No DoD → not a ticket: thin or
      split until one exists.
 5. Parallel-safe: mark a ticket parallel-safe only when its file scope is
-   disjoint from every other open ticket's scope. Shared surface — same files
+   disjoint from every other open ticket's scope (the split itself comes
+   from `micro-architecture` — engine seam, one file per variant, exact
+   signatures across tickets). Shared surface — same files
    or shared interfaces — gets a blocking edge instead. An interface crossing
    tickets is written once as an exact signature in both the producing and the
    consuming ticket.

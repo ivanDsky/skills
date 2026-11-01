@@ -70,6 +70,9 @@ recollection.
    new boundary, dependency direction in play) apply `design-architecture`
    first and grade the diff against its `../design-architecture/references/rules-architecture.md`.
    Brownfield work reuses the map-codebase project map; diagrams via archify.
+   Feature split follows `micro-architecture` (stable core + one-file
+   variants, tracer bullet before fan-out); conduct follows `senior-dev`
+   (smallest correct change, verify before trusting, no drive-by scope).
    Android CLI (`android-cli` skill) where it beats raw tooling: renames and
    blast-radius via `android studio find-usages` (IDE open) or LSP;
    dependency bumps verified with `android studio version-lookup`; Android
