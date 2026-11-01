@@ -1,0 +1,24 @@
+{
+  "skill": "senior-dev",
+  "positive": [
+    "Just add what I asked, nothing else",
+    "Are you sure that API works that way? Check before using it",
+    "Don't ship it until you've run the changed path yourself",
+    "I disagree with the plan but do it anyway — commit to it",
+    "Write down what went wrong so the next session knows"
+  ],
+  "negative": [
+    {
+      "prompt": "Split the feature into parallel-safe files",
+      "owner": "micro-architecture"
+    },
+    {
+      "prompt": "Run the review gate on this diff",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "This bug report says the app flickers, find out why",
+      "owner": "diagnose-bug"
+    }
+  ]
+}

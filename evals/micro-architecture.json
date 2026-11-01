@@ -1,0 +1,24 @@
+{
+  "skill": "micro-architecture",
+  "positive": [
+    "Split this feature so the agents can work in parallel",
+    "Design how we add new game modes without touching the engine",
+    "This screen file keeps causing merge conflicts — restructure it",
+    "Before writing tickets, figure out the file layout for this feature",
+    "We need to add a third provider — design it so it's just a new file"
+  ],
+  "negative": [
+    {
+      "prompt": "Decide which modules the app should have",
+      "owner": "design-architecture"
+    },
+    {
+      "prompt": "Mark the tickets that can run in parallel",
+      "owner": "write-tickets"
+    },
+    {
+      "prompt": "Keep the change minimal, no refactoring",
+      "owner": "senior-dev"
+    }
+  ]
+}
