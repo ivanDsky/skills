@@ -53,7 +53,8 @@ than ten shell commands. Only reproduce what remains unexplained.
    their phone; you read logs over Wi-Fi:
    - One-time pairing: Developer options -> Wireless debugging -> pair with
      code; `adb pair <phone-ip>:<pair-port>` (code prompt), then
-     `adb connect <phone-ip>:<debug-port>`.
+     `adb connect <phone-ip>:<debug-port>` (PATH/`local.properties`/connect
+     recipes live in `android-env` — read it, don't re-derive).
    - Then: `adb -s <device> logcat` filtered by package/tag;
      `adb bugreport bugreport.zip` (logs + dumps in one file) when the picture
      is murky.

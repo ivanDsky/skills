@@ -75,6 +75,13 @@ recollection.
    dependency bumps verified with `android studio version-lookup`; Android
    API questions via `android docs search`; preview renders via
    `android preview render` when no Roborazzi suite exists.
+   During implementation, verification stops at rung ≤3 of the testing
+   ladder (`tdd`/references/android-testing.md): unit tests and device-free
+   captures only. Never boot an emulator or deploy to a device to "check
+   how it looks/works" mid-implementation — that is acceptance evidence,
+   owned by review and the user. Environment/build friction (missing adb,
+   SDK, suspicious Gradle red) goes through `android-env`'s checklist
+   before being believed or re-derived.
 5. Style while writing, not after: `design-architecture`'s
    `rules-code-style.md` (in design-architecture) governs comments (self-explanatory code;
    comments only for WHY) and names the AI-slop patterns a worker must not

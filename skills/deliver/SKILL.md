@@ -36,7 +36,10 @@ passed; this stage adds no code.
      (firebase / tailscale / local). Neither defines a target → build-only,
      and say so in the summary.
 
-3. Build first, always. Run the project build and capture the log to
+3. Build first, always. On Android, run the `android-env` checklist once
+   before the first build (PATH, `local.properties`, stale-incremental
+   triage) — deliver has no time to rediscover environment fixes. Run the
+   project build and capture the log to
    `.scratch/<slug>/build.log`. A failed build stops everything — a deploy
    never starts on a red build. The artifact then gets its canonical name
    before any deploy target touches it: copy to
