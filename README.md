@@ -36,6 +36,7 @@ round, an independent architect decides fix-forward vs teardown.
 `review-site` (one-file localhost review dashboard: changes, screenshots, diagrams, test report) ·
 `android-cli` (Android CLI routing: device-free preview renders, Studio analysis, docs, emulator/device control, Journeys, Crashlytics signals) ·
 `android-env` (session bootstrap: PATH, local.properties, worktree git, device connect, Gradle triage, Studio modal handling) ·
+`web-env` (web/Node session bootstrap: runtime + package-manager resolution, env files, ports, lockfiles, dev-server triage, Playwright evidence) ·
 `senior-ux` (UX engineering method: framework-judged pixels, measured references, A/B on user hardware, tokens with computed floors, walk-every-state) ·
 `micro-architecture` (feature-level file split: parallel-safe waves, open/closed one-file extension, single responsibility per file) ·
 `senior-dev` (judgment defaults: verify before trusting, smallest correct change, reproduce before fixing, own mistakes) ·

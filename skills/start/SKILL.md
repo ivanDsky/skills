@@ -118,6 +118,7 @@ closing the current one first (commit, stop, or hand off).
 | review | `review-change` | implement done |
 | deliver | `deliver` | review passes |
 | support | `android-env` | first Android command of a session fails, or before the first build/device action (bootstrap checklist) |
+| support | `web-env` | first web/Node command of a session fails, or before the first dev-server/build action (bootstrap checklist) |
 | support | `adopt-tool` | a new tool/capability is being adopted into the workflow |
 | spec/tickets | `micro-architecture` | designing a feature's file split before tickets — parallel-safe decomposition, OCP extension points |
 | spec/review | `senior-ux` | UI/UX design or review work — evaluation framework, A/B-on-hardware, tokens-with-floors method |
@@ -136,7 +137,9 @@ be asked): Compose UI → `preview-compose`; flags/dev settings →
 `wire-dev-settings`; animations → `animation-vocabulary` + `apple-design`;
 principles → `emil-design-eng`, `ui-ux-pro-max`; diagrams → `archify`;
 architecture → `design-architecture`; screenshots/tests → `tdd`
-(`references/android-testing.md`); Android tooling (renders, analysis, docs,
+(`references/android-testing.md`); web testing ladder (React-first, browser
+as the emulator of web) → `tdd` (`references/web-testing.md`); web/Node
+environment bootstrap → `web-env`; Android tooling (renders, analysis, docs,
 emulators, deploys, signals) → `android-cli`; environment bootstrap (PATH,
 local.properties, worktree git, device connect, Gradle triage, Studio
 modals) → `android-env`; capability adoption checklist → `adopt-tool`;

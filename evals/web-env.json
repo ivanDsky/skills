@@ -1,0 +1,26 @@
+{
+  "skill": "web-env",
+  "positive": [
+    "vite: command not found",
+    "the dev server says port 3000 is already in use",
+    "the page can't see the env variable but it's in .env",
+    "dev server shows an error for a file that exists",
+    "install behaves weirdly after switching branches",
+    "git is acting weird inside this worktree",
+    "which package manager does this repo use"
+  ],
+  "negative": [
+    {
+      "prompt": "Write component tests with React Testing Library",
+      "owner": "tdd"
+    },
+    {
+      "prompt": "Take Playwright screenshots of the settings page",
+      "owner": "tdd"
+    },
+    {
+      "prompt": "The adb path is missing again",
+      "owner": "android-env"
+    }
+  ]
+}

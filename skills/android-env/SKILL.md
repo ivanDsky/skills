@@ -13,7 +13,7 @@ requires: [Android SDK, android CLI (see android-cli)]
 ---
 
 > **TL;DR** Run the environment checklist before the first Android command of any session — PATH, `local.properties`, worktree git, device reachability — and never re-derive these fixes mid-session; Gradle "failures" that survive a `clean` are real, everything else is stale state.
-> **Related**: skill://android-cli (tooling routing, Studio project-open protocol), skill://deliver (deploy targets), skill://deploy-tailscale (device registry)
+> **Related**: skill://android-cli (tooling routing, Studio project-open protocol), skill://web-env (the web twin — Node/env/ports/dev-server triage), skill://deliver (deploy targets), skill://deploy-tailscale (device registry)
 
 # Android environment — derive once per session, not once per command
 
