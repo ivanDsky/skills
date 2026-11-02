@@ -112,7 +112,7 @@ closing the current one first (commit, stop, or hand off).
 | intake | `run-intake` | feature, prototype |
 | orientation | `map-codebase` | unmapped codebase + chain work |
 | spec | `draft-spec` | feature, prototype |
-| tickets | `write-tickets` | feature, prototype |
+| tickets | `write-tickets` | feature, prototype (ticket sets are parallel-first: minimal file overlap; device checks get one aggregate ticket, or none) |
 | research | `fan-out-research` | ticket/spec declares an Unknown |
 | implement | `implement` | ready frontier ticket |
 | review | `review-change` | implement done |

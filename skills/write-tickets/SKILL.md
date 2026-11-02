@@ -50,13 +50,26 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
    - **DoD** — ONE checkable condition. **Evidence** — the command, screenshot
      path, or deploy output that will prove it. No DoD → not a ticket: thin or
      split until one exists.
-5. Parallel-safe: mark a ticket parallel-safe only when its file scope is
+5. Parallel-safe, and make it the DEFAULT: tickets are designed to run in
+   parallel with minimal overlap — serialization is the exception that needs
+   a reason, not the norm. Mark a ticket parallel-safe only when its file
+   scope is
    disjoint from every other open ticket's scope (the split itself comes
    from `micro-architecture` — engine seam, one file per variant, exact
-   signatures across tickets). Shared surface — same files
-   or shared interfaces — gets a blocking edge instead. An interface crossing
+   signatures across tickets); when scopes collide, re-split along
+   `micro-architecture`'s seams first, and only fall back to a blocking
+   edge if the shared surface is genuinely inseparable. An interface crossing
    tickets is written once as an exact signature in both the producing and the
    consuming ticket.
+   **Device/emulator checks are pulled OUT of implementation tickets.** A
+   ticket whose DoD needs a device either (a) loses that DoD to a
+   device-free equivalent (JVM screenshot suite, `android preview render`,
+   unit test — the testing ladder), or (b) becomes ONE separate aggregate
+   ticket at the end of the set that batches every remaining on-device
+   acceptance check into a single sitting. Never spread device checks
+   across tickets — each one serializes its ticket behind a device and
+   multiplies emulator boots. (b) is the fallback; (a) is the goal, and a
+   set with no device-dependent ticket at all is the win.
 6. Publish: one file per ticket, `.scratch/<slug>/tickets/NN-<slug>.md`, with
    the tracker frontmatter from docs/agents/issue-tracker.md (`id`, `title`,
    `labels`, `status`, `assignee`, `blocked-by`). Claim = set `assignee:`
