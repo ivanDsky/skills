@@ -1,0 +1,23 @@
+{
+  "skill": "open-pr",
+  "positive": [
+    "Open a PR for this branch",
+    "Make a pull request with a proper description for the changes we just finished",
+    "Write the PR description from the spec and the review results",
+    "Delivery is set to pr — land this run as a pull request and merge it if review is green"
+  ],
+  "negative": [
+    {
+      "prompt": "Review the diff before we ship",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "Build the APK and deploy it to Firebase App Distribution",
+      "owner": "deliver"
+    },
+    {
+      "prompt": "Write a commit message for the staged changes",
+      "owner": "caveman-commit"
+    }
+  ]
+}

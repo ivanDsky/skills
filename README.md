@@ -1,6 +1,6 @@
 # ivandsky-skills
 
-My personal skillset for AI coding agents — one flow, 24 small composable
+My personal skillset for AI coding agents — one flow, 25 small composable
 skills in the open [Agent Skills](https://agentskills.io/specification)
 format. Install it, run `/start`, and the right stages fire: intake asks the
 few questions worth asking, specs get drafted with marked assumptions, tickets
@@ -42,7 +42,8 @@ round, an independent architect decides fix-forward vs teardown.
 `senior-dev` (judgment defaults: verify before trusting, smallest correct change, reproduce before fixing, own mistakes) ·
 `adopt-tool` (one-pass capability adoption checklist: verify → route → wire → mandate → navigate → eval → demo → ship from repo) ·
 `goldfish-review` (fresh-context lenses on a concept or design before code: reuse, persona flows, data, failure, best version, verifiability; architecture, patterns, file structure — you choose none / up to 3 / all) ·
-`structure-checks` (Konsist suite for Kotlin: one public type per file, layer dependencies, shrink-only allowlist — the mechanical backstop for file structure)
+`structure-checks` (Konsist suite for Kotlin: one public type per file, layer dependencies, shrink-only allowlist — the mechanical backstop for file structure) ·
+`open-pr` (PR as a 2-minute read: summary, before/after screenshot-test captures, major changes, top-3 review checks with line links, optional diagram; start asks PR or straight to main)
 
 **Adapted (owned text, credited sources):**
 `ponytail` (smallest-change governor) · `run-intake` core mechanics from

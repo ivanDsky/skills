@@ -12,7 +12,7 @@ requires: [firebase CLI when target=firebase, tailscale CLI when target=tailscal
 ---
 
 > **TL;DR** Builds the change and deploys to PROFILE.md targets with output attached as evidence; fires when review passes and the run ships.
-> **Related**: skill://review-change (gate before delivery), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://implement (tickets to close)
+> **Related**: skill://review-change (gate before delivery), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://implement (tickets to close), skill://open-pr (land step when delivery = pr)
 
 # Deliver
 
@@ -86,7 +86,15 @@ passed; this stage adds no code.
    Read the referenced skills for their output formats; do not improvise a
    new report shape.
 
-7. Post the delivery summary — the run's last message, always this shape:
+7. Land the change, per the run's delivery mode (PROFILE `## Delivery`
+   `changes:`, or the session answer from start's plan; precedence
+   session > project, default `ask` = start already asked):
+   - `pr` → fire `open-pr`; its URL and merged/open state go in the summary.
+   - `main` → the commit(s) go to the default branch per the consent ledger
+     (`commit+push to the project repo`); report the commit id.
+   Missing delivery answer on a standalone run → ask once, never infer `main`.
+
+8. Post the delivery summary — the run's last message, always this shape:
 
    - **Shipped**: one line per ticket, behavior only, no paths.
    - **Report**: path to `REPORT.md` (the user-facing evidence write-up).
@@ -96,6 +104,7 @@ passed; this stage adds no code.
    - **Evidence**: build log path, deploy URL or output, closed ticket ids,
      and the visual review doc path (`.scratch/<slug>/review/REVIEW.md`)
      when a review doc exists.
+   - **Landed**: PR url + state, or the commit id on `main`.
    - **Test on the deploy target**: 1-3 checks to do by hand, with the URL
      or start command.
    - **Skipped**: what was deferred or left unbuilt.

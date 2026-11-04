@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Triages an ask — quick task, prototype, feature, unmapped codebase — prints the run plan, and fires the matching chain; use on /start.
-> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://structure-checks (Konsist structure evidence)
+> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr)
 
 # Start
 
@@ -75,11 +75,17 @@ normally either way.
 Print one line per stage: fires/skips · HITL or AFK (read each skill's
 `interaction` frontmatter, effort overrides applied) · gate · artifact path.
 Ask at most one question, only if triage is genuinely ambiguous — then fire.
-Exception: the review-site publish decision. PROFILE.md `Review site
-publish:` decides — `always` → the plan lists `review-site` firing after
-deliver; `off` → skip silently; `ask` (the default) → one yes/no bundled
-into the plan ("publish the review dashboard when this run ships?") and the
-answer routes deliver's report step for this run only.
+Exceptions (each bundles into the plan, never a separate round trip):
+- Review-site publish. PROFILE.md `Review site publish:` decides — `always`
+  → the plan lists `review-site` firing after deliver; `off` → skip
+  silently; `ask` (the default) → one yes/no ("publish the review dashboard
+  when this run ships?") that routes deliver's report step for this run only.
+- Delivery. PROFILE.md `## Delivery` `changes:` decides — `pr` → the plan
+  lists `open-pr` after deliver and the run branch is cut before the first
+  commit; `main` → commits land on the default branch; `ask` (the default)
+  → one question ("PR, or straight to main?") answered for this run only.
+  Asked before `implement` starts, because the branch must exist before the
+  first commit.
 
 ## Debug run log
 
@@ -121,6 +127,7 @@ closing the current one first (commit, stop, or hand off).
 | implement | `implement` | ready frontier ticket |
 | review | `review-change` | implement done |
 | deliver | `deliver` | review passes |
+| land | `open-pr` | run's delivery decision = pr (PROFILE `## Delivery` `changes:` or session answer); fired by `deliver` |
 | support | `android-env` | first Android command of a session fails, or before the first build/device action (bootstrap checklist) |
 | support | `web-env` | first web/Node command of a session fails, or before the first dev-server/build action (bootstrap checklist) |
 | support | `adopt-tool` | a new tool/capability is being adopted into the workflow |
@@ -152,7 +159,8 @@ feature file-split design (parallel-safe, open/closed, one responsibility
 per file) → `micro-architecture`; judgment defaults → `senior-dev`; UX
 method (framework-judged pixels, A/B on hardware, tokens with floors) →
 `senior-ux`; blind concept/design lenses → `goldfish-review`; mechanical
-file-structure and layering checks (Konsist) → `structure-checks`.
+file-structure and layering checks (Konsist) → `structure-checks`; PR
+description and landing → `open-pr`.
 
 Close calls (quick vs feature vs prototype): read
 [Triage cases](references/triage-cases.md).

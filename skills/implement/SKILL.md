@@ -24,6 +24,9 @@ recollection.
 1. Read the frontier (tickets open, unblocked, unclaimed), each ticket's spec
    backlink, and PROFILE.md (effort level, debug). Resuming? Trust the ledger
    and git log over your own memory.
+   Delivery `pr` (PROFILE `## Delivery` or start's answer) → make sure the
+   run branch `<slug>` is checked out before the first dispatch; workers
+   commit on it. Never commit a `pr` run to the default branch.
 2. Claim: set `status: claimed` before any work.
 3. A ticket with `Unknowns` gets research subagents first, one per unknown, in
    parallel; link every findings file into the ticket before coding starts.
