@@ -20,9 +20,9 @@ not apply, and never leave an empty heading.
 - <≤5 bullets; name mechanical churn once: "renames in 8 files, no logic">
 
 ## Check these (top 3)
-1. [`<File.kt#L40-L72>`](<permalink>) — <what to check> (<why it is risky>)
-2. [`<path#L10-L18>`](<permalink>) — <…>
-3. [`<path#L5>`](<permalink>) — <…>
+1. [`<File.kt L40-L72>`](<PR diff link: pull/N/files#diff-H R40-R72>) — <what to check> (<why it is risky>)
+2. [`<path L10-L18>`](<PR diff link>) — <…>
+3. [`<path L5>`](<PR diff link>) — <…>
 
 ## Diagram                   <!-- only when structure/flow changed -->
 ```mermaid

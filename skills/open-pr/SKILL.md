@@ -40,10 +40,14 @@ everything else is short. Template and budgets:
   and `Ruling:` lines first, then one-way doors (migration, deletion, public
   API), shared contracts, and the densest logic in the diff. Exactly three or
   fewer; each is one line: what to check, why, a line link.
-- **Line links**: permalinks on the pushed head sha —
-  `https://github.com/<owner>/<repo>/blob/<head-sha>/<path>#L<a>-L<b>`. Take
-  the ranges from `git diff -U0 <base>..<head>`. Push first; re-link if more
-  commits land. No stable line (deleted code, whole-file) → link the file.
+- **Line links point into the PR's "Files changed" view, never the code
+  browser** — the reviewer must land on the diff, not the file. Form:
+  `https://github.com/<owner>/<repo>/pull/<N>/files#diff-<H>R<a>-R<b>`
+  where `<H>` = `printf '%s' <path> | shasum -a 256` (hex of the repo-relative
+  path) and `R<a>-R<b>` are new-side line numbers from `git diff -U0
+  <base>..<head>` (`L` instead of `R` for removed code). Needs the PR number:
+  open the PR first, then fill the links with `gh pr edit <N> --body-file`.
+  Whole-file or unlinkable line → anchor on `#diff-<H>` alone.
 - **Screenshots** (UI diff only): pair each changed screen/state by capture
   name. Source is the screenshot test suite (`preview-compose`, Roborazzi / AGP
   captures) — never a device. *Before* = the committed golden at the base ref
@@ -71,7 +75,9 @@ commit screenshots to the run branch.
    Changes list first, never the screenshots or the top 3.
 3. `gh pr create --base main --head <slug> --title "<t>"
    --body-file .scratch/<slug>/pr.md` (add `--draft` per step 1; use the
-   repo's default branch if it is not `main`). Print the URL.
+   repo's default branch if it is not `main`). Then rewrite the top-3 links
+   with the real `<N>` and run `gh pr edit <N> --body-file
+   .scratch/<slug>/pr.md`. Print the URL.
 
 ## 5. Merge
 
