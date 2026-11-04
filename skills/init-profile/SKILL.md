@@ -13,7 +13,7 @@ requires: []
 ---
 
 > **TL;DR** Interviews once with recommended one-word defaults, then writes PROFILE.md and seeds tracker and scratch; fires on a project's first start.
-> **Related**: skill://start (first run), skill://integrate-skill (repo onboarding)
+> **Related**: skill://start (first run), skill://integrate-skill (repo onboarding), skill://structure-checks (opt-in question 8; writes the `structure:` line)
 
 # Init profile
 
@@ -56,8 +56,10 @@ Numbered questions, arrow line with the recommendation, "yes" accepts, one-word
 replies. Lookups are never questions: ask only what the repo and the global
 layer do not already answer.
 
-1. Care-axes rank — 3, most important first. The rank order is the review
-   priority order and selects the `references/rules-*.md` payloads.
+1. Care-axes rank — 3, most important first, each optionally with up to 2
+   hard-rule sub-bullets. The rank order is the review priority order,
+   selects the `references/rules-*.md` payloads, and picks which hard rules
+   ride in each brief's Standards block.
 2. Effort level: `fast | standard | thorough` — recommend `standard`.
 3. Deploy targets, in order — recommend build-only (`- local: <run command>`).
 4. Testing style: `tdd-fakes | tdd-real | smoke-only`, runner, seams.
@@ -69,6 +71,11 @@ layer do not already answer.
    for, and the core loop (the main flow a user repeats). Understanding pain
    points and what users care about starts here — every later spec builds on
    this frame instead of re-asking it.
+8. Structure checks — Kotlin/Android projects only: opt in to
+   `structure-checks` (Konsist tests: one public type per file, layer
+   dependencies)? Recommend yes; it adds a test dependency. `yes` records the
+   command under Testing style after `structure-checks` setup runs; `no`
+   records `structure: none`.
 
 Send the batch and stop. Never a second batch.
 
@@ -87,6 +94,7 @@ Send the batch and stop. Never a second batch.
 
 ## Care-axes (ranked: what quality means here)
 1. architecture/SOLID
+   - one public type per file; part N+1 is a new file    # hard rules, ≤2 per axis: the rank picks which ride in each brief's Standards block
 2. UI/UX                     # premium | standard
 3. readability
 
@@ -123,6 +131,7 @@ Send the batch and stop. Never a second batch.
 - runner: <command>
 - approach: tdd-fakes        # tdd-fakes | tdd-real | smoke-only
 - seams: <where tests attach>
+- structure: <command | none>  # Gradle task running the structure-checks suite; set by structure-checks setup
 ```
 
 The four contract sections are Care-axes, Effort, Deploy targets, Testing

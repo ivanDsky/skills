@@ -1,6 +1,6 @@
 # ivandsky-skills
 
-My personal skillset for AI coding agents — one flow, 22 small composable
+My personal skillset for AI coding agents — one flow, 24 small composable
 skills in the open [Agent Skills](https://agentskills.io/specification)
 format. Install it, run `/start`, and the right stages fire: intake asks the
 few questions worth asking, specs get drafted with marked assumptions, tickets
@@ -40,12 +40,15 @@ round, an independent architect decides fix-forward vs teardown.
 `senior-ux` (UX engineering method: framework-judged pixels, measured references, A/B on user hardware, tokens with computed floors, walk-every-state) ·
 `micro-architecture` (feature-level file split: parallel-safe waves, open/closed one-file extension, single responsibility per file) ·
 `senior-dev` (judgment defaults: verify before trusting, smallest correct change, reproduce before fixing, own mistakes) ·
-`adopt-tool` (one-pass capability adoption checklist: verify → route → wire → mandate → navigate → eval → demo → ship from repo)
+`adopt-tool` (one-pass capability adoption checklist: verify → route → wire → mandate → navigate → eval → demo → ship from repo) ·
+`goldfish-review` (fresh-context lenses on a concept or design before code: reuse, persona flows, data, failure, best version, verifiability; architecture, patterns, file structure — you choose none / up to 3 / all) ·
+`structure-checks` (Konsist suite for Kotlin: one public type per file, layer dependencies, shrink-only allowlist — the mechanical backstop for file structure)
 
 **Adapted (owned text, credited sources):**
 `ponytail` (smallest-change governor) · `run-intake` core mechanics from
 mattpocock/skills · `tdd` (fakes-over-mocks payload) from obra/superpowers ·
-`scope-creep-detector` from awesome-llm-apps
+`scope-creep-detector` from awesome-llm-apps · `goldfish-review` from
+google/elephant-goldfish-model (Apache-2.0)
 
 **Installed as-is (vendored, attributed — see skills/ATTRIBUTION.md):**
 `design-taste-frontend` · `archify` · `ponytail-review` / `-audit` / `-debt` ·
@@ -54,7 +57,7 @@ mattpocock/skills · `tdd` (fakes-over-mocks payload) from obra/superpowers ·
 Design knowledge ships here too — `apple-design`, `emil-design-eng`,
 `animation-vocabulary` (vendored from emilkowalski/skills, MIT), plus
 `ui-ux-pro-max` for stack-specific guidelines. Every skill carries routing
-trigger cases in `evals/` (29/29). Flow skills name the moment to
+trigger cases in `evals/` (one file per skill). Flow skills name the moment to
 reach for expertise and descriptions route the rest; the repo is
 self-sufficient — no other skills need to be installed.
 

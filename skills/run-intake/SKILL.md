@@ -12,7 +12,7 @@ requires: []
 ---
 
 > **TL;DR** Interviews the user in one batch of highest-impact questions with defaults, turning the rest into numbered assumptions; fires before a spec.
-> **Related**: skill://draft-spec (spec next), skill://start (chain entry)
+> **Related**: skill://draft-spec (spec next), skill://start (chain entry), skill://goldfish-review (blind concept review, asked for here), skill://micro-architecture (pattern table for the extension question)
 
 # Run intake
 
@@ -34,7 +34,7 @@ never a second batch.
      money, deletions.
 3. Build ONE batch in frontier order: a question joins only if nothing else in
    the batch must be answered first. In a prototype run the batch always
-   includes the deploy question (`deploy: main | standalone | none`). Two
+   includes the deploy question (`deploy: main | standalone | none`). Four
    more always-join rules:
    - **DoD** — every feature ask gets one definition-of-done question ("what
      must be true for you to call this done?"), recommended default = review
@@ -45,6 +45,19 @@ never a second batch.
      constraints (existing app theme vs new tokens), and feel words for motion
      (resolve feel-words per animation-vocabulary). Build on the PROFILE.md
      Product frame — never re-ask purpose the frame already answers.
+   - **Extension direction** — features only, not fixes. Look up the repo's
+     existing variation points first (a registry, a `when` over types, a
+     provider list), then ask once: name the variation points this feature
+     has (providers, formats, rules, screens) and the pattern that would make
+     part N+1 a new file (`micro-architecture`'s table; Kotlin sealed/enum
+     before Factory/Registry). Recommended default: **no seam** — per-variant
+     files are free, but an interface + registry needs a second variant the
+     user names. Also ask whether a part N+1 is on the roadmap. The answer
+     becomes a numbered assumption in the spec ("Extension points").
+   - **Blind review** (standard and thorough runs; fast skips) — "Want fresh
+     eyes on the concept before I draft the spec: none / up to 3 / all
+     lenses?" (`goldfish-review`). Recommended default: up to 3 at standard,
+     all at thorough. Each lens costs one subagent run; say so.
 4. Format every question so a one-word reply answers it: number it, word it so
    "yes" accepts your recommendation, and put the recommendation on an arrow
    line. Then send the batch and stop — the reply "1-4 yes, 5: no" must be a
@@ -57,9 +70,11 @@ never a second batch.
 5. Never ask what the repo or PROFILE.md already answers, and never re-ask a
    settled decision.
 6. Write the handoff: answers plus the numbered assumption list (A1, A2, ...)
-   to `.scratch/<slug>/intake.md`. Each assumption is a concrete reviewable
-   statement ("A1: single tenant, Postgres only"). The spec stage consumes that
-   file; standalone runs put the same content in the reply.
+   to `.scratch/<slug>/intake.md`, with a **Hard constraints** list (stack,
+   deadlines, "must not" statements — facts, never rationale; with the
+   hypothesis, all a blind reviewer will see). Each assumption is a concrete
+   reviewable statement ("A1: single tenant, Postgres only"). The spec stage
+   consumes that file; standalone runs put the same content in the reply.
 7. Read [Question craft](references/question-craft.md) when running the deep
    gear or when the batch is hard to fill with load-bearing questions.
 8. An irreversible fork discovered mid-flight gets the grilling treatment:

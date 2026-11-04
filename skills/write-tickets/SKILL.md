@@ -12,7 +12,7 @@ requires: []
 ---
 
 > **TL;DR** Breaks an approved spec into dependency-ordered tracer-bullet tickets with DoD and evidence in the local tracker; fires after a spec passes checkpoint.
-> **Related**: skill://draft-spec (upstream spec), skill://implement (downstream execution), skill://fan-out-research (Unknowns research)
+> **Related**: skill://draft-spec (upstream spec), skill://implement (downstream execution), skill://fan-out-research (Unknowns research), skill://structure-checks (file-map evidence), skill://goldfish-review (stage B design review)
 
 # Write tickets
 
@@ -43,13 +43,23 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
      be inlined, trimmed to the decision.
    - **Blocked by** — ticket ids that must close first, or "none".
    - **File scope** — the files/dirs this ticket may touch.
+   - **File map** — only when the ticket adds or moves files: one line per new
+     or moved file, `path — one-sentence responsibility`. A line that needs
+     "and" to state its responsibility is two files. Reviewers diff the real
+     files against this map; paths belong here and in the brief, never in the
+     spec.
    - **Unknowns** — one open question per line; each line becomes one
      `fan-out-research` subagent before coding starts. If an answer could
      change the build, either write a DoD that survives both answers or block
      the ticket on a research ticket.
-   - **DoD** — ONE checkable condition. **Evidence** — the command, screenshot
-     path, or deploy output that will prove it. No DoD → not a ticket: thin or
-     split until one exists.
+   - **DoD** — ONE checkable condition. **Evidence** — a re-runnable command
+     with an exit code (test task, `structure:` command from PROFILE.md,
+     preview render task). Screenshot paths and deploy output are Evidence only
+     on the single device-acceptance ticket (item 5). A ticket that adds or
+     moves files also carries the DoD line "structure checks green" with the
+     `structure:` command as Evidence (`structure-checks`; not configured →
+     say so in the ticket). No DoD → not a ticket: thin or split until one
+     exists.
 5. Parallel-safe, and make it the DEFAULT: tickets are designed to run in
    parallel with minimal overlap — serialization is the exception that needs
    a reason, not the norm. Mark a ticket parallel-safe only when its file
@@ -87,6 +97,12 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
    and report the numbered list (title, effort, blocked-by, what it delivers).
    Thorough — show the list and wait: confirm granularity, blocking edges, and
    split/merge before publishing.
+9. Design review (stage B, `goldfish-review`): before publishing, when the
+   set adds a module or boundary or the run is thorough, ask the user in the
+   same confirm message whether they want a blind design review — none / up
+   to 3 / all lenses (recommended: all at thorough, up to 3 otherwise). fast,
+   or nothing architectural → skip silently. Findings land as ticket edits
+   or file-map changes, never a second interview.
 
 Adapted from mattpocock/skills (`to-tickets`) and obra/superpowers
 (`writing-plans`), MIT.

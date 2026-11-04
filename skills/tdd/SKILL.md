@@ -6,7 +6,7 @@ requires: []
 ---
 
 > **TL;DR** Implements every change test-first — failing test, minimal passing code, refactor while green; fires on TDD, red-green-refactor, or bug repro as test.
-> **Related**: skill://implement (ticket execution), skill://diagnose-bug (bug repro), skill://preview-compose (screenshot tests)
+> **Related**: skill://implement (ticket execution), skill://diagnose-bug (bug repro), skill://preview-compose (screenshot tests), skill://structure-checks (structure suite as Kotlin evidence), skill://goldfish-review (verifiability lens)
 
 # TDD
 

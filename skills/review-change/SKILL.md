@@ -12,7 +12,7 @@ requires: []
 ---
 
 > **TL;DR** Runs the effort-tiered review gate — scripted checks, screenshots, code review, dual-verdict subagent — and owns the fix loop; fires before deliver.
-> **Related**: skill://implement (upstream tickets), skill://deliver (downstream ship), skill://assess-teardown (teardown escalation), skill://scope-creep-detector (drift catch)
+> **Related**: skill://implement (upstream tickets), skill://deliver (downstream ship), skill://assess-teardown (teardown escalation), skill://scope-creep-detector (drift catch), skill://structure-checks (fast-tier command), skill://goldfish-review (earlier blind lenses; shares its triage rules)
 
 # Review change
 
@@ -36,7 +36,9 @@ chat carries only the user-facing report.
      when no JVM capture exists for
      that surface, and never inside a fix round. On Android,
      `android studio analyze-file` (when the IDE is open) supplements lint on
-     the touched files. A prototype run caps
+     the touched files. On Kotlin diffs, run PROFILE.md's `structure:` command
+     (`structure-checks`) yourself: red is ❌ Important; not configured on a
+     Kotlin diff is `cannot-verify`, said out loud. A prototype run caps
      here plus the demo, at any effort. Plus, before anything is pushed:
      one secret scan over the diff and new fixtures (keys, tokens,
      session IDs, connection strings) — audited cost of skipping: a
@@ -73,8 +75,24 @@ chat carries only the user-facing report.
    direction) → thorough tier grades against `design-architecture`'s
    `../design-architecture/references/rules-architecture.md` payload; findings are Critical when the
    dependency rule breaks.
+   Coverage proof, every tier that reviews code: the report carries one row
+   per axis — spec, architecture, file structure, patterns, UI — with what
+   was checked and the count (`structure: 14 new/moved files vs file map, 0
+   findings`). File structure = the diff's real files against the tickets'
+   file maps and the one-responsibility rule (a file needing "and" to state
+   its job, several public types, a shared `when` edited to add a variant);
+   patterns = the Extension points assumption honored, each introduced
+   pattern carrying its forcing function, repo-consistent with the pattern
+   table in `micro-architecture`. A row without evidence is `cannot-verify`,
+   never ✅. A worker report saying `device: used because …` with a weak
+   reason, or a diff showing device-driven edits with `device: none`, is an
+   Important finding.
 6. UI in the diff → load [review-ux.md](references/review-ux.md) and run the UX
    axis at every tier; check against `design-taste-frontend` when installed.
+   Thorough adds one fresh-context visual reviewer that sees only preview
+   renders and screenshots — layout, icons, motion, microinteractions graded
+   against `apple-design` / `emil-design-eng` / `animation-vocabulary` /
+   `ui-ux-pro-max`; it proposes, never policing taste the user owns.
 7. Visual review doc — at verdict time produce `.scratch/<slug>/review/REVIEW.md`
    per [review-doc.md](references/review-doc.md): numbered screenshots (reuse
    JVM captures), motion clips from the wireless-adb device when reachable,
@@ -86,13 +104,14 @@ chat carries only the user-facing report.
    fast/standard follow the PROFILE `Review site publish:` setting or the
    session answer, and the doc itself is always written either way.
 8. Fix loop: findings go back to the same implementer as a resumed brief;
-   re-review is scoped to the fix diff only. Minors are ledgered as deferred —
+   re-review is scoped to the fix diff only; triage and convergence rules in
+   [fix-loop.md](references/fix-loop.md). Minors are ledgered as deferred —
    never silently fixed. Count failed fix rounds per module in the ledger.
 9. Teardown gate: 2 failed fix rounds on the same module (fire before round 3),
    or reviewer discretion once with a logged reason → invoke `assess-teardown`.
    The architect decides fix-forward vs clean redesign; a redesign carries
    forward only root cause, interface contracts, and surviving tests.
-8. Report the verdict to the user: verdicts, findings by grade, what was
+10. Report the verdict to the user: verdicts, findings by grade, what was
    skipped, residual risk. Append the ledger line; when debug is on, add the
    ≤4-line run-log entry (`depth: not ok` when fix rounds were exceeded or a
    gate re-ran — always with the cause).

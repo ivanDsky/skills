@@ -1,0 +1,28 @@
+{
+  "skill": "goldfish-review",
+  "positive": [
+    "Get fresh eyes on this feature idea before we write the spec",
+    "Play devil's advocate on the plan — someone who hasn't seen our conversation",
+    "Run a blind review of the design before we cut tickets",
+    "Have a few independent reviewers poke holes in the concept: reuse, failure modes, data migration",
+    "I want up to 3 lenses on this feature before drafting"
+  ],
+  "negative": [
+    {
+      "prompt": "Review the finished diff before we ship",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "Ask me what you need to know before drafting the spec",
+      "owner": "run-intake"
+    },
+    {
+      "prompt": "Research how Room auto-migrations handle renamed columns",
+      "owner": "fan-out-research"
+    },
+    {
+      "prompt": "Grill me on whether we should change the database engine",
+      "owner": "grilling"
+    }
+  ]
+}

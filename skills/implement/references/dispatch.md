@@ -14,8 +14,29 @@ File scope: <paths this ticket may touch; disjoint for parallel-safe tickets>
 Neighbor interfaces: <signatures/contracts from earlier tickets this brief cannot know>
 Unknowns: <one link per resolved findings file, or "none">
 DoD: <the checkable condition>
-Evidence: <command | screenshot path | deploy output>
+Evidence: <re-runnable command with an exit code; screenshot/deploy output only on the device-acceptance ticket>
+Standards: <≤5 lines, see below>
 ```
+
+### Standards block
+
+The controller picks at most 5 lines — concrete, checkable, each naming its
+source file — by ticket type and the top care-axis in PROFILE.md. Never a
+skill wall; the worker reads only what a line names. Selection:
+
+- adds/moves files → file map in the ticket is binding; `structure:` command
+  green (`structure-checks`); one responsibility per file
+  (`design-architecture/references/rules-architecture.md` 17, 20)
+- spec names an Extension points assumption → follow it; pattern per
+  `micro-architecture`'s table; no seam beyond it
+- UI → `preview-compose` previews for each state; tokens not literals;
+  motion named via `animation-vocabulary`
+- verification → rung ≤3; no device or emulator; semantic JVM test for any
+  tap flow (`tdd/references/android-testing.md`)
+- care-axes rank 1-3 hard rules from PROFILE.md fill the rest
+
+Event triggers (creating a file, editing a shared variant site, introducing
+a pattern) live in `implement` §3 and are not repeated here.
 
 The dispatch prompt carries three things only: one line on where this ticket
 fits, the brief path introduced as "read this first — it is your
@@ -31,6 +52,8 @@ commits: <base7>..<head7>
 tests: <one line — runner, passed/failed>
 dod: <met? evidence path>
 skipped: <what>
+device: none | used because <reason>
+structure: <command and result, or "not configured">
 residual risk: <what could be wrong>
 concerns: <numbered, or none>
 ```

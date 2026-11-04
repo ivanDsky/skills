@@ -95,11 +95,14 @@ ciembor/agent-rules-books, plus the books cited below):
     `var` state. One exposed stream per concern, combined in one data class
     when the screen needs several. MUST. (Android state-holders guidance;
     user bar)
-20. One public type per file in the UI layer: a composable file holds ONE
-    public composable (plus its private helpers and its previews). Multiple
-    public composables or classes sharing a file — however idiomatic the
-    language — is the split signal; split by feature slice before stacking a
-    fifth type. MUST. (user bar; sharpens rule 17 for UI files)
+20. One public top-level type per file, in every layer: a file holds ONE
+    public class/interface/object/composable (plus private helpers, its own
+    extensions, typealiases, and previews). Several public top-level types
+    sharing a file — however idiomatic the language — is the split signal;
+    split before stacking a second. A sealed hierarchy either nests its
+    variants inside the parent (one type) or gives each top-level variant its
+    own file (`micro-architecture`). MUST. Mechanical check:
+    `structure-checks`. (user bar; sharpens rule 17)
 
 ## Trigger rules
 

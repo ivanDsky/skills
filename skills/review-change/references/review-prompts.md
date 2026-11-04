@@ -21,9 +21,14 @@ Ask for, in care-axes order:
 
 - (a) spec breaches — quote the spec line each finding violates;
 - (b) quality findings against the rules payloads and care-axes;
-- (c) scope creep — behavior in the diff nobody asked for.
+- (c) scope creep — behavior in the diff nobody asked for;
+- (d) file structure and patterns — the real files against the tickets' file
+  maps, `structure:` command result, the spec's Extension points
+  assumption, forcing function for each introduced pattern.
 
 Findings graded Critical / Important / Minor, each citing the owning hunk.
+End with the coverage rows (axis — what was checked — count); an axis with no
+evidence is `cannot-verify`, not ✅.
 
 ## Dual-verdict subagent (thorough) — fresh context, most capable model
 
