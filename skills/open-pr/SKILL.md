@@ -69,8 +69,9 @@ commit screenshots to the run branch.
 2. Body to `.scratch/<slug>/pr.md` from the template. Budget: **≤~350 words
    of prose**; images and the diagram are not counted. Over budget → cut the
    Changes list first, never the screenshots or the top 3.
-3. `gh pr create --base <default branch> --head <slug> --title "<t>"
-   --body-file .scratch/<slug>/pr.md` (add `--draft` per step 1). Print the URL.
+3. `gh pr create --base main --head <slug> --title "<t>"
+   --body-file .scratch/<slug>/pr.md` (add `--draft` per step 1; use the
+   repo's default branch if it is not `main`). Print the URL.
 
 ## 5. Merge
 
