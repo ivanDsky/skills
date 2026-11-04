@@ -28,3 +28,9 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | Prototype flag | Triage outcome; same flow, reduced gates, DoD = question answered/demoable, carries `deploy: main/standalone/none`. | spike |
 | Deploy target | build-only (default), firebase, tailscale, or local; ordered list in PROFILE.md. | environment |
 | Rules payload | Swappable `references/rules-*.md` carrying style/architecture rules; procedures stay generic (T008). | config |
+| Goldfish | Fresh-context subagent that has not seen the conversation; gets a brief file (hypothesis + hard constraints, or spec + file maps) and reviews one angle. | reviewer (reviewer = diff grader) |
+| Lens | One goldfish angle with its own objective and evidence (reuse, persona flows, data & migration, failure & resources, best version, verifiability; architecture, patterns, file structure). User picks the count: none / up to 3 / all. | persona, checklist |
+| Tension | Two lenses pulling opposite ways, kept visible with the parent's pick and why; never averaged. | conflict |
+| Not run | A lens that produced no findings file; reported as missing coverage, never as clean. | skipped, passed |
+| Standards block | ≤5 lines in an implementer brief naming the rules this ticket must satisfy, picked by care-axes rank and ticket shape. | rules dump |
+| File map | Per-ticket list of path — one-sentence responsibility; "and" in a line means two files. | file list |

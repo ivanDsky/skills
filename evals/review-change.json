@@ -6,7 +6,8 @@
     "The reviewer sent findings back — run the fix loop and re-review just the fix diff",
     "Check the diff before shipping: scripted checks, screenshots, and a reviewer pass",
     "Ticket is marked effort: fast — run its review gate (expect lint/compile plus JVM-capture evidence, no emulator, no dual-verdict subagent)",
-    "Review this fix round — re-review only the fix diff, JVM screenshot-test captures are the evidence"
+    "Review this fix round — re-review only the fix diff, JVM screenshot-test captures are the evidence",
+    "Review the diff: per-axis coverage proof, run the structure check, and triage the findings from the last round"
   ],
   "negative": [
     {

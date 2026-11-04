@@ -11,3 +11,5 @@ Installed-as-is skills keep upstream frontmatter; our additions live in the cent
 | ui-ux-pro-max | nextlevelbuilder/ui-ux-pro-max-skill | 28b3b8d | MIT (Basic version) |
 
 Adapt-tier skills (ponytail core mode, run-intake, tdd, scope-creep-detector) are ours; sources credited in each SKILL.md footer.
+
+Adapt-tier, Apache-2.0: `goldfish-review` and the triage/convergence sections of `review-change/references/fix-loop.md` adapt concepts from google/elephant-goldfish-model (commit not pinned; fresh-context reviewers, anchored hypothesis, not-run rule). No upstream text is copied; lens prompts are ours.

@@ -4,7 +4,8 @@
     "Gather requirements for the new CSV export feature before we write the spec",
     "Ask me what you need to know to build the billing prototype",
     "We're adding multi-tenant support \u2014 scope it with me, ask your questions in one go",
-    "Run intake on this feature request"
+    "Run intake on this feature request",
+    "Intake for the new reminders feature — ask me whether it should be extensible and how many blind reviewers I want"
   ],
   "negative": [
     {

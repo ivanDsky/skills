@@ -15,6 +15,36 @@ fires.
 3. A round fails when any Critical/Important finding survives or a new one of
    the same grade appears. Count failed rounds per module in the ledger.
 
+## Triage — what the implementer may do with a finding
+
+Each finding gets exactly one response, recorded in the findings file:
+
+- **FIX** — change the code; the default.
+- **CONTEST** — only with evidence the reviewer could have read (a spec
+  assumption number, a ledger Ruling, a test, a line in the diff). "I wrote
+  it that way" is not evidence. A finding that says the work is hard to
+  understand is never contestable — fix the unclear part.
+- **ESCALATE** — the finding is right but the fix changes a spec decision or
+  an interface other tickets rely on: ledger a `Ruling:` and ask the user
+  or the controller; do not decide alone.
+- **DECLINE** — out of scope for this change; allowed only for a Minor, with
+  the ledger line `Ruling: minor <what> deferred — <why>`.
+
+A contest the reviewer cannot refute from the cited evidence closes the
+finding; one it can refute makes it a FIX.
+
+## Convergence
+
+- Findings keep stable ids across rounds, so a fix is checked against the
+  same id, not a reworded copy.
+- Keep a settled list (closed, contested-and-accepted, declined): a re-review
+  does not re-raise a settled id without new evidence.
+- A reviewer or lens that failed, timed out, or could not be dispatched is
+  **not run** — never counted as a clean pass. Report it as not run and name
+  the missing coverage.
+- Churn: the same location flips between findings across rounds, or fixes
+  keep reopening each other → stop looping and feed the teardown gate below.
+
 ## Teardown gate
 
 Fire `assess-teardown` when a module hits 2 failed fix rounds (before round 3),

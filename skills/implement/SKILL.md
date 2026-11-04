@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Executes tracker tickets one fresh subagent per ticket in tracer-bullet order, fanning out research first; fires when the frontier has ready tickets.
-> **Related**: skill://write-tickets (upstream tickets), skill://fan-out-research (declared unknowns), skill://review-change (downstream gate), skill://graduate-prototype (prototype re-entry)
+> **Related**: skill://write-tickets (upstream tickets), skill://fan-out-research (declared unknowns), skill://review-change (downstream gate), skill://graduate-prototype (prototype re-entry), skill://structure-checks (`structure:` before DONE)
 
 # Implement
 
@@ -24,6 +24,9 @@ recollection.
 1. Read the frontier (tickets open, unblocked, unclaimed), each ticket's spec
    backlink, and PROFILE.md (effort level, debug). Resuming? Trust the ledger
    and git log over your own memory.
+   Delivery `pr` (PROFILE `## Delivery` or start's answer) → make sure the
+   run branch `<slug>` is checked out before the first dispatch; workers
+   commit on it. Never commit a `pr` run to the default branch.
 2. Claim: set `status: claimed` before any work.
 3. A ticket with `Unknowns` gets research subagents first, one per unknown, in
    parallel; link every findings file into the ticket before coding starts.
@@ -38,12 +41,14 @@ recollection.
    run concurrently, each on its own subagent; shared surfaces wait on their
    blocking edges. Never two implementers on one tree — if scopes overlap,
    serialize and ledger the `Ruling:`.
-2. The brief is a FILE: the ticket, the spec backlink, neighbor interfaces.
-   The dispatch prompt holds only the brief path, one line of context, and
-   the report contract. Never paste session history into a dispatch.
+2. The brief is a FILE: the ticket, the spec backlink, neighbor interfaces,
+   and a Standards block (at most 5 lines — see dispatch.md). The dispatch
+   prompt holds only the brief path, one line of context, and the report
+   contract. Never paste session history into a dispatch.
 3. Report contract: the worker writes a report file and replies in at most
    15 lines — status DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT,
-   commits, one-line test summary, concerns.
+   commits, one-line test summary, `device:` and `structure:` lines,
+   concerns.
 4. Workers never spawn subagents — no helpers, no reviewers. Review belongs
    to review-change.
 5. Knobs, enforced at dispatch: implementer on the cheapest capable tier;
@@ -60,39 +65,48 @@ recollection.
    non-trivial logic leaves one small test behind.
 3. Guard: skills/scope-creep-detector the moment a diff touches files the
    ticket never named — its keep / split / justify verdicts decide.
-4. Knowledge: UI/view tickets consult the installed UX skills before writing
-   UI code — method from `senior-ux` (evaluation framework, computed floors,
-   A/B on the user's hardware); taste from `emil-design-eng`,
-   `ui-ux-pro-max`, `apple-design`, `animation-vocabulary`.
-   views — ui-ux-pro-max for stack-specific guidelines, apple-design and
-   emil-design-eng for principles. Jetpack Compose UI tickets read
-   `preview-compose` before writing any composable and author its `@Preview`s
-   with it; tickets touching feature flags, remote config, or dev-facing
-   settings read `wire-dev-settings` before touching configuration code.
-   Architecture-heavy tickets (new module,
-   new boundary, dependency direction in play) apply `design-architecture`
-   first and grade the diff against its `../design-architecture/references/rules-architecture.md`.
-   Brownfield work reuses the map-codebase project map; diagrams via archify.
-   Feature split follows `micro-architecture` (stable core + one-file
-   variants, tracer bullet before fan-out); conduct follows `senior-dev`
-   (smallest correct change, verify before trusting, no drive-by scope).
-   Android CLI (`android-cli` skill) where it beats raw tooling: renames and
-   blast-radius via `android studio find-usages` (IDE open) or LSP;
-   dependency bumps verified with `android studio version-lookup`; Android
-   API questions via `android docs search`; preview renders via
-   `android preview render` when no Roborazzi suite exists.
-   During implementation, verification stops at rung ≤3 of the testing
-   ladder (`tdd`/references/android-testing.md): unit tests and device-free
-   captures only. Never boot an emulator or deploy to a device to "check
-   how it looks/works" mid-implementation — that is acceptance evidence,
-   owned by review and the user. Environment/build friction (missing adb,
-   SDK, suspicious Gradle red) goes through `android-env`'s checklist
-   before being believed or re-derived.
+4. Knowledge: read what the brief's Standards block names, nothing more.
+   - UI/view tickets: `preview-compose` before any composable (author its
+     `@Preview`s with it); method from `senior-ux` (evaluation framework,
+     computed floors, A/B on the user's hardware); taste from
+     `emil-design-eng`, `ui-ux-pro-max`, `apple-design`; motion named via
+     `animation-vocabulary`.
+   - Feature flags, remote config, dev-facing settings: `wire-dev-settings`
+     before touching configuration code.
+   - Architecture-heavy tickets (new module, new boundary, dependency
+     direction in play): `design-architecture` first, diff graded against its
+     `../design-architecture/references/rules-architecture.md`. Feature
+     split follows `micro-architecture` (stable core + one-file variants,
+     tracer bullet before fan-out); conduct follows `senior-dev`. Brownfield
+     work reuses the map-codebase project map; diagrams via archify.
+   - Android CLI (`android-cli` skill) where it beats raw tooling: renames
+     and blast-radius via `android studio find-usages` (IDE open) or LSP;
+     dependency bumps via `android studio version-lookup`; API questions via
+     `android docs search`; preview renders via `android preview render`
+     when no Roborazzi suite exists.
+   - Verification stops at rung ≤3 of the testing ladder
+     (`tdd`/references/android-testing.md): unit tests and device-free
+     captures only. Never boot an emulator, deploy to a device, or tap
+     through a screen to "check how it looks/works" mid-implementation —
+     that is acceptance evidence, owned by review and the user. A flow you
+     would verify by hand becomes a persisted semantic JVM test (recipe in
+     the same reference). Report `device: none`; any use needs
+     `device: used because <reason>`. Environment/build friction (missing
+     adb, SDK, suspicious Gradle red) goes through `android-env`'s
+     checklist before being believed or re-derived.
 5. Style while writing, not after: `design-architecture`'s
    `rules-code-style.md` (in design-architecture) governs comments (self-explanatory code;
    comments only for WHY) and names the AI-slop patterns a worker must not
    emit; review grades against the same file.
-6. Every worker reply ends `skipped: … / residual risk: …`.
+6. Event triggers while writing: creating a file → its one-sentence
+   responsibility is written down first (the ticket's file map; none
+   present → add it to the report); about to add a variant by editing a
+   shared `when`/registry/factory → stop, write a `Ruling:`; introducing a
+   pattern → state its forcing function (a second real variant, or the
+   Extension points assumption in the spec) in the commit body. The
+   `structure:` command from PROFILE.md is green before DONE — fix by
+   splitting; never edit the rules or the allowlist (`structure-checks`).
+7. Every worker reply ends `skipped: … / residual risk: …`.
 
 ## 4. Status handling
 

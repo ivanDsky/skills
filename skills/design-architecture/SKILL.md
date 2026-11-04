@@ -14,7 +14,7 @@ requires: []
 ---
 
 > **TL;DR** Designs and judges module architecture — seams, coupling, dependency rule, ADRs; fires when a spec needs its architecture section or review grades structure.
-> **Related**: skill://draft-spec (architecture section), skill://archify (architecture diagrams), skill://review-change (dependency grading)
+> **Related**: skill://draft-spec (architecture section), skill://archify (architecture diagrams), skill://review-change (dependency grading), skill://structure-checks (mechanical form of rules 17/20 and layer checks), skill://goldfish-review (architecture lens at stage B)
 
 # Design architecture
 

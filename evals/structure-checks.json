@@ -1,0 +1,28 @@
+{
+  "skill": "structure-checks",
+  "positive": [
+    "Set up konsist tests so agents can't put ten classes in one file",
+    "Add a structure check that enforces one public class per file in this Android project",
+    "The agent keeps stuffing multiple classes into one Kotlin file — enforce it mechanically",
+    "Wire a layer-dependency test so domain never imports data",
+    "This ticket adds new Kotlin files — what evidence do I need for the structure rules?"
+  ],
+  "negative": [
+    {
+      "prompt": "Decide which Gradle modules the app should have",
+      "owner": "design-architecture"
+    },
+    {
+      "prompt": "Split this feature so the agents can work in parallel",
+      "owner": "micro-architecture"
+    },
+    {
+      "prompt": "Write a failing test for the login ViewModel first",
+      "owner": "tdd"
+    },
+    {
+      "prompt": "Run the lint and screenshot gate over this finished diff",
+      "owner": "review-change"
+    }
+  ]
+}

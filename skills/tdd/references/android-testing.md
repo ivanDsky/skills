@@ -101,3 +101,20 @@ against the reference images, never an emulator boot. Record colors and theme
 values as assertions or capture variants (light/dark/font-scale), so any
 visual claim from a previous round is re-verifiable in seconds by any later
 run without a device.
+
+## Tap flow → persisted JVM test (instead of guessing coordinates)
+
+A flow you would otherwise verify by tapping through a device ("open the
+sheet, pick an item, see the total") is written as a rung-2 test, once, and
+re-run by command:
+
+1. Locate the targets semantically, not by position: text, `contentDescription`,
+   or a `testTag` added to the composable. Need the real tree? `android layout
+   --output hierarchy.json` (Android CLI) shows the semantics a test can see.
+2. `createComposeRule` + Robolectric (`@GraphicsMode(NATIVE)`): set content with
+   fake state, then `onNodeWithText("Continue").performClick()` and assert the
+   next state with `assertIsDisplayed()` / `assertTextEquals(...)`.
+3. Commit the test; its Gradle task is the ticket's Evidence (exit code), and
+   "still broken" next round means re-running it, not opening a device.
+4. Only what semantics cannot see (insets, real input pipeline, text shaping)
+   climbs to rung 4, and then as an aggregate acceptance ticket.

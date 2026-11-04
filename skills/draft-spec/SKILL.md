@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Writes the working spec with numbered Assumptions and posts the single correct-me-or-I-go checkpoint; fires after intake answers exist.
-> **Related**: skill://run-intake (intake answers), skill://design-architecture (architecture section), skill://write-tickets (next stage)
+> **Related**: skill://run-intake (intake answers), skill://design-architecture (architecture section), skill://write-tickets (next stage), skill://goldfish-review (stage A concept lenses before drafting)
 
 # Draft the spec
 
@@ -27,6 +27,14 @@ autonomous. The intake batch was the interview — never ask again.
    the user never saw is one they could not reject.
 2. Read PROFILE.md for care-axes and the effort level. Never re-ask anything
    intake or the repo already settles.
+3. Blind concept review: when intake recorded a lens choice other than none,
+   run `goldfish-review` stage A now, on the hypothesis + hard constraints
+   from `intake.md`. Triage each finding before drafting — a finding is one
+   of: a numbered assumption, a non-goal in Out of scope, a Success-criteria
+   line, or declined with a one-line reason. Lens tensions (two lenses
+   pulling opposite ways) become an assumption that names both sides and
+   your pick. A lens that did not run is stated in the digest as not run.
+   An irreversible fork goes to `grilling`, not an assumption.
 
 ## 2. Write the spec
 
@@ -35,9 +43,13 @@ Write `.scratch/<slug>/spec.md`, exactly these sections:
 1. **Problem** — from the user's side: what hurts, who feels it. Grounded in
    the PROFILE.md Product frame (purpose, users, core loop) when present.
 2. **Solution** — what gets built, stated as behavior.
-3. **Assumptions** — every A-item from intake plus your own fills, each one
-   concrete and checkable ("A1: single tenant, Postgres only"). This section is
-   what the checkpoint sells; no silent gaps, nothing unnumbered.
+3. **Assumptions** — every A-item from intake plus your own fills and triaged
+   lens findings, each one concrete and checkable ("A1: single tenant,
+   Postgres only"). Features include an **Extension points** assumption from
+   intake's extension question: either "variation points X, Y via <pattern>;
+   part N+1 = a new file" or "no seam; a second variant triggers a refactor
+   ticket". This section is what the checkpoint sells; no silent gaps,
+   nothing unnumbered.
 4. **Success criteria** — checkable outcomes; they seed the tickets' DoD. UI
    features also record the visual direction here: the references the user
    named (apps/screens), theme constraints, and feel words — or the explicit
@@ -69,6 +81,9 @@ Decision rules:
 ## 3. Post the checkpoint
 
 The flow's only standing blocking gate besides intake. ONE message:
+0. Before posting, diff the draft against `intake.md` and the lens findings:
+   every intake answer and non-declined finding is reflected, none
+   contradicted, no Out-of-scope item re-added by the Solution.
 
 1. Digest ≤30 lines: problem, solution in a sentence, success criteria, then
    the FULL assumption list A1..An — the assumptions are the point, show all

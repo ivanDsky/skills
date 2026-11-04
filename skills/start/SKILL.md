@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Triages an ask — quick task, prototype, feature, unmapped codebase — prints the run plan, and fires the matching chain; use on /start.
-> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage)
+> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr)
 
 # Start
 
@@ -75,11 +75,17 @@ normally either way.
 Print one line per stage: fires/skips · HITL or AFK (read each skill's
 `interaction` frontmatter, effort overrides applied) · gate · artifact path.
 Ask at most one question, only if triage is genuinely ambiguous — then fire.
-Exception: the review-site publish decision. PROFILE.md `Review site
-publish:` decides — `always` → the plan lists `review-site` firing after
-deliver; `off` → skip silently; `ask` (the default) → one yes/no bundled
-into the plan ("publish the review dashboard when this run ships?") and the
-answer routes deliver's report step for this run only.
+Exceptions (each bundles into the plan, never a separate round trip):
+- Review-site publish. PROFILE.md `Review site publish:` decides — `always`
+  → the plan lists `review-site` firing after deliver; `off` → skip
+  silently; `ask` (the default) → one yes/no ("publish the review dashboard
+  when this run ships?") that routes deliver's report step for this run only.
+- Delivery. PROFILE.md `## Delivery` `changes:` decides — `pr` → the plan
+  lists `open-pr` after deliver and the run branch is cut before the first
+  commit; `main` → commits land on the default branch; `ask` (the default)
+  → one question ("PR, or straight to main?") answered for this run only.
+  Asked before `implement` starts, because the branch must exist before the
+  first commit.
 
 ## Debug run log
 
@@ -97,9 +103,12 @@ log. The per-run ledger (`.scratch/<slug>/ledger.md`) is a different file.
 Before dispatching anything, name the hat: **implementer** (writes to the
 ticket, optimistic), **reviewer** (grades a diff it didn't write, never its
 own), **designer** (decides what the thing should be, before code),
-**diagnostician** (finds cause, fixes nothing yet). The dispatch table
+**diagnostician** (finds cause, fixes nothing yet), **challenger** (a
+`goldfish-review` lens: fresh context, one angle, finds what is wrong with a
+concept or design, fixes and decides nothing). The dispatch table
 below is hat-routed: `implement` dispatches implementers, `review-change`
-dispatches a reviewer on a stronger tier, `diagnose-bug` stays
+dispatches a reviewer on a stronger tier, `goldfish-review` dispatches
+challengers, `diagnose-bug` stays
 diagnostician until the fix is a ticket. Never let one agent wear two hats
 on the same work product — the implementer "reviewing" its own diff is the
 audited source of "all done" → full-rework incidents. Switching hats means
@@ -112,17 +121,20 @@ closing the current one first (commit, stop, or hand off).
 | intake | `run-intake` | feature, prototype |
 | orientation | `map-codebase` | unmapped codebase + chain work |
 | spec | `draft-spec` | feature, prototype |
+| spec/tickets | `goldfish-review` | the user chose lenses (none / up to 3 / all): stage A after intake and before the spec is drafted; stage B at the write-tickets confirm gate |
 | tickets | `write-tickets` | feature, prototype (ticket sets are parallel-first: minimal file overlap; device checks get one aggregate ticket, or none) |
 | research | `fan-out-research` | ticket/spec declares an Unknown |
 | implement | `implement` | ready frontier ticket |
 | review | `review-change` | implement done |
 | deliver | `deliver` | review passes |
+| land | `open-pr` | run's delivery decision = pr (PROFILE `## Delivery` `changes:` or session answer); fired by `deliver` |
 | support | `android-env` | first Android command of a session fails, or before the first build/device action (bootstrap checklist) |
 | support | `web-env` | first web/Node command of a session fails, or before the first dev-server/build action (bootstrap checklist) |
 | support | `adopt-tool` | a new tool/capability is being adopted into the workflow |
 | spec/tickets | `micro-architecture` | designing a feature's file split before tickets — parallel-safe decomposition, OCP extension points |
 | spec/review | `senior-ux` | UI/UX design or review work — evaluation framework, A/B-on-hardware, tokens-with-floors method |
 | always-on | `senior-dev` | every coding session — judgment defaults alongside the stage skills |
+| implement/review | `structure-checks` | Kotlin/Android ticket adds or moves files, or the diff touches Kotlin — the PROFILE `structure:` command is Evidence and a fast-tier review check |
 | report | `review-site` | run's publish decision = yes (PROFILE `Review site publish:` or session answer) |
 | support | `graduate-prototype` | prototype promoted to feature work |
 | support | `assess-teardown` | teardown gate: 2 failed fix rounds or reviewer discretion |
@@ -146,7 +158,9 @@ modals) → `android-env`; capability adoption checklist → `adopt-tool`;
 feature file-split design (parallel-safe, open/closed, one responsibility
 per file) → `micro-architecture`; judgment defaults → `senior-dev`; UX
 method (framework-judged pixels, A/B on hardware, tokens with floors) →
-`senior-ux`.
+`senior-ux`; blind concept/design lenses → `goldfish-review`; mechanical
+file-structure and layering checks (Konsist) → `structure-checks`; PR
+description and landing → `open-pr`.
 
 Close calls (quick vs feature vs prototype): read
 [Triage cases](references/triage-cases.md).
