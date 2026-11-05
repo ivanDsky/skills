@@ -29,6 +29,7 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | Quick prototype | `prototype` skill output: one question → one throwaway self-contained HTML page in `.scratch/<slug>/prototype/`; no intake/spec/tickets; ends in a handoff file and a direct port or `graduate-prototype`. | mockup, spike |
 | Handoff | `<NN>-<task>.handoff.md`: verdict, chosen variant, tokens → theme, states, motion, copy, what was faked; the port's spec. | notes |
 | Deploy target | build-only (default), firebase, tailscale, or local; ordered list in PROFILE.md. | environment |
+| Build identity | Per-build versionCode/versionName/APK name from deliver's allocator: one ledger in the git common dir shared by all worktrees, code never below the device's. APK `<app>-<semver>-<code>-<slug>-<variant>.apk`. | build number |
 | Rules payload | Swappable `references/rules-*.md` carrying style/architecture rules; procedures stay generic (T008). | config |
 | Goldfish | Fresh-context subagent that has not seen the conversation; gets a brief file (hypothesis + hard constraints, or spec + file maps) and reviews one angle. | reviewer (reviewer = diff grader) |
 | Lens | One goldfish angle with its own objective and evidence (reuse, persona flows, data & migration, failure & resources, best version, verifiability; architecture, patterns, file structure). User picks the count: none / up to 3 / all. | persona, checklist |

@@ -4,7 +4,9 @@
     "Review passed — build it and deploy to the firebase target, then close out the run",
     "Ship it: wrap up the run with evidence and the delivery summary",
     "The prototype question is answered; deploy it standalone so the main site stays untouched",
-    "Run /deliver — build only for now, no deploy targets in this project"
+    "Run /deliver — build only for now, no deploy targets in this project",
+    "Which branch's build is on my phone right now?",
+    "Two agents in parallel worktrees keep installing APKs over each other — the versionCode goes down and installs fail"
   ],
   "negative": [
     {

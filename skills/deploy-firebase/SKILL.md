@@ -52,8 +52,10 @@ not this skill — they stay in `deliver`.
 Gradle, per the PROFILE.md runner: `./gradlew assembleRelease` (APK) or
 `./gradlew bundleRelease` (AAB — the same distribute command takes it).
 Distribute the canonical-named artifact
-`<app_name>-<sem_ver>-<debug|release>.apk` — deliver renames after build;
-the release notes lead with the semver so testers see which build arrived.
+`<app_name>-<sem_ver>-<code>-<slug>-<debug|release>.apk` (deliver's build
+identity: unique versionCode from the shared ledger); the release notes
+lead with the versionName (`<semver>-<slug>`) so testers see which build
+and branch arrived.
 
 - Signing: App Distribution accepts a debug-signed build, and for a small
   personal tester set that is the sanctioned fallback; a real
