@@ -11,7 +11,7 @@ interaction: afk
 ---
 
 > **TL;DR** Ask first (which need fails, which hat decides, will the next surface inherit this), then judge pixels on a framework, measure instead of eyeball, decide on the user's hardware, and serve evidence where the user is.
-> **Related**: skill://senior-dev (the general questions), skill://review-change (review-ux enforcement), skill://micro-architecture (shared-layer fixes), skill://preview-compose (the variant matrix), skill://review-site (evidence where the user is)
+> **Related**: skill://senior-dev (the general questions), skill://review-change (review-ux enforcement), skill://micro-architecture (shared-layer fixes), skill://preview-compose (the variant matrix), skill://review-site (evidence where the user is), skill://prototype (throwaway variant pages before implementation locks)
 
 # The questions (most important part)
 
@@ -44,7 +44,8 @@ interaction: afk
   Values become named tokens; floors become tests.
 - **Decide on hardware**: debug-only A/B switcher (user flips, verdict is
   final, losers deleted); walk every state on the device before changing
-  any — including states that look wrong but are correct.
+  any — including states that look wrong but are correct. Before any app
+  code exists, the switcher is a `prototype` page served to the phone.
 - **Policies, tested**: "two-pane requires large width AND landscape";
   "content caps at a readable maximum". Layout keys on size AND
   orientation. Error copy tells the truth about the cause. Motion: exit

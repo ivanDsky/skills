@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Triages an ask — quick task, prototype, feature, unmapped codebase — prints the run plan, and fires the matching chain; use on /start.
-> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr)
+> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes)
 
 # Start
 
@@ -43,10 +43,17 @@ first `/start` — never via a separate command the user had to remember.
    chain for the fix.
 2. **Unmapped codebase** — chain work ahead + no orientation artifacts →
    run `map-codebase`, fill PROFILE.md care-axes from the map, re-triage.
-3. **Prototype** — user flag ("prototype", "quick sketch", "just a demo") or
-   the ask is really a question ("would X work?") → full chain + prototype
-   flag: reduced gates, DoD = question answered or demoable, the last ticket
-   carries `deploy: main | standalone | none`.
+3. **Prototype** — user flag ("prototype", "quick sketch", "just a demo",
+   "show me options") or the ask is really a question ("would X work?").
+   Two sizes:
+   - **Quick** (default) — one question answerable on a page, nothing real
+     touched → `prototype` directly: one throwaway HTML page per task (one
+     subagent per task when there are several), no intake, spec or tickets.
+   - **Big** — needs real app code or persisted data, spans modules, or is
+     meant to ship → full chain + prototype flag: reduced gates, DoD =
+     question answered or demoable, the last ticket carries
+     `deploy: main | standalone | none`.
+   Close call → quick; its answer decides whether the big one is worth it.
 4. **Feature** — default → full chain.
 
 Frontier non-empty → the run plan lists in-flight tickets and offers resume
@@ -137,6 +144,7 @@ closing the current one first (commit, stop, or hand off).
 | implement/review | `structure-checks` | Kotlin/Android ticket adds or moves files, or the diff touches Kotlin — the PROFILE `structure:` command is Evidence and a fast-tier review check |
 | report | `review-site` | run's publish decision = yes (PROFILE `Review site publish:` or session answer) |
 | support | `graduate-prototype` | prototype promoted to feature work |
+| prototype | `prototype` | quick prototype: one question per page, one subagent per task; small ports land directly, big ones via `graduate-prototype` |
 | support | `assess-teardown` | teardown gate: 2 failed fix rounds or reviewer discretion |
 | support | `diagnose-bug` | bug report: evidence ladder, user-time-last |
 
@@ -160,7 +168,8 @@ per file) → `micro-architecture`; judgment defaults → `senior-dev`; UX
 method (framework-judged pixels, A/B on hardware, tokens with floors) →
 `senior-ux`; blind concept/design lenses → `goldfish-review`; mechanical
 file-structure and layering checks (Konsist) → `structure-checks`; PR
-description and landing → `open-pr`.
+description and landing → `open-pr`; throwaway one-page prototypes →
+`prototype`.
 
 Close calls (quick vs feature vs prototype): read
 [Triage cases](references/triage-cases.md).

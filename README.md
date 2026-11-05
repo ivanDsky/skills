@@ -1,6 +1,6 @@
 # ivandsky-skills
 
-My personal skillset for AI coding agents — one flow, 25 small composable
+My personal skillset for AI coding agents — one flow, 26 small composable
 skills in the open [Agent Skills](https://agentskills.io/specification)
 format. Install it, run `/start`, and the right stages fire: intake asks the
 few questions worth asking, specs get drafted with marked assumptions, tickets
@@ -43,13 +43,15 @@ round, an independent architect decides fix-forward vs teardown.
 `adopt-tool` (one-pass capability adoption checklist: verify → route → wire → mandate → navigate → eval → demo → ship from repo) ·
 `goldfish-review` (fresh-context lenses on a concept or design before code: reuse, persona flows, data, failure, best version, verifiability; architecture, patterns, file structure — you choose none / up to 3 / all) ·
 `structure-checks` (Konsist suite for Kotlin: one public type per file, layer dependencies, shrink-only allowlist — the mechanical backstop for file structure) ·
-`open-pr` (PR as a 2-minute read: summary, before/after screenshot-test captures, major changes, top-3 review checks with line links, optional diagram; start asks PR or straight to main)
+`open-pr` (PR as a 2-minute read: summary, before/after screenshot-test captures, major changes, top-3 review checks with line links, optional diagram; start asks PR or straight to main) ·
+`prototype` (quick throwaway prototype: one task → one self-contained HTML page, 2-3 switchable variants judged with senior-ux on your phone, one subagent per task + an index page; small picks ported straight into the app, big ones through graduate-prototype)
 
 **Adapted (owned text, credited sources):**
 `ponytail` (smallest-change governor) · `run-intake` core mechanics from
 mattpocock/skills · `tdd` (fakes-over-mocks payload) from obra/superpowers ·
 `scope-creep-detector` from awesome-llm-apps · `goldfish-review` from
-google/elephant-goldfish-model (Apache-2.0)
+google/elephant-goldfish-model (Apache-2.0) · `prototype` from
+mattpocock/skills (MIT)
 
 **Installed as-is (vendored, attributed — see skills/ATTRIBUTION.md):**
 `design-taste-frontend` · `archify` · `ponytail-review` / `-audit` / `-debt` ·
