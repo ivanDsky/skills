@@ -13,7 +13,7 @@ requires: [python3 (serves the page on the LAN)]
 ---
 
 > **TL;DR** One task → one throwaway HTML file in `.scratch/`, built in minutes: design questions get 2-3 structurally different variants on a switcher (senior-ux decides the method, the user picks on their phone); logic questions get buttons that drive the state with the state always visible. Small picks are ported straight into the app; big ones go through `graduate-prototype`.
-> **Related**: skill://senior-ux (method for every design prototype), skill://emil-design-eng, skill://apple-design, skill://animation-vocabulary (taste and motion names), skill://graduate-prototype (exit for big ports), skill://start (quick vs big triage), skill://preview-compose (the Compose port's previews), skill://web-env (browser smoke check)
+> **Related**: skill://senior-ux (method for every design prototype), skill://emil-design-eng, skill://apple-design, skill://animation-vocabulary (taste and motion names), skill://graduate-prototype (exit for big ports), skill://start (quick vs big triage), skill://preview-compose (the Compose port's previews)
 
 # Prototype
 
@@ -83,11 +83,9 @@ Rules for every page — full checklist in the brief:
 
 ## 3. Check, serve, ask
 
-1. Smoke (the parent, after all pages are back): load each page in a
-   headless browser (`web-env` Playwright when available), switch every
-   variant and state, no console errors or network requests; capture a
-   screenshot per variant into `.scratch/<slug>/prototype/shots/` and look
-   at them. No browser available → say "not browser-checked" in the reply.
+1. Compile check only: pipe each page's inline `<script>` to
+   `node --check -` (exit 0 = parses; ~0.1 s). No headless browser, no
+   screenshots — the user judges the page directly; speed is the point.
 2. Serve: `python3 -m http.server 8766 --bind 0.0.0.0 --directory
    .scratch/<slug>/prototype` and reply with the LAN URL
    `http://<lan-ip>:8766/` (tailnet address from PROFILE `Environment facts`
@@ -120,6 +118,8 @@ This is the port's spec.
 - A page that needs `npm install`, a server-side build, or network.
 - Judging on the laptop browser when the target is the phone.
 - Polishing the losing variants, or writing tests for the page.
+- Browser runs or screenshots before the user sees it — they cost time and
+  the user's own look replaces them.
 - Porting by translating the HTML line by line instead of from the handoff.
 
 Adapted from mattpocock/skills (`prototype` — throwaway-answers-a-question,

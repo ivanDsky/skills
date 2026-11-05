@@ -26,8 +26,8 @@ Checklist (all required):
       Switcher ≤ ~2 rows, short labels, collapsible — the screen being judged stays visible.
 - [ ] Design: contrast ≥ 4.5:1, 48 px targets, reduced-motion respected.
 - [ ] Logic: a button per event, 1-3 guided scenarios, full state rendered after every action.
-- [ ] Opens with no console errors (check in a headless browser if you have one).
+- [ ] Inline script parses: `node --check -` on it exits 0. No browser run, no screenshots.
 
 Reply (≤5 lines): status DONE | BLOCKED, the file path, one line per variant
-(what is structurally different), and "browser-checked: yes | no".
+(what is structurally different), and "script-checked: yes | no".
 ```
