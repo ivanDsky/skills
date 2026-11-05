@@ -46,17 +46,21 @@ passed; this stage adds no code.
      one phone: `scripts/build_identity.py allocate`, per
      [Build identity](references/build-identity.md). It takes a unique
      versionCode from the ledger shared by all worktrees, never lower than
-     what is on the device; versionName is `<semver>-<branch-slug>`
-     (`<semver>` on main). Gradle wiring missing → stop and ask for it to
+     what is on the device; versionName is `<semver>-<branch-slug>.<n>`
+     (`1.3.0-reminders.2`, `n` = that branch's install count, `main.<n>` on
+     main), so no two installs ever share a name. Gradle wiring missing → stop and ask for it to
      land on main first; never add it in a worktree.
    - Run the project build with its `$GRADLE_ARGS` and capture the log to
      `.scratch/<slug>/build.log`. A failed build stops everything — a
      deploy never starts on a red build.
    - Copy the artifact to `$APK_NAME`
-     (`<app_name>-<sem_ver>-<code>-<slug>-<debug|release>.apk`) before any
+     (`<app_name>-<version_name>-<code>-<debug|release>.apk`) before any
      deploy target touches it. Deploy targets and evidence lines reference
      that name, never Gradle's `app-<variant>.apk`.
-   - Semver is NOT bumped here; it bumps only on main, in step 7.
+   - Semver is NOT bumped by installs or by landing on main. Only a release
+     the user asks for bumps it (minor by default, once for all its
+     features), on main, then builds with `allocate --release` for the
+     plain `1.4.0` name; see [Build identity](references/build-identity.md).
 
 4. Deploy per target, in listed order. Mobile distribution has dedicated
    playbooks — dispatch, don't improvise: `firebase` target on an Android
@@ -98,11 +102,9 @@ passed; this stage adds no code.
    `changes:`, or the session answer from start's plan; precedence
    session > project, default `ask` = start already asked):
    - `pr` → fire `open-pr`; its URL and merged/open state go in the summary.
-     After the merge, bump PROFILE `version:` (breaking → major, feature →
-     minor, fix → patch) in a one-line commit on main.
    - `main` → the commit(s) go to the default branch per the consent ledger
-     (`commit+push to the project repo`), with the semver bump in the
-     landing commit; report the commit id.
+     (`commit+push to the project repo`); report the commit id.
+   Neither bumps semver; that waits for a release (step 3).
    Missing delivery answer on a standalone run → ask once, never infer `main`.
 
 8. Post the delivery summary — the run's last message, always this shape:

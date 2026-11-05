@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-"""Build identity for parallel worktrees: one versionCode ledger per repo clone.
+"""Build identity for parallel worktrees: one install ledger per repo clone.
 
 The ledger lives in the git common dir (shared by every worktree, never
-committed): <git-common-dir>/agent-builds/versions.jsonl.
+committed): <git-common-dir>/agent-builds/versions.jsonl, one line per install.
 
-  allocate  next versionCode = max(ledger, installed on device, committed) + 1,
-            recorded under a lock; prints KEY=VALUE lines (shell-evalable).
+  allocate  every install gets a unique identity, recorded under a lock:
+            versionCode = max(ledger, installed on device, committed) + 1;
+            versionName = <semver>-<slug>.<n>: semver is the release line from
+            PROFILE.md (untouched here), n counts installs per slug.
+            --release (main only): versionName = plain <semver>, once per semver.
+            Prints KEY=VALUE lines (shell-evalable).
   which     what is on the device: installed versionCode -> ledger record.
   list      last N ledger records.
 """
@@ -22,7 +26,6 @@ from pathlib import Path
 
 LOCK_WAIT_S = 30
 LOCK_STALE_S = 120
-DEFAULT_BRANCHES = {"main", "master"}
 
 
 def git(*args, cwd):
@@ -45,8 +48,7 @@ def read_ledger(path):
 def slug_for(branch, sha):
     if branch == "HEAD":
         return f"sha-{sha}"
-    if branch in DEFAULT_BRANCHES:
-        return ""
+    # main/master keep their name as the slug: main installs need a counter too.
     last = branch.rsplit("/", 1)[-1].lower()
     return re.sub(r"[^a-z0-9]+", "-", last).strip("-")[:24].rstrip("-")
 
@@ -59,6 +61,16 @@ def profile_value(root, key):
         if m and not m.group(1).startswith("<"):
             return m.group(1)
     return None
+
+
+def is_semver(s):
+    return bool(re.fullmatch(r"\d+\.\d+\.\d+", s or ""))
+
+
+def next_install(records, slug):
+    """Per-slug install counter; keyed by slug so two branches that share one
+    (feature/sync, fix/sync) still never produce the same name."""
+    return max((r.get("n", 0) for r in records if r.get("slug") == slug), default=0) + 1
 
 
 def committed_code(root):
@@ -123,6 +135,8 @@ class Lock:
 def cmd_allocate(a):
     root = a.root
     semver = a.semver
+    if not is_semver(semver):
+        sys.exit(f"build_identity: version '{semver}' is not major.minor.patch")
     branch = git("rev-parse", "--abbrev-ref", "HEAD", cwd=root)
     sha = git("rev-parse", "--short", "HEAD", cwd=root)
     slug = slug_for(branch, sha)
@@ -130,13 +144,25 @@ def cmd_allocate(a):
     ledger = d / "versions.jsonl"
     devices = device_codes(a.app_id, a.serial)
     base = a.base_code if a.base_code is not None else committed_code(root)
+    if a.release and branch not in ("main", "master"):
+        sys.exit(f"build_identity: --release only from main/master (on {branch})")
     with Lock(d):
-        last = max((r["code"] for r in read_ledger(ledger)), default=0)
+        records = read_ledger(ledger)
+        last = max((r["code"] for r in records), default=0)
         code = max(last, max(devices.values(), default=0), base) + 1
-        name = f"{semver}-{slug}" if slug else semver
-        apk = "-".join(p for p in (a.app_name, semver, str(code), slug, a.variant) if p) + ".apk"
+        if a.release:
+            if any(r.get("release") and r.get("semver") == semver for r in records):
+                sys.exit(f"build_identity: {semver} already released — bump PROFILE.md `version:` first")
+            n, name = 0, semver
+        else:
+            n = next_install(records, slug)
+            name = f"{semver}-{slug}.{n}"
+        apk = f"{a.app_name}-{name}-{code}-{a.variant}.apk"
+        if any(r.get("version_name") == name or r.get("apk") == apk for r in records):
+            sys.exit(f"build_identity: {name} / {apk} already in the ledger — refusing a duplicate name")
         record = {
-            "code": code, "version_name": name, "apk": apk, "variant": a.variant,
+            "code": code, "semver": semver, "n": n, "release": a.release, "version_name": name,
+            "apk": apk, "variant": a.variant,
             "branch": branch, "slug": slug, "sha": sha, "worktree": str(Path(root).resolve()),
             "device_codes": devices, "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         }
@@ -179,6 +205,8 @@ def main():
     al.add_argument("--semver", help="default: PROFILE.md `- version:`")
     al.add_argument("--base-code", type=int, help="override the committed versionCode")
     al.add_argument("--serial", help="adb serial (default: every connected device)")
+    al.add_argument("--release", action="store_true",
+                    help="release build from main: versionName = plain semver, once per semver")
     wh = sub.add_parser("which")
     wh.add_argument("--app-id", help="default: PROFILE.md `- app-id:`")
     wh.add_argument("--serial")

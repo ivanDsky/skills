@@ -3,14 +3,16 @@
 Parallel worktrees share one phone. Without a shared counter each agent
 builds with the committed versionCode, installs fail with
 `INSTALL_FAILED_VERSION_DOWNGRADE`, and same-named APKs overwrite each other
-in Downloads. One allocator fixes all three.
+in Downloads. One allocator fixes all three: **every install gets a name no
+other install has ever had**, and the ledger records it.
 
 ## The ledger
 
 `<git-common-dir>/agent-builds/versions.jsonl`. The git common dir is the
 main checkout's `.git`, the same path from every worktree. The ledger is
-never committed or pushed. One JSON line per allocation: code, version name,
-APK name, branch, slug, sha, worktree, device codes seen, time.
+never committed or pushed. One JSON line per install: code, semver,
+install number, version name, APK name, branch, slug, sha, worktree,
+device codes seen, time.
 
 ## Allocate before every installable build
 
@@ -29,13 +31,18 @@ cp app/build/outputs/apk/debug/app-debug.apk ".scratch/<slug>/$APK_NAME"
 - `VERSION_CODE` = max(ledger, installed on every connected device via
   `adb shell dumpsys package`, committed Gradle code) + 1, taken under a
   `mkdir` lock, so parallel agents never get the same number.
-- `VERSION_NAME` = `<semver>` on `main`/`master`, otherwise
-  `<semver>-<slug>` (shown in App info, so the phone tells you the branch).
-- `APK_NAME` = `<AppName>-<semver>-<code>[-<slug>]-<variant>.apk`, e.g.
-  `Habits-1.3.0-1042-reminders-ui-debug.apk`. The code alone makes it
-  unique.
+- `VERSION_NAME` = `<semver>-<slug>.<n>`, a SemVer pre-release tag, e.g.
+  `1.3.0-reminders.2`. App info shows it, so the phone tells you the branch
+  and which install of it. `<semver>` is the release line from PROFILE.md;
+  the allocator never bumps it (see below). `<n>` counts installs per slug,
+  starting at 1 and never reused; `main` installs count too (`1.3.0-main.4`).
+- `APK_NAME` = `<AppName>-<versionName>-<code>-<variant>.apk`, e.g.
+  `Habits-1.3.0-reminders.2-1042-debug.apk`. Name and code are both unique;
+  the allocator refuses a name already in the ledger.
 - Slug = the last segment of the branch name, lowercase, `[a-z0-9-]`, up to
-  24 characters. A detached HEAD gives `sha-<short>`.
+  24 characters. A detached HEAD gives `sha-<short>`. Two branches with the
+  same slug (`feature/sync`, `fix/sync`) share one counter, so their names
+  stay unique; `which`/`list` tell the branches apart.
 - `--base-code` overrides the committed code when the project keeps it
   outside `app/build.gradle(.kts)` (version catalog, properties file).
 - Device unreachable → the code comes from the ledger and the committed
@@ -79,10 +86,22 @@ worktree finds the wiring missing, it stops and asks for it to land on
 `main` first. Each worktree adding it separately gives a conflict on every
 merge.
 
-## Semver bumps only on `main`
+## Semver moves only on a release
 
-Worktree builds never write `version:` back to PROFILE.md. The bump
-(breaking → major, feature → minor, fix → patch) happens once, when the
-change lands on `main`. With delivery `main` it goes in the landing commit.
-With delivery `pr` it is a one-line commit on `main` right after the merge.
-The bump also updates the Gradle `versionName` fallback when one exists.
+Every install bumps `<n>`, never the semver, so parallel worktrees never
+fight over `version:` in PROFILE.md. Landing a feature or fix on `main`
+bumps nothing either: a release can carry many landed changes.
+
+Cutting a release (the user asks for one) is the only bump, on `main`:
+
+1. Bump PROFILE `version:` once for the whole release: minor by default
+   (`1.3.0` → `1.4.0`), patch for a fixes-only release, major for a
+   breaking one. Update the Gradle `versionName` fallback to match and
+   commit both in one commit.
+2. `eval "$(python3 $BI allocate --variant release --release)"`:
+   versionName is the plain semver (`1.4.0`), APK
+   `Habits-1.4.0-1077-release.apk`. The allocator refuses `--release`
+   outside `main`/`master` and refuses a semver already released, so one
+   version is never shipped twice.
+
+Branches cut after the release build `1.4.0-<slug>.<n>`.

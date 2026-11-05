@@ -108,9 +108,9 @@ Send the batch and stop. Never a second batch.
 # stack: <only when this project diverges from the preferred stack>
 
 ## Version
-- version: 0.1.0             # semver major.minor.patch; bumped ONLY when a change lands on main (deliver step 7), never in a worktree
+- version: 0.1.0             # semver major.minor.patch; bumped ONLY when cutting a release on main (minor default), never per install or per landed change
 - app-id: <applicationId>    # build-identity allocator (deliver): device versionCode lookup
-- app-name: <AppName>        # APK prefix: <app_name>-<sem_ver>-<code>-<slug>-<variant>.apk
+- app-name: <AppName>        # APK prefix: <app_name>-<version_name>-<code>-<variant>.apk
 
 ## Review site
 - publish: ask               # ask (default: start asks each run) | always | off
@@ -143,7 +143,7 @@ The four contract sections are Care-axes, Effort, Deploy targets, Testing
 style — extra sections are allowed, never required. `## Version` is seeded
 (`0.1.0`, plus `app-id`/`app-name` read from the app module) when missing
 so every project ships named artifacts
-(`<app_name>-<sem_ver>-<code>-<slug>-<debug|release>.apk`). Setup on main
+(`<app_name>-<version_name>-<code>-<debug|release>.apk`). Setup on main
 also lands the one-time Gradle wiring from
 `deliver`/references/build-identity.md (versionCode/versionName read from
 `-PagentVersionCode`/`-PagentVersionName`), so worktrees never edit build

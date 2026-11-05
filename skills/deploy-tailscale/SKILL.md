@@ -18,10 +18,11 @@ requires: [tailscale]
 
 Deliver built first — never rebuild here; the APK path comes from the build
 step and carries the canonical name
-`<app_name>-<sem_ver>-<code>-<slug>-<debug|release>.apk` (deliver's build
-identity allocates it; Gradle's `app-<variant>.apk` never reaches this
-skill). The name is what the device's Downloads list shows: the unique
-versionCode and the branch slug mean parallel worktrees never collide.
+`<app_name>-<version_name>-<code>-<debug|release>.apk`, e.g.
+`Habits-1.3.0-reminders.2-1042-debug.apk` (deliver's build identity
+allocates it; Gradle's `app-<variant>.apk` never reaches this skill). The
+name is what the device's Downloads list shows: no two installs ever share
+one, so parallel worktrees never collide.
 Tailnet-only by default: this skill never exposes anything to the public
 internet unless the user explicitly asks for funnel.
 
