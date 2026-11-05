@@ -52,6 +52,12 @@ inside a worktree: check `cat .git` first; run the command from the main
 checkout if the tool can't handle worktrees; never "fix" it by deleting
 `.git`.
 
+State shared by all worktrees lives in the git common dir
+(`git rev-parse --git-common-dir`, the main checkout's `.git`): the build
+ledger at `agent-builds/versions.jsonl` hands out versionCodes (see
+`deliver`/references/build-identity.md). "Which build is on the phone?" →
+`build_identity.py which`, never a guess from the APK name.
+
 ## 4. Device over tailscale
 
 The user's tablet is reached by its tailscale IP, not USB. Connect:

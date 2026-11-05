@@ -3,16 +3,19 @@ name: deliver
 description: >-
   Build the change and deploy to the PROFILE.md deploy targets — build-only,
   firebase, tailscale, or local — then attach the build/deploy output as
-  evidence so the final tickets close. Use when review passes and the run is
+  evidence so the final tickets close. Owns build identity across parallel
+  worktrees: a shared versionCode ledger (never below the device), branch
+  slug in versionName and APK name. Use when review passes and the run is
   ready to ship, when the user says /deliver, "ship it", "wrap up the run",
-  or "build and deploy", or when a feature or prototype run needs its
-  delivery summary.
+  or "build and deploy", when a feature or prototype run needs its delivery
+  summary, or when asked which build is on the device or about versionCode
+  or APK-name collisions.
 interaction: afk
 requires: [firebase CLI when target=firebase, tailscale CLI when target=tailscale]
 ---
 
 > **TL;DR** Builds the change and deploys to PROFILE.md targets with output attached as evidence; fires when review passes and the run ships.
-> **Related**: skill://review-change (gate before delivery), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://implement (tickets to close), skill://open-pr (land step when delivery = pr)
+> **Related**: skill://review-change (gate before delivery), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://implement (tickets to close), skill://open-pr (land step when delivery = pr), skill://android-env (worktrees share the build ledger)
 
 # Deliver
 
@@ -38,17 +41,26 @@ passed; this stage adds no code.
 
 3. Build first, always. On Android, run the `android-env` checklist once
    before the first build (PATH, `local.properties`, stale-incremental
-   triage) — deliver has no time to rediscover environment fixes. Run the
-   project build and capture the log to
-   `.scratch/<slug>/build.log`. A failed build stops everything — a deploy
-   never starts on a red build. The artifact then gets its canonical name
-   before any deploy target touches it: copy to
-   `<app_name>-<sem_ver>-<debug|release>.apk` (variant from the build type).
-   The semver comes from PROFILE.md `version:` (fallback: Gradle
-   `versionName`); bump it per the run's change — breaking → major, feature →
-   minor, fix/step → patch — and write the new value back to PROFILE.md.
-   Deploy targets and evidence lines reference the canonical name, never
-   Gradle's `app-<variant>.apk`.
+   triage) — deliver has no time to rediscover environment fixes.
+   - **Build identity before the build**, because parallel worktrees share
+     one phone: `scripts/build_identity.py allocate`, per
+     [Build identity](references/build-identity.md). It takes a unique
+     versionCode from the ledger shared by all worktrees, never lower than
+     what is on the device; versionName is `<semver>-<branch-slug>.<n>`
+     (`1.3.0-reminders.2`, `n` = that branch's install count, `main.<n>` on
+     main), so no two installs ever share a name. Gradle wiring missing → stop and ask for it to
+     land on main first; never add it in a worktree.
+   - Run the project build with its `$GRADLE_ARGS` and capture the log to
+     `.scratch/<slug>/build.log`. A failed build stops everything — a
+     deploy never starts on a red build.
+   - Copy the artifact to `$APK_NAME`
+     (`<app_name>-<version_name>-<code>-<debug|release>.apk`) before any
+     deploy target touches it. Deploy targets and evidence lines reference
+     that name, never Gradle's `app-<variant>.apk`.
+   - Semver is NOT bumped by installs or by landing on main. Only a release
+     the user asks for bumps it (minor by default, once for all its
+     features), on main, then builds with `allocate --release` for the
+     plain `1.4.0` name; see [Build identity](references/build-identity.md).
 
 4. Deploy per target, in listed order. Mobile distribution has dedicated
    playbooks — dispatch, don't improvise: `firebase` target on an Android
@@ -92,6 +104,7 @@ passed; this stage adds no code.
    - `pr` → fire `open-pr`; its URL and merged/open state go in the summary.
    - `main` → the commit(s) go to the default branch per the consent ledger
      (`commit+push to the project repo`); report the commit id.
+   Neither bumps semver; that waits for a release (step 3).
    Missing delivery answer on a standalone run → ask once, never infer `main`.
 
 8. Post the delivery summary — the run's last message, always this shape:
