@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Cherry-picks working prototype modules into real tracker tickets or ends in clean discard; fires when a prototype answered its question.
-> **Related**: skill://implement (re-entry flow), skill://write-tickets (tracker tickets), skill://start (prototype runs)
+> **Related**: skill://implement (re-entry flow), skill://write-tickets (tracker tickets), skill://start (prototype runs), skill://prototype (quick pages; their handoff files feed big ports here)
 
 # Graduate a prototype
 
@@ -39,6 +39,10 @@ the chain:
 The user answers the prototype's question or approves the demo. Also fires on
 "graduate it", "keep the good parts", "promote this prototype", "throw it
 away", or whenever a prototype run is done and needs its exit.
+
+Quick prototypes (`prototype` skill) arrive here only when the port is big:
+the inputs are the `<NN>-<task>.handoff.md` files, each becoming a rewrite
+ticket (design notes, never the HTML). Small ports skip this skill.
 
 ## 2. Inventory
 

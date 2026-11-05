@@ -25,7 +25,9 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | Ledger | Append-only run log (`.scratch/<slug>/ledger.md`): rulings, ticket closes; beats memory after compaction. | progress file |
 | Ruling | Autonomous decision recorded as `Ruling: what — why — cost if wrong`. | decision log |
 | HITL / AFK | Human-in-the-loop vs autonomous stage marking; declared in `interaction` frontmatter. | interactive / automatic |
-| Prototype flag | Triage outcome; same flow, reduced gates, DoD = question answered/demoable, carries `deploy: main/standalone/none`. | spike |
+| Prototype flag | Big-prototype triage outcome; same flow, reduced gates, DoD = question answered/demoable, carries `deploy: main/standalone/none`. | spike |
+| Quick prototype | `prototype` skill output: one question → one throwaway self-contained HTML page in `.scratch/<slug>/prototype/`; no intake/spec/tickets; ends in a handoff file and a direct port or `graduate-prototype`. | mockup, spike |
+| Handoff | `<NN>-<task>.handoff.md`: verdict, chosen variant, tokens → theme, states, motion, copy, what was faked; the port's spec. | notes |
 | Deploy target | build-only (default), firebase, tailscale, or local; ordered list in PROFILE.md. | environment |
 | Rules payload | Swappable `references/rules-*.md` carrying style/architecture rules; procedures stay generic (T008). | config |
 | Goldfish | Fresh-context subagent that has not seen the conversation; gets a brief file (hypothesis + hard constraints, or spec + file maps) and reviews one angle. | reviewer (reviewer = diff grader) |

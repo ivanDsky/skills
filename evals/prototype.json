@@ -1,0 +1,28 @@
+{
+  "skill": "prototype",
+  "positive": [
+    "Prototype the new reminders screen quickly, show me a few options",
+    "Quick sketch: would a bottom-sheet filter work better than a filter screen?",
+    "Mock up the onboarding flow as a page I can open on my phone",
+    "Prototype these three screens before we build them: settings, profile, paywall",
+    "Make a clickable demo of the sync state machine so I can see if it feels right"
+  ],
+  "negative": [
+    {
+      "prompt": "The prototype answered the question — turn the good parts into tickets",
+      "owner": "graduate-prototype"
+    },
+    {
+      "prompt": "Build the settings page with persisted notification toggles",
+      "owner": "start"
+    },
+    {
+      "prompt": "Review the UX of the current home screen and find what fails",
+      "owner": "senior-ux"
+    },
+    {
+      "prompt": "Write Compose previews for every state of the card",
+      "owner": "preview-compose"
+    }
+  ]
+}
