@@ -6,14 +6,16 @@ description: >-
   scopes, open/closed extension (new behavior = new file, not edits to
   existing ones), single responsibility at the smallest useful grain (one
   interaction, one decision per file). Use when designing a feature, before
-  writing tickets, or when parallel dispatch keeps colliding on shared
-  files.
+  writing tickets, when parallel dispatch keeps colliding on shared files, or
+  when designing a reusable Compose component or design-system API (slots vs
+  params, Modifier vs component, where component state lives, XxxDefaults,
+  library vs app tier).
 interaction: afk
 requires: [design-architecture for cross-app structure]
 ---
 
 > **TL;DR** Design the feature so that adding part N+1 is a new file and part N is untouched; every file owns one small thing; disjoint files = parallel agents with zero merge conflicts.
-> **Related**: skill://write-tickets (file-disjoint tickets are the output contract), skill://implement (parallel dispatch), skill://design-architecture (cross-app structure — this skill stops where that one starts), skill://senior-dev (the judgment defaults), skill://structure-checks (mechanical enforcement of one responsibility per file), skill://goldfish-review (patterns and file-structure lenses at stage B), skill://user-check (re-gate grades fast-fix code against this file split)
+> **Related**: skill://write-tickets (file-disjoint tickets are the output contract), skill://implement (parallel dispatch), skill://design-architecture (cross-app structure — this skill stops where that one starts), skill://senior-dev (the judgment defaults), skill://structure-checks (mechanical enforcement of one responsibility per file; S6 component API), skill://goldfish-review (patterns and file-structure lenses at stage B), skill://user-check (re-gate grades fast-fix code against this file split), skill://review-change (grades the component-API axis against references/ui-components.md), skill://preview-compose (components preview from parameters alone)
 
 # Micro-architecture — the shape of one feature
 
@@ -107,6 +109,28 @@ agents; (c) testable without scaffolding for unrelated concerns.
 6. Registration/wiring lands in one closing ticket (or was a one-line slot
    from step 2).
 
+## 5. UI components — decompose by layer, not by Clean Architecture
+
+A reusable composable has no business rules, so it never gets a use case,
+mapper, domain model, or a ViewModel for its own state. Its seams are
+building-block layers (`BasicTag` → `Tag`), hoisted state (`value` +
+`onValueChange`, or a plain `@Stable` `XxxState` holder), slots, and
+`XxxDefaults`. The rules, the state-owner and API-shape tables, and the
+per-component file map are in
+[references/ui-components.md](references/ui-components.md); a compiled
+sample (Tag, TagGroup, headless holder test) is in
+[examples/ui-component/](examples/ui-component/).
+
+- **Tier first.** A design-system, shared or published module is the
+  *library* tier (rules at MUST); feature-local components are the *app*
+  tier (SHOULD). Infer it per module; `start` asks once when ambiguous.
+- **One component, several files.** `Tag.kt` (composable + previews),
+  `TagDefaults.kt`, `TagColors.kt`, `TagGroupState.kt` (+
+  `rememberTagGroupState`). These files are disjoint, so agents can work in
+  parallel, but create only the files the component needs.
+- **Ask before building**: if callers compose it from public blocks in a few
+  readable lines, it is not a component.
+
 ## Anti-patterns
 
 - **Hot file**: every ticket touches the same screen/viewmodel — split the
@@ -120,3 +144,6 @@ agents; (c) testable without scaffolding for unrelated concerns.
 - **expect/actual by reflex** (KMP): platform-gating chosen without
   checking the KMP constraint actually applies — cost a dead-end detour.
   Check the constraint first, then choose the mechanism.
+- **Clean Architecture inside a component**: a use case or ViewModel for
+  expanded/selected state. UI-only state belongs to the composition or a
+  plain holder (`references/ui-components.md` rule 6).

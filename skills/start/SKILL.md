@@ -102,6 +102,13 @@ Exceptions (each bundles into the plan, never a separate round trip):
   → one question ("PR, or straight to main?") answered for this run only.
   Asked before `implement` starts, because the branch must exist before the
   first commit.
+- UI tier. The ask builds or changes a reusable composable → infer the tier
+  per module (`micro-architecture`/references/ui-components.md, "Tier
+  first"): design-system, shared or published module → `library`;
+  feature-local → `app`. Record it as a ledger line
+  `Ruling: ui-tier <module> = library|app — <why>`. When it is ambiguous
+  (single module, shared `ui/components` package), ask one question
+  ("library rules (MUST) or app rules (SHOULD) for <module>?").
 
 ## Debug run log
 

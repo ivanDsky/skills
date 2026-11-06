@@ -10,7 +10,7 @@ interaction: afk
 ---
 
 > **TL;DR** Ask first: why is this required, who decided, will the next change be easier, what am I not doing. Then: verify before trusting, change as little as correctness allows, never boot a device when a faster tool answers the question.
-> **Related**: skill://senior-ux (the UX version of these questions), skill://micro-architecture (how to split the work), skill://implement (stage mechanics), skill://user-check (re-gate asks these over the fast-fix diff), skill://review-change (the gate that grades this)
+> **Related**: skill://senior-ux (the UX version of these questions), skill://micro-architecture (how to split the work; its ui-components payload for reusable UI), skill://implement (stage mechanics), skill://user-check (re-gate asks these over the fast-fix diff), skill://review-change (the gate that grades this)
 
 # The questions (most important part — ask them, out loud, before acting)
 
@@ -29,6 +29,12 @@ interaction: afk
 5. **What am I NOT doing?** Name the boundary ("fixing the crash, not the
    sync architecture") so the diff is never mistaken for a verdict on the
    rest of the system.
+6. **Is this business code or a UI component, and which tier?** Business
+   state and data follow `design-architecture`/references/rules-architecture.md.
+   A reusable composable follows `micro-architecture`/references/ui-components.md:
+   no domain layer, use case or ViewModel for its own state. Name the tier
+   (library = design-system/shared/published module, app = feature-local);
+   it sets whether the rules are MUST or SHOULD.
 
 # The defaults (few and non-negotiable)
 

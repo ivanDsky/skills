@@ -5,7 +5,11 @@
     "Design how we add new provider types without touching the engine",
     "This screen file keeps causing merge conflicts — restructure it",
     "Before writing tickets, figure out the file layout for this feature",
-    "We need to add a third provider — design it so it's just a new file"
+    "We need to add a third provider — design it so it's just a new file",
+    "Design a reusable chip component for our design system",
+    "Should this be a Modifier or a component?",
+    "Where should this dropdown's expanded state live — remember, a state holder, or the ViewModel?",
+    "Slots or String params for our card component's title and icon?"
   ],
   "negative": [
     {
@@ -23,6 +27,14 @@
     {
       "prompt": "Add a Konsist test that fails when a file has two public classes",
       "owner": "structure-checks"
+    },
+    {
+      "prompt": "Add previews for every state of this card composable",
+      "owner": "preview-compose"
+    },
+    {
+      "prompt": "Does this card's spacing and hierarchy feel right on a tablet?",
+      "owner": "senior-ux"
     }
   ]
 }

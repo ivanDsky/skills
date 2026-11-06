@@ -75,7 +75,10 @@ recollection.
      `@Preview`s with it); method from `senior-ux` (evaluation framework,
      computed floors, A/B on the user's hardware); taste from
      `emil-design-eng`, `ui-ux-pro-max`, `apple-design`; motion named via
-     `animation-vocabulary`.
+     `animation-vocabulary`. A new or changed reusable composable (public
+     API, `XxxState`, `XxxDefaults`) follows
+     `micro-architecture`/references/ui-components.md at the ledgered
+     `ui-tier`: no use case, domain model or ViewModel for UI-only state.
    - Feature flags, remote config, dev-facing settings: `wire-dev-settings`
      before touching configuration code.
    - Architecture-heavy tickets (new module, new boundary, dependency

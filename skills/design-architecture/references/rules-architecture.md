@@ -2,16 +2,24 @@
 
 The user's swappable rules payload (GLOSSARY: rules payload): replace per
 user or project; the `design-architecture` procedure stays generic. Built on
-the five-part rule template from ciembor/agent-rules-books (MIT): modal
-strength MUST / SHOULD / MUST NOT, every rule cited to its source book. The
-books themselves are the full-class reference; the bias list below is the
-nano-class core.
+the five-part rule template from ciembor/agent-rules-books (MIT, Copyright
+(c) 2026 Maciej Ciemborowicz): modal strength MUST / SHOULD / MUST NOT,
+every rule cited to its source book. The books themselves are the
+full-class reference; the bias list below is the nano-class core.
 
 ## When to use
 
 Designing or changing modules, placing a seam, choosing an interface, or
 grading a diff's dependency direction — draft-spec's architecture section,
 implement's architecture-heavy tickets, review-change's thorough tier.
+
+Scope gate: rules 13, 14, 15 and 19 (data/domain/UI layers, use cases, state
+machines, ViewModel state) apply to code that owns business state or data.
+Reusable UI components (a public composable, its `XxxState` holder,
+`XxxDefaults`) follow `micro-architecture`/references/ui-components.md
+instead: no domain layer, use case or ViewModel for UI-only state. For a
+component, rule 15's state machine is the plain `@Stable` `XxxState` holder,
+unit-tested headless. Rules 1–12, 16–18 and 20 still apply.
 
 ## Primary bias to correct
 
@@ -138,6 +146,7 @@ ciembor/agent-rules-books, plus the books cited below):
 - Load-bearing decisions live in a spec contract or an ADR.
 - data / domain / UI edges hold: domain imports none of them.
 - Orchestrations are use cases; each tests against fakes only.
-- Interactive screens have an explicit state machine; transitions tested headless.
+- Interactive screens have an explicit state machine; transitions tested headless
+  (a reusable component: its plain `XxxState` holder, per the scope gate).
 - Patterns in the diff carry their forcing function in the decision note.
 - No file serves two responsibilities; the split signal was acted on.

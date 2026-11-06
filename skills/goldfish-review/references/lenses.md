@@ -74,8 +74,10 @@ feature.*
   maps respect them; one-adapter seams with no forcing function; missing
   boundaries.
 - Knowledge skill: `design-architecture` with
-  `references/rules-architecture.md`. Evidence: module map, imports in the
-  files the tickets touch.
+  `references/rules-architecture.md` (its scope gate: reusable UI components
+  are graded against `micro-architecture`'s `ui-components.md` at the
+  ledgered `ui-tier`, never handed a domain layer or ViewModel). Evidence:
+  module map, imports in the files the tickets touch.
 
 ### patterns
 - Objective: does the design make part N+1 a new file where the spec's

@@ -84,8 +84,10 @@ rounds skipped it. Write the result to `.scratch/<slug>/regate.md`:
 2. **Design check** over `git diff <base>...HEAD`, fast commits first:
    `senior-dev` questions; file split and patterns per `micro-architecture`;
    dependency direction per `design-architecture`'s
-   `rules-architecture.md`; PROFILE `structure:` on Kotlin diffs; UI per
-   `senior-ux`. Each finding names the file and the rule it breaks.
+   `rules-architecture.md`; component API of public composables per
+   `micro-architecture`/references/ui-components.md at the ledgered
+   `ui-tier`; PROFILE `structure:` on Kotlin diffs; UI per `senior-ux`.
+   Each finding names the file and the rule it breaks.
 3. **Hardening tickets** via `write-tickets`: one per finding cluster, plus
    one that pins the baseline. That ticket turns the verify steps and every
    F-id into persisted tests, each watched failing by temporarily reverting

@@ -37,6 +37,10 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | Deploy target | build-only (default), firebase, tailscale, or local; ordered list in PROFILE.md. | environment |
 | Build identity | Per-install versionCode/versionName/APK name from deliver's allocator: one ledger in the git common dir shared by all worktrees, code never below the device's, no name ever reused. versionName `<semver>-<slug>.<n>` (plain `<semver>` only for a release); APK `<app>-<version_name>-<code>-<variant>.apk`. Semver bumps only on a release. | build number |
 | Rules payload | Swappable `references/rules-*.md` carrying style/architecture rules; procedures stay generic (T008). | config |
+| Component tier | Requirement level of the UI component rules for one module: `library` (design-system, shared by ≥2 features, or published; MUST) or `app` (feature-local; SHOULD). Inferred per module; ambiguous → `start` asks once, ledgered as `Ruling: ui-tier`. | strictness, mode |
+| State holder (plain) | `@Stable class XxxState` + `rememberXxxState()` owning a component's UI state and UI logic; lives in composition, unit-tested headless. Not a ViewModel. | controller, presenter |
+| Slot | A `@Composable` lambda parameter for a caller-varying region (`label`, `leadingIcon`); nullable with a `null` default when optional. | render prop, content param |
+| `XxxDefaults` | The public object holding a component's default values and `colors()` factories, so wrappers can reproduce them. | style class, config |
 | Goldfish | Fresh-context subagent that has not seen the conversation; gets a brief file (hypothesis + hard constraints, or spec + file maps) and reviews one angle. | reviewer (reviewer = diff grader) |
 | Lens | One goldfish angle with its own objective and evidence (reuse, persona flows, data & migration, failure & resources, best version, verifiability; architecture, patterns, file structure). User picks the count: none / up to 3 / all. | persona, checklist |
 | Tension | Two lenses pulling opposite ways, kept visible with the parent's pick and why; never averaged. | conflict |

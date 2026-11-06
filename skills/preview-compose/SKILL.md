@@ -14,7 +14,7 @@ requires: []
 ---
 
 > **TL;DR** Writes, fixes, and verifies Jetpack Compose @Preview code — stateless composables, variants, multipreview, screenshot tests; fires on any Compose preview work.
-> **Related**: skill://wire-dev-settings (Android debug screens), skill://tdd (screenshot tests)
+> **Related**: skill://wire-dev-settings (Android debug screens), skill://tdd (screenshot tests), skill://micro-architecture (reusable component API — its ui-components payload)
 
 # Preview compose
 
@@ -28,8 +28,13 @@ in the official tooling docs (see `references/sources.md`).
    `ViewModel` (or Hilt-injected deps) into a stateless overload taking plain
    data + event lambdas; the ViewModel wrapper calls it; preview the overload.
    The preview renderer (Layoutlib) cannot construct repositories, use cases,
-   or DI graphs and renders an error instead. Done when: the previewed
-   function has no `ViewModel` parameter and renders.
+   or DI graphs and renders an error instead. Reusable components (not
+   screens) create their runtime objects (`LazyListState`, `FocusRequester`,
+   an `XxxState` holder) as remembered parameter defaults and take initial
+   state from parameters, not a `LaunchedEffect`, so sample data alone
+   renders frame one (`micro-architecture`/references/ui-components.md rules
+   6 and 10). Done when: the previewed function has no `ViewModel` parameter
+   and renders.
 2. **One preview per meaningful state** (loading, empty, error, content,
    extremes). Use `@PreviewParameter(Provider::class)` with a
    `PreviewParameterProvider<T>` whose `values` sequence yields one state per

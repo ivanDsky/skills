@@ -5,7 +5,8 @@
     "Add a structure check that enforces one public class per file in this Android project",
     "The agent keeps stuffing multiple classes into one Kotlin file — enforce it mechanically",
     "Wire a layer-dependency test so domain never imports data",
-    "This ticket adds new Kotlin files — what evidence do I need for the structure rules?"
+    "This ticket adds new Kotlin files — what evidence do I need for the structure rules?",
+    "Make the build fail when a public composable has no modifier parameter or takes a MutableState"
   ],
   "negative": [
     {
@@ -23,6 +24,10 @@
     {
       "prompt": "Run the lint and screenshot gate over this finished diff",
       "owner": "review-change"
+    },
+    {
+      "prompt": "Should this chip take a slot or a String label?",
+      "owner": "micro-architecture"
     }
   ]
 }
