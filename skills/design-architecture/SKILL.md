@@ -14,7 +14,7 @@ requires: []
 ---
 
 > **TL;DR** Designs and judges module architecture — seams, coupling, dependency rule, ADRs; fires when a spec needs its architecture section or review grades structure.
-> **Related**: skill://draft-spec (architecture section), skill://archify (architecture diagrams), skill://review-change (dependency grading), skill://structure-checks (mechanical form of rules 17/20 and layer checks), skill://goldfish-review (architecture lens at stage B)
+> **Related**: skill://draft-spec (architecture section), skill://archify (architecture diagrams), skill://review-change (dependency grading), skill://user-check (re-gate after the user's OK), skill://structure-checks (mechanical form of rules 17/20 and layer checks), skill://goldfish-review (architecture lens at stage B)
 
 # Design architecture
 
@@ -38,8 +38,10 @@ vocabulary and the deepening patterns.
 - Brownfield: at implement step zero of any ticket that touches a module edge
   or adds a dependency — assess seams before changes; input is the
   map-codebase project map.
-- Review: before review-change's architecture axis — its thorough tier grades
-  the diff against this skill's rules payload.
+- Re-gate: `user-check`'s step after the user's OK grades the whole run's
+  diff (fast fixes first) against this skill's rules payload.
+- Review: review-change's architecture axis grades the diff against this
+  skill's rules payload at every tier.
 - Any direct ask: "design the modules", "fix this coupling", "is the
   architecture OK".
 
@@ -96,7 +98,7 @@ vocabulary and the deepening patterns.
   module boundaries and interface contracts, never file paths.
 - `implement` applies it at step zero of architecture-heavy tickets (new
   module, new seam, dependency direction in play) before coding starts.
-- `review-change` thorough tier grades the diff against
+- `review-change` (every tier) and `user-check`'s re-gate grade the diff against
   [references/rules-architecture.md](references/rules-architecture.md);
   findings are Critical when the dependency rule breaks.
 

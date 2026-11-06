@@ -1,0 +1,24 @@
+{
+  "skill": "user-check",
+  "positive": [
+    "Let me try it on my phone before you review anything",
+    "Implementation is done — send me the build so I can check it first",
+    "The change is finished, give me the build name and the steps to verify it",
+    "I tried it: the list should open on tap, and the header is too big — fix that and send a new build",
+    "OK, I like it — now clean up what the quick fixes left behind before review"
+  ],
+  "negative": [
+    {
+      "prompt": "Review the diff against the spec and run the fix loop",
+      "owner": "review-change"
+    },
+    {
+      "prompt": "Ship the approved build to Firebase App Distribution for the testers",
+      "owner": "deliver"
+    },
+    {
+      "prompt": "Prototype three options for the reminders screen so I can pick one",
+      "owner": "prototype"
+    }
+  ]
+}

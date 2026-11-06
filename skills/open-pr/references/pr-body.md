@@ -45,3 +45,6 @@ Rules:
 - The "Not verified" line is mandatory when review or evidence skipped
   anything notable (no capture, no smoke test, unrun lens, `cannot-verify`);
   omit it only when nothing was skipped. It is one line, not a section.
+- Stacked run: the bottom PR uses this template; every layer above uses the
+  short per-layer shape in [stacks.md](stacks.md) and links into its own
+  PR's diff.

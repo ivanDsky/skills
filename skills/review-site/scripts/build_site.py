@@ -8,11 +8,11 @@ served by any static file server.
 
 Collected, in section order:
   1. Changes        — REPORT.md (deliver's user-facing report), if present
-  2. Visual review  — REVIEW.md (review-change's doc), if present
+  2. Visual review  — REVIEW.md (user-check's check doc), if present
   3. Screenshots    — *.png/*.gif/*.jpg/*.webp under the slug dir (cap 24,
                       newest first), inlined
   4. Diagrams       — *.html diagram/explainer artifacts (linked, not inlined)
-  5. Test report    — build.log tail + any *test*.log/*.txt tails
+  5. Test report    — build.log + suite.log tails + any *test*.log/*.txt tails
 Everything else is ignored — the site stays small and review-focused.
 """
 import argparse
@@ -117,7 +117,7 @@ def main() -> int:
             shutil.copy2(p, dst)
         sections.append(section("Diagrams", f"<ul>{items}</ul>"))
 
-    logs = [slug / "build.log"] + sorted(slug.rglob("*test*.log")) + sorted(slug.glob("*test*.txt"))
+    logs = [slug / "build.log", slug / "suite.log"] + sorted(slug.rglob("*test*.log")) + sorted(slug.glob("*test*.txt"))
     log_html = "".join(
         f"<h3>{html.escape(p.name)}</h3><pre>{html.escape(log_tail(p))}</pre>"
         for p in dict.fromkeys(logs) if p.is_file())

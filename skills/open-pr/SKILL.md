@@ -1,18 +1,19 @@
 ---
 name: open-pr
 description: >-
-  Land a finished run as a pull request a human reads in two minutes: short
-  summary, before/after screenshots for UI changes, the major changes, the top
-  three things a reviewer must check with line links, and a small diagram when
-  structure changed. Use when deliver reaches its land step with delivery =
-  pr, when the user says "open a PR", "make a pull request" or "PR this", or
-  when a finished branch needs a PR description.
+  Land a finished run as a pull request (or a stack of per-ticket PRs via gh
+  stack) a human reads in two minutes: short summary, before/after
+  screenshots for UI changes, the major changes, the top three things a
+  reviewer must check with line links, and a small diagram when structure
+  changed. Use when deliver reaches its land step with delivery = pr, when
+  the user says "open a PR", "make a pull request", "PR this" or "stack the
+  PRs per ticket", or when a finished branch needs a PR description.
 interaction: afk
-requires: [gh CLI logged in to the project's remote]
+requires: [gh CLI logged in to the project's remote, gh-stack extension for stacked runs]
 ---
 
-> **TL;DR** Opens the run's PR as a 2-minute read — summary, before/after screenshots, major changes, top-3 review checks with line links, optional diagram — and merges only on green review; fires from `deliver` when delivery is `pr`.
-> **Related**: skill://deliver (fires it), skill://review-change (verdict the merge depends on; findings feed the top 3), skill://preview-compose (screenshot captures), skill://tdd (screenshot-test ladder), skill://archify (diagram when structure changed), skill://implement (commits on the run branch), skill://start (asks pr vs main), skill://init-profile (seeds `delivery:`)
+> **TL;DR** Opens the run's PR — or a per-ticket `gh stack` for big runs — as a 2-minute read: summary, before/after screenshots, major changes, top-3 review checks with line links, optional diagram; merges only on green review; fires from `deliver` when delivery is `pr`.
+> **Related**: skill://deliver (fires it), skill://user-check (OK required before any PR body), skill://review-change (verdict + `suite: green` the merge depends on; findings feed the top 3), skill://preview-compose (screenshot captures), skill://tdd (screenshot-test ladder), skill://archify (diagram when structure changed), skill://implement (commits on the run branch or stack layers), skill://start (asks pr vs main), skill://init-profile (seeds `delivery:`)
 
 # Open PR
 
@@ -23,16 +24,19 @@ everything else is short. Template and budgets:
 
 ## 1. Gate and branch
 
-1. `deliver` step 1 (green tree) must have passed. Review not green or not run
-   → open as **draft**, never merge.
+1. The ledger carries `user-check: ok` (or `skipped`) and `suite: green @
+   <sha>` with `<sha>` equal to HEAD (`deliver` step 1). Review not green or
+   not run → open as **draft**, never merge.
 2. Branch = the run slug (kebab-case), cut before the run's first commit so
    `implement` commits on it. Run already committed on local `main`,
    unpushed → `git switch -c <slug>` and reset local `main` to `origin/main`.
    Pushed `main` is never rewritten unless the user says so; push own run
    branches with `--force-with-lease` only.
-3. Over ~800 changed lines, or two unrelated concerns → propose a split in a
-   `Ruling:` line before opening. A PR that cannot be read in two minutes is
-   too big.
+3. Over ~20 changed files or several tickets → a stack, one layer per ticket
+   ([references/stacks.md](references/stacks.md)). `implement` normally cut
+   it already; a run that arrived as one branch is split at the ticket
+   commits now. Two unrelated concerns in one ticket → propose a split in a
+   `Ruling:` line. A layer that cannot be read in two minutes is too big.
 
 ## 2. Gather (before writing a word)
 
@@ -78,13 +82,20 @@ commit screenshots to the run branch.
    repo's default branch if it is not `main`). Then rewrite the top-3 links
    with the real `<N>` and run `gh pr edit <N> --body-file
    .scratch/<slug>/pr.md`. Print the URL.
+4. Stack: `gh stack submit --auto` (one draft PR per layer), then one body
+   per layer to `.scratch/<slug>/pr-<NN>.md` and `gh pr edit` each. The
+   bottom PR carries Summary, Before/after and Diagram; each layer ≤ ~150
+   words (shape in [references/stacks.md](references/stacks.md)). Print
+   `gh stack view --short`.
 
 ## 5. Merge
 
 Only when the PROFILE consent ledger pre-approves merge-to-main AND review is
 green AND, if checks exist, `gh pr checks` is green (no CI → say "no CI";
 it is not a pass). Then `gh pr merge --squash --delete-branch`; the squash
-body is the Summary. Pending/red checks → leave open and report. After merge:
+body is the Summary. Stack: mark layers ready (`gh stack submit --open`),
+then `gh stack merge --yes --merge` (atomic) and `gh stack sync --prune`.
+Pending/red checks → leave open and report. After merge:
 `git switch main && git pull`, then any post-merge step in PROFILE
 `Environment facts` (skills repo: re-install with `npx skills add`).
 

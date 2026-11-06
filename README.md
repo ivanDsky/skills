@@ -11,9 +11,17 @@ review is tiered by effort, and delivery produces build/deploy evidence.
 
 ```
 /start ──> intake ──> spec (+ one checkpoint) ──> tickets ──> [research]
-       ──> implement ──> review ──> deliver (build | deploy)
+       ──> implement ──> user check ──> review ──> deliver (build | deploy)
+                         ↺ feedback → fast fix
+                         ok → re-gate → hardening tickets
 conditional: map-codebase (unmapped repo) · prototype mode · teardown gate
 ```
+
+The user tries the whole change before any review, test suite or PR body:
+feedback rounds are fast fixes that ignore code quality, and on OK the run
+goes back to design level (spec vs feedback vs code, senior-dev and
+architecture checks) and pays the debt down as hardening tickets. The full
+suite runs once, in review. The user reads code last, in the PR.
 
 Stages are conditional and effort-scaled: the effort level (fast / standard /
 thorough, set per project in `PROFILE.md`, overridable per session) maps to
@@ -25,7 +33,7 @@ round, an independent architect decides fix-forward vs teardown.
 
 **Flow (fresh, authored):**
 `start` · `run-intake` · `draft-spec` · `write-tickets` · `implement` ·
-`review-change` · `deliver` · `map-codebase` · `fan-out-research` ·
+`user-check` · `review-change` · `deliver` · `map-codebase` · `fan-out-research` ·
 `graduate-prototype` · `assess-teardown` · `init-profile` · `integrate-skill` ·
 `diagnose-bug` (bug reports: evidence ladder, user-time-last) ·
 `design-architecture` (SOLID payload, wired into spec/implement/review) ·
@@ -43,7 +51,7 @@ round, an independent architect decides fix-forward vs teardown.
 `adopt-tool` (one-pass capability adoption checklist: verify → route → wire → mandate → navigate → eval → demo → ship from repo) ·
 `goldfish-review` (fresh-context lenses on a concept or design before code: reuse, persona flows, data, failure, best version, verifiability; architecture, patterns, file structure — you choose none / up to 3 / all) ·
 `structure-checks` (Konsist suite for Kotlin: one public type per file, layer dependencies, shrink-only allowlist — the mechanical backstop for file structure) ·
-`open-pr` (PR as a 2-minute read: summary, before/after screenshot-test captures, major changes, top-3 review checks with line links, optional diagram; start asks PR or straight to main) ·
+`open-pr` (PR as a 2-minute read: summary, before/after screenshot-test captures, major changes, top-3 review checks with line links, optional diagram; big runs as a per-ticket `gh stack` with fixes landing in the owning layer; start asks PR or straight to main) ·
 `prototype` (quick throwaway prototype: one task → one self-contained HTML page, 2-3 switchable variants judged with senior-ux on your phone, one subagent per task + an index page; small picks ported straight into the app, big ones through graduate-prototype)
 
 **Adapted (owned text, credited sources):**

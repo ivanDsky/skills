@@ -10,8 +10,8 @@ interaction: afk
 requires: []
 ---
 
-> **TL;DR** Executes tracker tickets one fresh subagent per ticket in tracer-bullet order, fanning out research first; fires when the frontier has ready tickets.
-> **Related**: skill://write-tickets (upstream tickets), skill://fan-out-research (declared unknowns), skill://review-change (downstream gate), skill://graduate-prototype (prototype re-entry), skill://structure-checks (`structure:` before DONE)
+> **TL;DR** Executes tracker tickets one fresh subagent per ticket in tracer-bullet order, fanning out research first; fires when the frontier has ready tickets, for user-check fast fixes, and for hardening tickets.
+> **Related**: skill://write-tickets (upstream tickets), skill://fan-out-research (declared unknowns), skill://user-check (downstream: user tries the epic; sends fast fixes and hardening tickets back), skill://review-change (gate after hardening), skill://graduate-prototype (prototype re-entry), skill://structure-checks (`structure:` before DONE)
 
 # Implement
 
@@ -26,7 +26,12 @@ recollection.
    and git log over your own memory.
    Delivery `pr` (PROFILE `## Delivery` or start's answer) → make sure the
    run branch `<slug>` is checked out before the first dispatch; workers
-   commit on it. Never commit a `pr` run to the default branch.
+   commit on it. Never commit a `pr` run to the default branch. More than
+   ~20 files or several tickets expected → a stack instead: `gh stack init
+   <slug>/01-<ticket>`, then `gh stack add <slug>/<NN>-<ticket>` from the top
+   before each next ticket; concurrent parallel-safe tickets share one
+   layer. A fix (review round, fast fix) commits into the layer that owns
+   the file, then `gh stack rebase --upstack` (`open-pr`/references/stacks.md).
 2. Claim: set `status: claimed` before any work.
 3. A ticket with `Unknowns` gets research subagents first, one per unknown, in
    parallel; link every findings file into the ticket before coding starts.
@@ -88,7 +93,7 @@ recollection.
      (`tdd`/references/android-testing.md): unit tests and device-free
      captures only. Never boot an emulator, deploy to a device, or tap
      through a screen to "check how it looks/works" mid-implementation —
-     that is acceptance evidence, owned by review and the user. A flow you
+     that is acceptance evidence, owned by `user-check` and the user. A flow you
      would verify by hand becomes a persisted semantic JVM test (recipe in
      the same reference). Report `device: none`; any use needs
      `device: used because <reason>`, and the installed build gets its
@@ -129,8 +134,15 @@ recollection.
    ledger line, take the next frontier ticket.
 2. Every deviation from ticket or spec lands as
    `Ruling: what — why — cost if wrong`.
-3. Frontier empty → hand off to review-change.
-4. Debug on (PROFILE.md): append one ≤4-line entry per ticket to
+3. Frontier empty → hand off by ticket kind. Feature tickets → `user-check`
+   (the user tries the whole epic, not each ticket). Hardening tickets from
+   `user-check`'s re-gate → `review-change`.
+4. Fast-fix briefs from `user-check` (`mode: fast-fix`, F-ids listed): the
+   quality bar is off on purpose. No tests, no refactor, no `structure:`;
+   only the smallest change the user asked for, committed `fast(F<n>): …`.
+   The section-3 never-cuts (validation, security, accessibility, data
+   loss) still hold. The re-gate pays the rest down.
+5. Debug on (PROFILE.md): append one ≤4-line entry per ticket to
    `.scratch/run-log.md`.
 
 Read [references/dispatch.md](references/dispatch.md) before writing the

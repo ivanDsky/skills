@@ -11,8 +11,8 @@
       "owner": "deploy-tailscale"
     },
     {
-      "prompt": "Write the visual review doc with numbered screenshots for the fix loop",
-      "owner": "review-change"
+      "prompt": "Write the check doc with the build name, numbered verify steps and screenshots so I can try it",
+      "owner": "user-check"
     },
     {
       "prompt": "Create an architecture diagram of the new module boundary",
