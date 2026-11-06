@@ -104,7 +104,8 @@ passed; this stage adds no code.
 7. Land the change, per the run's delivery mode (PROFILE `## Delivery`
    `changes:`, or the session answer from start's plan; precedence
    session > project, default `ask` = start already asked):
-   - `pr` → fire `open-pr`; its URL and merged/open state go in the summary.
+   - `pr` → fire `open-pr` (one PR, or one per stack layer); its URL(s) and
+     merged/open state go in the summary.
    - `main` → the commit(s) go to the default branch per the consent ledger
      (`commit+push to the project repo`); report the commit id.
    Neither bumps semver; that waits for a release (step 3).

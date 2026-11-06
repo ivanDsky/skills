@@ -97,7 +97,8 @@ Exceptions (each bundles into the plan, never a separate round trip):
   when this run ships?") that routes deliver's report step for this run only.
 - Delivery. PROFILE.md `## Delivery` `changes:` decides — `pr` → the plan
   lists `open-pr` after deliver and the run branch is cut before the first
-  commit; `main` → commits land on the default branch; `ask` (the default)
+  commit (several tickets or > ~20 files → a `gh stack`, one layer per
+  ticket); `main` → commits land on the default branch; `ask` (the default)
   → one question ("PR, or straight to main?") answered for this run only.
   Asked before `implement` starts, because the branch must exist before the
   first commit.
@@ -177,8 +178,9 @@ per file) → `micro-architecture`; judgment defaults → `senior-dev`; UX
 method (framework-judged pixels, A/B on hardware, tokens with floors) →
 `senior-ux`; blind concept/design lenses → `goldfish-review`; mechanical
 file-structure and layering checks (Konsist) → `structure-checks`; PR
-description and landing → `open-pr`; throwaway one-page prototypes →
-`prototype`.
+description and landing → `open-pr`; stacked PRs per ticket (`gh stack`,
+fixes into the owning layer) → `open-pr`/references/stacks.md;
+throwaway one-page prototypes → `prototype`.
 
 Close calls (quick vs feature vs prototype): read
 [Triage cases](references/triage-cases.md).

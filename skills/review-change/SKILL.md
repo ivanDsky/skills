@@ -116,6 +116,8 @@ file; chat carries only the user-facing report.
    re-review is scoped to the fix diff only; triage and convergence rules in
    [fix-loop.md](references/fix-loop.md). Minors are ledgered as deferred —
    never silently fixed. Count failed fix rounds per module in the ledger.
+   Stacked run: each fix commits into the layer that owns the file, never a
+   new layer (`open-pr`/references/stacks.md); the suite runs on the top.
    Fix rounds run only the touched module's tests. When the loop converges,
    run the PROFILE.md test runner **once** over HEAD, log it to
    `.scratch/<slug>/suite.log`, and ledger `suite: green @ <sha>`. This is

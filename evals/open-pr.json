@@ -4,7 +4,9 @@
     "Open a PR for this branch",
     "Make a pull request with a proper description for the changes we just finished",
     "Write the PR description from the spec and the review results",
-    "Delivery is set to pr — land this run as a pull request and merge it if review is green"
+    "Delivery is set to pr — land this run as a pull request and merge it if review is green",
+    "This run has five tickets — split it into stacked PRs, one per ticket",
+    "The review fix belongs to the first ticket — put it in that layer of the stack, not a new PR"
   ],
   "negative": [
     {
@@ -18,6 +20,10 @@
     {
       "prompt": "Write a commit message for the staged changes",
       "owner": "caveman-commit"
+    },
+    {
+      "prompt": "The run is done — let me try the build before you open any PR",
+      "owner": "user-check"
     }
   ]
 }

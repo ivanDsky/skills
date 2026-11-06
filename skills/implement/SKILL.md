@@ -26,7 +26,12 @@ recollection.
    and git log over your own memory.
    Delivery `pr` (PROFILE `## Delivery` or start's answer) → make sure the
    run branch `<slug>` is checked out before the first dispatch; workers
-   commit on it. Never commit a `pr` run to the default branch.
+   commit on it. Never commit a `pr` run to the default branch. More than
+   ~20 files or several tickets expected → a stack instead: `gh stack init
+   <slug>/01-<ticket>`, then `gh stack add <slug>/<NN>-<ticket>` from the top
+   before each next ticket; concurrent parallel-safe tickets share one
+   layer. A fix (review round, fast fix) commits into the layer that owns
+   the file, then `gh stack rebase --upstack` (`open-pr`/references/stacks.md).
 2. Claim: set `status: claimed` before any work.
 3. A ticket with `Unknowns` gets research subagents first, one per unknown, in
    parallel; link every findings file into the ticket before coding starts.
