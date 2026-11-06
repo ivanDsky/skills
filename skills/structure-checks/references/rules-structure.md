@@ -29,8 +29,11 @@ an allowlist entry that no longer violates fails the suite.
 - Exceptions (fixed list; anything else is a rule change): private/internal
   helpers; typealiases; extension functions/properties on the file's own
   type; `@Preview` functions; nested types (a sealed parent with nested
-  variants is one type); `const` and top-level `val`s of that type.
-  Top-level sealed variants each get their own file.
+  variants is one type); `const` and top-level `val`s of that type;
+  overloads of the file's composable (same name); the `remember<Type>()`
+  factory beside its state type (`TagGroupState.kt` holds
+  `rememberTagGroupState`). Top-level sealed variants each get their own
+  file.
 - Shape: files from `scopeFromProduction()` minus the allowlist; count
   `declarations(includeNested = false, includeLocal = false)` that are
   classes/interfaces/objects with public or default visibility; assert
@@ -84,3 +87,37 @@ an allowlist entry that no longer violates fails the suite.
   files outside the theme package; spacing literals by agreed pattern per
   project (layout-only `0.dp` and divider `1.dp` excepted by an explicit list).
 - Fix: add or reuse a token in the theme.
+
+## S6 — component API (UI opt-in)
+
+- Enforces the mechanical half of `micro-architecture`'s ui-components
+  payload (rules 4, 6, 7) on public top-level `@Composable` functions
+  (previews excluded):
+  - (a) a Unit-returning one has a `modifier: Modifier = Modifier` parameter;
+  - (b) none takes a `State<…>`/`MutableState<…>` parameter;
+  - (c) only route composables take a `…ViewModel` parameter.
+- Route = name ends with a suffix agreed at setup (default `Route`,
+  `Screen`). Routes are exempt from (a) and (c); the suffix list lives in the
+  test, so changing it is a protected-file change.
+- Why: these three are the component-API findings a reviewer can miss and a
+  type check can't. Parameter order, slots vs params and the tier stay
+  review work.
+- Shape (verified with Konsist 0.17.3 on 2026-11-05: green on a real app,
+  red on probes for all three): `Konsist.scopeFromProduction().functions(
+  includeNested = false, includeLocal = false).withAnnotationNamed(
+  "Composable").withoutAnnotationNamed("Preview").filter { it.isTopLevel &&
+  it.hasPublicOrDefaultModifier }`. Then:
+  - (a) filter `returnType == null || returnType?.name == "Unit"`, drop
+    routes, `assertTrue(strict = true) { f -> f.parameters.any {
+    it.name == "modifier" && it.type.name == "Modifier" && it.defaultValue
+    == "Modifier" } }`;
+  - (b) `assertFalse` on `p.type.name.substringBefore('<') in
+    setOf("State", "MutableState")`;
+  - (c) drop routes, `assertFalse` on
+    `it.type.name.endsWith("ViewModel")`.
+
+  Exempt routes by name, never by "has a ViewModel param": that exemption
+  let a probe with both a ViewModel and no `modifier` pass (a).
+- Fix: (a) add the parameter and apply it first at the root; (b) take `T`
+  or `() -> T` plus an event lambda, or a `@Stable` holder; (c) pass the
+  state slice and lambdas from the route.

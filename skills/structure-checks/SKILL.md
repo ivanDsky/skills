@@ -3,7 +3,8 @@ name: structure-checks
 description: >-
   Turn file-structure and layering rules into Konsist unit tests for a Kotlin
   or Android project — one public top-level type per file, file-size cap,
-  layer dependencies, Compose preview and token rules — with a shrink-only
+  layer dependencies, Compose preview, token and component-API rules (modifier
+  param, no State params, no ViewModel below the route) — with a shrink-only
   allowlist for existing violators, so workers fix by splitting instead of
   arguing with prose. Use when setting up structure checks, when a ticket adds
   or moves Kotlin files and needs its structure evidence, when files keep
@@ -14,7 +15,7 @@ requires: [Kotlin project built with Gradle]
 ---
 
 > **TL;DR** Prose rules about file structure get ignored; a failing Konsist test does not. This skill installs the tests, owns the allowlist ratchet, and defines the worker contract: fix by splitting, never edit rules or suppress.
-> **Related**: skill://design-architecture (rule text lives in its rules-architecture payload, rules 17 and 20 — this skill enforces, never redefines), skill://micro-architecture (file maps and one-file-per-variant), skill://write-tickets (file map + Evidence), skill://implement (`structure:` before DONE), skill://review-change (runs it in the fast tier), skill://init-profile (opt-in, `structure:` command), skill://tdd (where the tests run in the ladder)
+> **Related**: skill://design-architecture (rule text lives in its rules-architecture payload, rules 17 and 20 — this skill enforces, never redefines), skill://micro-architecture (file maps and one-file-per-variant; S6 enforces its ui-components payload rules 4/6/7), skill://write-tickets (file map + Evidence), skill://implement (`structure:` before DONE), skill://review-change (runs it in the fast tier), skill://init-profile (opt-in, `structure:` command), skill://tdd (where the tests run in the ladder)
 
 # Structure checks
 
@@ -43,7 +44,8 @@ constraints from those docs shape the design:
    question; declined → record `structure: none` in PROFILE.md and stop.
 2. Add the dependency and a `structure` test package; generate the rule
    tests from [references/rules-structure.md](references/rules-structure.md)
-   for the rules the user keeps (S1 and S3 default on, S2/S4/S5 asked).
+   for the rules the user keeps (S1 and S3 default on, S2/S4/S5/S6 asked;
+   S6 also asks for the route-name suffixes).
 3. First run: every current violator lands in `structure/allowlist.txt` —
    one project-relative path per line, comment with the rule id. The tests
    exclude allowlisted paths from their violations **and fail on any
