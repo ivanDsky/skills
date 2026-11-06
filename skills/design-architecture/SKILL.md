@@ -14,7 +14,7 @@ requires: []
 ---
 
 > **TL;DR** Designs and judges module architecture — seams, coupling, dependency rule, ADRs; fires when a spec needs its architecture section or review grades structure.
-> **Related**: skill://draft-spec (architecture section), skill://archify (architecture diagrams), skill://review-change (dependency grading), skill://user-check (re-gate after the user's OK), skill://structure-checks (mechanical form of rules 17/20 and layer checks), skill://goldfish-review (architecture lens at stage B)
+> **Related**: skill://draft-spec (architecture section), skill://archify (architecture diagrams), skill://review-change (dependency grading), skill://user-check (re-gate after the user's OK), skill://structure-checks (mechanical form of rules 17/20 and layer checks), skill://goldfish-review (architecture lens at stage B), skill://micro-architecture (reusable UI components: its ui-components payload, outside rules 13/14/15/19)
 
 # Design architecture
 
@@ -101,6 +101,10 @@ vocabulary and the deepening patterns.
 - `review-change` (every tier) and `user-check`'s re-gate grade the diff against
   [references/rules-architecture.md](references/rules-architecture.md);
   findings are Critical when the dependency rule breaks.
+- Reusable UI components are out of scope for rules 13, 14, 15 and 19 (the
+  payload's scope gate); grade them against
+  `micro-architecture`/references/ui-components.md, never by adding a domain
+  layer or ViewModel to a composable.
 
 Authored for ivanDsky/skills. Vocabulary and deepening patterns adapted from
 mattpocock/skills (`codebase-design`, `improve-codebase-architecture`), MIT.

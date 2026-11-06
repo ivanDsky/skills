@@ -46,7 +46,7 @@ round, an independent architect decides fix-forward vs teardown.
 `android-env` (session bootstrap: PATH, local.properties, worktree git, device connect, Gradle triage, Studio modal handling) ·
 `web-env` (web/Node session bootstrap: runtime + package-manager resolution, env files, ports, lockfiles, dev-server triage, Playwright evidence) ·
 `senior-ux` (UX engineering method: framework-judged pixels, measured references, A/B on user hardware, tokens with computed floors, walk-every-state) ·
-`micro-architecture` (feature-level file split: parallel-safe waves, open/closed one-file extension, single responsibility per file) ·
+`micro-architecture` (feature-level file split: parallel-safe waves, open/closed one-file extension, single responsibility per file; reusable Compose component API — library/app tier, slots vs params, Modifier vs component, state owner ladder, `XxxDefaults`, with a compiled sample) ·
 `senior-dev` (judgment defaults: verify before trusting, smallest correct change, reproduce before fixing, own mistakes) ·
 `adopt-tool` (one-pass capability adoption checklist: verify → route → wire → mandate → navigate → eval → demo → ship from repo) ·
 `goldfish-review` (fresh-context lenses on a concept or design before code: reuse, persona flows, data, failure, best version, verifiability; architecture, patterns, file structure — you choose none / up to 3 / all) ·

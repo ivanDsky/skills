@@ -9,10 +9,12 @@ dual-verdict subagent.
   `git log <base>..HEAD --oneline`).
 - Spec excerpt with its numbered assumptions.
 - Care-axes (ranked) + the rules payloads they select:
-  `design-architecture`'s `rules-architecture.md` (architecture axis) and
+  `design-architecture`'s `rules-architecture.md` (architecture axis),
   `rules-code-style.md` (comments, naming, AI-slop patterns — style findings
   grade against it; a comment-slop or swallowing-catch finding is Important
-  by default).
+  by default), and, when the diff adds or changes a public composable,
+  `micro-architecture`'s `ui-components.md` with the module's tier
+  (component API axis).
 - Relevant ledger lines.
 
 ## Standard reviewer — one report, under 400 words
@@ -25,6 +27,9 @@ Ask for, in care-axes order:
 - (d) file structure and patterns — the real files against the tickets' file
   maps, `structure:` command result, the spec's Extension points
   assumption, forcing function for each introduced pattern.
+- (e) component API — each public composable, state holder and `XxxDefaults`
+  against `ui-components.md`, findings tagged `[library]`/`[app]` plus the
+  rule number.
 
 Findings graded Critical / Important / Minor, each citing the owning hunk.
 End with the coverage rows (axis — what was checked — count); an axis with no

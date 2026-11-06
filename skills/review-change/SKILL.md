@@ -13,7 +13,7 @@ requires: []
 ---
 
 > **TL;DR** Runs the effort-tiered review gate — scripted checks, screenshots, code review, dual-verdict subagent — owns the fix loop and the one full-suite run; fires after user-check OK and hardening, before deliver.
-> **Related**: skill://user-check (upstream: approved behavior + hardening tickets; behavior-changing fixes go back to it), skill://implement (upstream tickets), skill://deliver (downstream ship), skill://assess-teardown (teardown escalation), skill://scope-creep-detector (drift catch), skill://structure-checks (fast-tier command), skill://goldfish-review (earlier blind lenses; shares its triage rules)
+> **Related**: skill://user-check (upstream: approved behavior + hardening tickets; behavior-changing fixes go back to it), skill://implement (upstream tickets), skill://deliver (downstream ship), skill://assess-teardown (teardown escalation), skill://scope-creep-detector (drift catch), skill://structure-checks (fast-tier command), skill://goldfish-review (earlier blind lenses; shares its triage rules), skill://micro-architecture (its ui-components payload grades the component-API axis)
 
 # Review change
 
@@ -48,8 +48,9 @@ file; chat carries only the user-facing report.
      the touched files. On Kotlin diffs, run PROFILE.md's `structure:` command
      (`structure-checks`) yourself: red is ❌ Important; not configured on a
      Kotlin diff is `cannot-verify`, said out loud. Plus one design-only
-     reviewer subagent (diff, tickets' file maps, `rules-architecture.md`)
-     that fills the step-5 architecture, file-structure and patterns rows. A
+     reviewer subagent (diff, tickets' file maps, `rules-architecture.md`, and
+     `ui-components.md` when the diff has public composables) that fills the
+     step-5 architecture, component API, file-structure and patterns rows. A
      prototype run caps here plus the demo, at any effort. Plus, before
      anything is pushed:
      one secret scan over the diff and new fixtures (keys, tokens,
@@ -90,17 +91,26 @@ file; chat carries only the user-facing report.
    Critical when the dependency rule breaks. `regate.md` findings already
    ticketed count as checked only when their hardening ticket is closed.
    Coverage proof, every tier that reviews code: the report carries one row
-   per axis — spec, architecture, file structure, patterns, UI — with what
-   was checked and the count (`structure: 14 new/moved files vs file map, 0
-   findings`). File structure = the diff's real files against the tickets'
-   file maps and the one-responsibility rule (a file needing "and" to state
-   its job, several public types, a shared `when` edited to add a variant);
+   per axis — spec, architecture, component API, file structure, patterns,
+   UI — with what was checked and the count (`structure: 14 new/moved files
+   vs file map, 0 findings`). File structure = the diff's real files against
+   the tickets' file maps and the one-responsibility rule (a file needing
+   "and" to state its job, several public types, a shared `when` edited to
+   add a variant);
    patterns = the Extension points assumption honored, each introduced
    pattern carrying its forcing function, repo-consistent with the pattern
    table in `micro-architecture`. A row without evidence is `cannot-verify`,
    never ✅. A worker report saying `device: used because …` with a weak
    reason, or a diff showing device-driven edits with `device: none`, is an
    Important finding.
+   Component API: a new or changed public `@Composable`, `XxxState`,
+   `XxxDefaults`/`XxxColors` or `Modifier` factory → graded at every tier
+   against `micro-architecture`/references/ui-components.md. Name the tier per
+   module (library/app; the ledger `Ruling: ui-tier` wins), tag each finding
+   `[library]`/`[app]` with its rule number, and grade at the rule's strength
+   for that tier. A use case, domain model or ViewModel added for UI-only
+   state is Important at both tiers. Row: `component API: <n> public
+   composables, tier <t>, <k> findings`.
 6. UI in the diff → load [review-ux.md](references/review-ux.md) and run the UX
    axis at every tier; check against `design-taste-frontend` when installed.
    Thorough adds one fresh-context visual reviewer that sees only preview
