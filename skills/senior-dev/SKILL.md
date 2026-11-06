@@ -10,7 +10,7 @@ interaction: afk
 ---
 
 > **TL;DR** Ask first: why is this required, who decided, will the next change be easier, what am I not doing. Then: verify before trusting, change as little as correctness allows, never boot a device when a faster tool answers the question.
-> **Related**: skill://senior-ux (the UX version of these questions), skill://micro-architecture (how to split the work), skill://implement (stage mechanics), skill://review-change (the gate that grades this)
+> **Related**: skill://senior-ux (the UX version of these questions), skill://micro-architecture (how to split the work), skill://implement (stage mechanics), skill://user-check (re-gate asks these over the fast-fix diff), skill://review-change (the gate that grades this)
 
 # The questions (most important part — ask them, out loud, before acting)
 

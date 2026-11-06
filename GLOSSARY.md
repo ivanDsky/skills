@@ -8,7 +8,7 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 
 | Term | Definition | Avoid |
 |---|---|---|
-| Stage | One named step of the /start flow (intake, orientation, spec, tickets, research, implement, review, deliver). | phase |
+| Stage | One named step of the /start flow (intake, orientation, spec, tickets, research, implement, user check, review, deliver). | phase |
 | Effort level | fast / standard / thorough; quality-vs-speed setting. Per task by default (`thorough` = architecture/planning/big-view only); run default comes from PROFILE.md, per-session override wins for the default. | dial (retired, T005), mode |
 | Gear | Intake batch size: focused (5–8) or deep (20–30). | mode |
 | Care-axes | Ranked quality priorities in PROFILE.md; drive review order + rules-payload selection. | preferences |
@@ -19,7 +19,12 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | Evidence | Artifact proving a DoD: command output, screenshot path, deploy output. | proof |
 | Unknown | A declared open question on a ticket/spec that triggers research fan-out. | risk |
 | Assumption | Unresolved point the agent decided, numbered (A1…) in the spec for review. | guess |
-| Checkpoint | The single "correct me or I go" spec message; the only standing blocking gate besides intake. | approval |
+| Checkpoint | The single "correct me or I go" spec message; the only standing blocking gate besides intake and the user check. | approval |
+| User check | `user-check` stage after implement and before review: the user tries the whole change (installed build, LAN URL or demo output) and answers `ok` or feedback by id. One per run, never per ticket. | UAT, manual QA, demo |
+| F-id | One numbered point of user-check feedback (`F1`…), quoted in the user's words; outranks the spec and amends it at the re-gate. | comment, note |
+| Fast fix | A feedback-round change made with the quality bar off (no tests, no refactor), committed `fast(F<n>): …`; never cuts validation, security, accessibility or data-loss handling. | hotfix, quick fix |
+| Re-gate | user-check's step after OK: reconcile spec vs feedback vs code, design-check the diff, emit hardening tickets. Written to `regate.md`. | retro, cleanup |
+| Hardening ticket | Re-gate output that pays fast-fix debt (tests, structure, design) while keeping the approved behavior unchanged. | tech-debt ticket |
 | Teardown gate | 2 failed fix rounds or reviewer discretion → independent architect decides fix-forward vs redesign; carries only root cause, contracts, surviving tests. | rewrite, pivot |
 | Dual-verdict review | Reviewer returns two separate verdicts: spec compliance + code quality; never merged. | sign-off |
 | Ledger | Append-only run log (`.scratch/<slug>/ledger.md`): rulings, ticket closes; beats memory after compaction. | progress file |

@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Triages an ask — quick task, prototype, feature, unmapped codebase — prints the run plan, and fires the matching chain; use on /start.
-> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes)
+> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://user-check (hands-on check before review), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes)
 
 # Start
 
@@ -35,8 +35,12 @@ first `/start` — never via a separate command the user had to remember.
 ## Triage — first match wins, in this order
 
 1. **Quick task** — ALL true: ≤3 files touched, no new public interface, no
-   irreversible op, no deploy → inline ponytail run, zero artifacts, no
-   chain; the reply ends with `skipped:` and `residual risk:` lines.
+   irreversible op, no deploy → code only (ponytail; no tests, no checks) →
+   `user-check` (build or demo, one message, wait) → on OK, its re-gate
+   inline and `review-change` at the fast tier (tests for the change, suite
+   once, design check) → land.
+   No spec, no tickets; the reply ends with `skipped:` and `residual risk:`
+   lines.
 1b. **Bug report** — the ask reports broken behavior (crash, glitch, wrong
    result) rather than requesting new behavior → `diagnose-bug` owns the
    intake and evidence gathering; its output ticket re-enters the normal
@@ -54,7 +58,11 @@ first `/start` — never via a separate command the user had to remember.
      question answered or demoable, the last ticket carries
      `deploy: main | standalone | none`.
    Close call → quick; its answer decides whether the big one is worth it.
-4. **Feature** — default → full chain.
+4. **Feature** — default → full chain: intake → spec → tickets → implement
+   (TDD at the seams) → `user-check` on the whole epic (feedback rounds are
+   fast fixes) → on OK, re-gate into hardening tickets → implement →
+   `review-change` (suite once) → deliver → land. The user reviews code
+   last, in the PR.
 
 Frontier non-empty → the run plan lists in-flight tickets and offers resume
 (resume = jump straight to `implement`); the new ask is still classified
@@ -131,9 +139,10 @@ closing the current one first (commit, stop, or hand off).
 | spec/tickets | `goldfish-review` | the user chose lenses (none / up to 3 / all): stage A after intake and before the spec is drafted; stage B at the write-tickets confirm gate |
 | tickets | `write-tickets` | feature, prototype (ticket sets are parallel-first: minimal file overlap; device checks get one aggregate ticket, or none) |
 | research | `fan-out-research` | ticket/spec declares an Unknown |
-| implement | `implement` | ready frontier ticket |
-| review | `review-change` | implement done |
-| deliver | `deliver` | review passes |
+| implement | `implement` | ready frontier ticket; `user-check` fast fixes; re-gate hardening tickets |
+| user check | `user-check` | implement done (feature tickets) or quick-task code written — the user tries the whole change before any review; on OK it re-gates the run into hardening tickets |
+| review | `review-change` | hardening tickets closed after `user-check` OK (quick task: right after OK) |
+| deliver | `deliver` | review passes and `suite: green @ HEAD` is ledgered |
 | land | `open-pr` | run's delivery decision = pr (PROFILE `## Delivery` `changes:` or session answer); fired by `deliver` |
 | support | `android-env` | first Android command of a session fails, or before the first build/device action (bootstrap checklist) |
 | support | `web-env` | first web/Node command of a session fails, or before the first dev-server/build action (bootstrap checklist) |
@@ -153,7 +162,7 @@ are the chain contract and land separately — when one fires and the skill is
 absent, say so and stop that branch instead of improvising.
 
 Direct paths for knowledge skills the chain mandates mid-run (do not wait to
-be asked): Compose UI → `preview-compose`; flags/dev settings →
+be asked): "let me try it first" / hands-on check → `user-check`; Compose UI → `preview-compose`; flags/dev settings →
 `wire-dev-settings`; animations → `animation-vocabulary` + `apple-design`;
 principles → `emil-design-eng`, `ui-ux-pro-max`; diagrams → `archify`;
 architecture → `design-architecture`; screenshots/tests → `tdd`

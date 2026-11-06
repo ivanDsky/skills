@@ -12,14 +12,14 @@ requires: []
 ---
 
 > **TL;DR** Builds a one-file static review site (changes, screenshots, diagrams, test logs) from `.scratch/<slug>/` and serves it on localhost; fires on "publish the review" / "review site".
-> **Related**: skill://deliver (REPORT.md source), skill://review-change (REVIEW.md source), skill://archify (diagram artifacts), skill://preview-compose (screenshot captures)
+> **Related**: skill://deliver (REPORT.md source), skill://user-check (REVIEW.md check-doc source), skill://archify (diagram artifacts), skill://preview-compose (screenshot captures)
 
 # Review site
 
 Assemble the run's evidence into one small page the user can skim in a
 browser. Nothing new is produced here — the site only packages artifacts
-that `review-change` and `deliver` already wrote. Missing inputs are listed,
-never faked.
+that `user-check`, `review-change` and `deliver` already wrote. Missing
+inputs are listed, never faked.
 
 ## 1. Collect
 
@@ -28,13 +28,14 @@ Inputs live under `.scratch/<slug>/`:
 | Section | Source | Written by |
 |---|---|---|
 | Changes | `REPORT.md` | `deliver` |
-| Visual review | `REVIEW.md` | `review-change` |
-| Screenshots | `*.png/gif/jpg/webp` (JVM captures, review doc assets) | `preview-compose` suites, review gate |
+| Visual review | `REVIEW.md` (check doc) | `user-check` |
+| Screenshots | `*.png/gif/jpg/webp` (JVM captures, check doc assets) | `preview-compose` suites, `user-check` |
 | Diagrams | `*.html` archify artifacts | `archify` |
-| Test report | `build.log`, `*test*.log` | `deliver`, test runner |
+| Test report | `build.log`, `suite.log`, `*test*.log` | `user-check`/`deliver` builds, `review-change` suite run |
 
-No REPORT.md yet → run `deliver`'s report step first; an empty Changes
-section makes the page pointless.
+No REPORT.md yet and the run is at `user-check` → publish with the check doc
+alone (Changes lists as missing). Otherwise run `deliver`'s report step
+first; an empty Changes section makes a delivery page pointless.
 
 ## 2. Build
 

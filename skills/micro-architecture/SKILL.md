@@ -13,7 +13,7 @@ requires: [design-architecture for cross-app structure]
 ---
 
 > **TL;DR** Design the feature so that adding part N+1 is a new file and part N is untouched; every file owns one small thing; disjoint files = parallel agents with zero merge conflicts.
-> **Related**: skill://write-tickets (file-disjoint tickets are the output contract), skill://implement (parallel dispatch), skill://design-architecture (cross-app structure — this skill stops where that one starts), skill://senior-dev (the judgment defaults), skill://structure-checks (mechanical enforcement of one responsibility per file), skill://goldfish-review (patterns and file-structure lenses at stage B)
+> **Related**: skill://write-tickets (file-disjoint tickets are the output contract), skill://implement (parallel dispatch), skill://design-architecture (cross-app structure — this skill stops where that one starts), skill://senior-dev (the judgment defaults), skill://structure-checks (mechanical enforcement of one responsibility per file), skill://goldfish-review (patterns and file-structure lenses at stage B), skill://user-check (re-gate grades fast-fix code against this file split)
 
 # Micro-architecture — the shape of one feature
 

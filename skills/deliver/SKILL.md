@@ -14,8 +14,8 @@ interaction: afk
 requires: [firebase CLI when target=firebase, tailscale CLI when target=tailscale]
 ---
 
-> **TL;DR** Builds the change and deploys to PROFILE.md targets with output attached as evidence; fires when review passes and the run ships.
-> **Related**: skill://review-change (gate before delivery), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://implement (tickets to close), skill://open-pr (land step when delivery = pr), skill://android-env (worktrees share the build ledger)
+> **TL;DR** Builds the change and deploys to PROFILE.md targets with output attached as evidence; never reruns the suite; fires when review passes and the run ships.
+> **Related**: skill://review-change (gate before delivery; owns the one suite run), skill://user-check (approved build; reuses build identity), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://implement (tickets to close), skill://open-pr (land step when delivery = pr), skill://android-env (worktrees share the build ledger)
 
 # Deliver
 
@@ -23,10 +23,11 @@ Produce the evidence that closes the run: a green build, a deploy when a
 target is set, closed tickets, and an honest delivery summary. Review has
 passed; this stage adds no code.
 
-1. Verify green on the tree you ship. Run the PROFILE.md test runner once
-   more — a green run from earlier proves only the tree it ran on. A failure
-   stops delivery: report it and stop; fixes go back through
-   `implement` + `review-change`.
+1. Verify the gate on the tree you ship — never rerun the suite. The ledger
+   needs `user-check: ok` (or `skipped`) and `suite: green @ <sha>` from
+   `review-change`, with `<sha>` equal to HEAD. HEAD moved since → back to
+   `review-change` (it reruns the suite once); missing user check → back to
+   `user-check`. Fixes go back through `implement` + `review-change`.
 
 2. Pick the delivery mode, in precedence order (session override > project
    config > global defaults):
@@ -41,7 +42,9 @@ passed; this stage adds no code.
 
 3. Build first, always. On Android, run the `android-env` checklist once
    before the first build (PATH, `local.properties`, stale-incremental
-   triage) — deliver has no time to rediscover environment fixes.
+   triage) — deliver has no time to rediscover environment fixes. The
+   `user-check` build is reused when its sha equals HEAD and the variant
+   matches the target; `build_identity.py which` names it. Otherwise:
    - **Build identity before the build**, because parallel worktrees share
      one phone: `scripts/build_identity.py allocate`, per
      [Build identity](references/build-identity.md). It takes a unique
@@ -88,10 +91,10 @@ passed; this stage adds no code.
    (≈1 screen), so the user never reverse-engineers what happened:
    - **What changed & how**: per ticket, one or two sentences, behavior level.
    - **Screenshots**: embed the JVM capture images (`preview-compose`
-     suites / review doc assets) — reuse existing captures, never re-shoot.
-   - **Verify it yourself**: 2–4 numbered manual steps with exact entry
-     points (deep link, `adb shell am start` command from `wire-dev-settings`,
-     or tap path), each naming the expected result.
+     suites / check doc assets) — reuse existing captures, never re-shoot.
+   - **User check**: the approved build name, its verdict line from the
+     ledger (`user-check: ok <versionName> @ <sha>`), and the F-ids that
+     changed the spec. Never re-list verify steps the user already ran.
    - **Architecture changes** (new/boundary-crossing modules, dependency
      direction): replace prose with a diagram via `archify` (the matching
      diagram type), linked inline, plus ≤5 bullets of high-level decisions.
@@ -114,12 +117,13 @@ passed; this stage adds no code.
      Publishing follows the run's review-site decision (start's plan; PROFILE.md
      `Review site publish:`): yes → run `review-site` and give the LAN URL;
      no → file path only.
-   - **Evidence**: build log path, deploy URL or output, closed ticket ids,
-     and the visual review doc path (`.scratch/<slug>/review/REVIEW.md`)
-     when a review doc exists.
+   - **Evidence**: build log path, `suite.log` + its sha, deploy URL or
+     output, closed ticket ids, and the check doc path
+     (`.scratch/<slug>/review/REVIEW.md`) when one exists.
    - **Landed**: PR url + state, or the commit id on `main`.
-   - **Test on the deploy target**: 1-3 checks to do by hand, with the URL
-     or start command.
+   - **Test on the deploy target**: only when the target build differs from
+     the one the user checked (release variant, new commits) — 1-3 checks,
+     with the URL or start command. Same build → omit.
    - **Skipped**: what was deferred or left unbuilt.
    - **Residual risk**: what could break, one line.
 

@@ -12,7 +12,7 @@ interaction: afk
 ---
 
 > **TL;DR** Run the environment checklist before the first web command of any session — runtime, package manager, env files, ports — and never re-derive fixes mid-session; a dev-server failure that survives a clean reinstall is real, everything else is stale state.
-> **Related**: skill://android-env (the Android twin — same triage philosophy), skill://tdd (`references/web-testing.md` — the evidence ladder), skill://deliver (deploy targets), skill://android-cli (the Android routing analog)
+> **Related**: skill://android-env (the Android twin — same triage philosophy), skill://tdd (`references/web-testing.md` — the evidence ladder), skill://deliver (deploy targets), skill://user-check (LAN dev-server URL for the hands-on check), skill://android-cli (the Android routing analog)
 
 # Web environment — derive once per session, not once per command
 

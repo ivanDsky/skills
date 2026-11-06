@@ -11,9 +11,17 @@ review is tiered by effort, and delivery produces build/deploy evidence.
 
 ```
 /start ──> intake ──> spec (+ one checkpoint) ──> tickets ──> [research]
-       ──> implement ──> review ──> deliver (build | deploy)
+       ──> implement ──> user check ──> review ──> deliver (build | deploy)
+                         ↺ feedback → fast fix
+                         ok → re-gate → hardening tickets
 conditional: map-codebase (unmapped repo) · prototype mode · teardown gate
 ```
+
+The user tries the whole change before any review, test suite or PR body:
+feedback rounds are fast fixes that ignore code quality, and on OK the run
+goes back to design level (spec vs feedback vs code, senior-dev and
+architecture checks) and pays the debt down as hardening tickets. The full
+suite runs once, in review. The user reads code last, in the PR.
 
 Stages are conditional and effort-scaled: the effort level (fast / standard /
 thorough, set per project in `PROFILE.md`, overridable per session) maps to
@@ -25,7 +33,7 @@ round, an independent architect decides fix-forward vs teardown.
 
 **Flow (fresh, authored):**
 `start` · `run-intake` · `draft-spec` · `write-tickets` · `implement` ·
-`review-change` · `deliver` · `map-codebase` · `fan-out-research` ·
+`user-check` · `review-change` · `deliver` · `map-codebase` · `fan-out-research` ·
 `graduate-prototype` · `assess-teardown` · `init-profile` · `integrate-skill` ·
 `diagnose-bug` (bug reports: evidence ladder, user-time-last) ·
 `design-architecture` (SOLID payload, wired into spec/implement/review) ·

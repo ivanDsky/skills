@@ -5,7 +5,7 @@ SKILL.md stays the contract.
 
 | Ask | Branch | Why |
 |---|---|---|
-| "/start fix the typo in the settings footer" | Quick task | 1 file, no interface, no irreversible op, no deploy → inline ponytail run, no artifacts. |
+| "/start fix the typo in the settings footer" | Quick task | 1 file, no interface, no irreversible op, no deploy → code only, `user-check` (build + one step), on OK tests + fast-tier review; no spec, no tickets. |
 | "/start add a settings page with toggles for notifications" | Feature | New public interface (new page + persisted settings) → full chain. |
 | "/start could we render the timeline as one big canvas? sketch it" | Prototype (big) | The question is about real rendering performance on real data — a fake page cannot answer it → chain + prototype flag, fast-tier gates. |
 | "/start prototype the reminders screen, show me a few options" | Prototype (quick) | A look-and-feel question answerable on a page → `prototype`: 2-3 variants in one HTML file, judged on the phone; no intake/spec/tickets. |

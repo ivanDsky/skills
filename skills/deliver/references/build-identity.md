@@ -16,7 +16,7 @@ device codes seen, time.
 
 ## Allocate before every installable build
 
-Any build that may reach a device: `deliver`, `implement` device checks,
+Any build that may reach a device: `deliver`, `user-check` hand-off builds, `implement` device checks,
 `diagnose-bug` instrumented builds. Run it from the worktree root.
 `app-id`, `app-name` and `version` come from PROFILE.md `## Version`; the
 flags `--app-id`, `--app-name` and `--semver` override them.

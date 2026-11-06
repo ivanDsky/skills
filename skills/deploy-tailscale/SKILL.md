@@ -5,14 +5,15 @@ description: >-
   device once, persist the name and IP mapping in PROFILE.md — over Taildrop
   (`tailscale file cp`) or a tailnet-only `tailscale serve` link, verified by
   size and checksum evidence; `funnel` only on explicit ask. Use when deliver
-  dispatches on the PROFILE.md tailscale target, or the user asks to send or
-  share an APK or build to their device over Tailscale.
+  dispatches on the PROFILE.md tailscale target, when user-check hands the
+  build to the user's phone, or the user asks to send or share an APK or
+  build to their device over Tailscale.
 interaction: afk
 requires: [tailscale]
 ---
 
 > **TL;DR** Ships the built APK to the registered tailnet device via Taildrop or serve, checksum-verified; fires on the PROFILE.md tailscale target.
-> **Related**: skill://deliver (dispatches targets), skill://deploy-firebase (sibling target)
+> **Related**: skill://deliver (dispatches targets), skill://user-check (pre-review hand-off build), skill://deploy-firebase (sibling target)
 
 # Deploy Tailscale
 
@@ -32,7 +33,7 @@ internet unless the user explicitly asks for funnel.
    errors → stop and hand the pointer: https://tailscale.com/download. Never
    improvise another transfer path or swap in another target.
 2. The artifact exists and is fresh from the green build. Missing → stop and
-   return to deliver; do not rebuild.
+   return to deliver (or user-check); do not rebuild.
 
 ## 2. Resolve the device (persist once)
 

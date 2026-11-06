@@ -5,7 +5,7 @@ run plan; `implement` enforces the subagent knobs at dispatch.
 
 | effort | subagent thinking | reviewer model | research fan-out | intake gear | blind review (`goldfish-review`) | spec checkpoint | ticket confirm | review tier |
 |---|---|---|---|---|---|---|---|---|
-| fast | low | same tier as implementer | skip (only when a ticket is blocked) | focused | none (not asked) | post-and-proceed | none | lint + screenshots |
+| fast | low | same tier as implementer | skip (only when a ticket is blocked) | focused | none (not asked) | post-and-proceed | none | lint + screenshots + design-only reviewer |
 | standard | medium | stronger tier | 1 per unknown, cap 3 | focused | asked; recommend up to 3 (stage B only if architecture-heavy) | blocking | none | + code review |
 | thorough | high | most capable | full parallel fan-out | deep if high stakes, else focused | asked; recommend all, stages A and B | blocking | blocking (edges + sizing) | + dual-verdict |
 
@@ -27,9 +27,14 @@ Rules:
   override explicitly.
 - A prototype flag caps gates at the fast tier at any effort (subagent
   thinking still follows the table).
-- The quality-vs-speed knob is the effort level.
-- Review-site publish: `thorough` defaults to yes (the review doc is the
-  primary human review surface); fast/standard follow the run's decision
+- The quality-vs-speed knob is the effort level — except inside the
+  `user-check` feedback loop, where fast fixes ignore code quality at every
+  effort and the re-gate pays it down. `user-check` itself runs at every
+  effort; only its check doc scales.
+- Full suite: once per run, in `review-change` after the fix loop converges,
+  at every effort. Ticket cycles and fix rounds run touched-module tests.
+- Review-site publish: `thorough` defaults to yes (the `user-check` check
+  doc is the primary hands-on surface); fast/standard follow the run's decision
   (PROFILE `Review site publish:` or the session answer in start's plan).
   An explicit user no always wins.
 - `implement` reads the same table at dispatch time; `start` does not

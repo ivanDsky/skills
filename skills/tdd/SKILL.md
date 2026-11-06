@@ -19,14 +19,14 @@ For each behavior, in order:
 1. **Red.** Write one minimal test for one behavior — "and" in the name means two tests. Clear name, real code, literal expected value, assertion on real behavior (never on a stub).
 2. **Watch it fail.** Run that test. It must fail because the feature is missing — not error on a typo, import, or fixture. Fix and re-run until the failure is the expected one.
 3. **Green.** Write the smallest code that passes. No extra options, no early generalizing.
-4. **Watch it pass.** Run the project's full suite, not just your file. Report and fix every failure it shows, including ones you did not cause, before calling the change done.
+4. **Watch it pass.** Run the touched module's (or file's) tests, not only the new one. Report and fix every failure they show, including ones you did not cause. The full suite runs once per run, in `review-change` after its fix loop converges — never per cycle.
 5. **Refactor.** Remove duplication, improve names, extract helpers. Tests stay green; add no behavior.
 6. Repeat from 1 for the next behavior.
 
 ## Decision rules
 
 - Test passes on the first run → it tests existing behavior. Rewrite it for the new one.
-- Code got written before its test anyway → delete it and implement fresh from the test. Keep no "reference" copy.
+- Code got written before its test anyway → delete it and implement fresh from the test. Keep no "reference" copy. The code-first cases under Exceptions are the only way around this.
 - Need to explore first → explore freely, throw the exploration away, start the cycle on what you learned.
 - Bug report → the first failing test reproduces it; the fix follows the cycle. A fix without its test is not done.
 - Test is hard to write → the design is hard to use. Simplify the interface; do not force the test.
@@ -35,10 +35,12 @@ For each behavior, in order:
 
 Only discarded throwaway prototypes, generated code, and pure config changes skip the cycle. If a throwaway turns into something kept, restart it test-first.
 
+Code-first by design: a quick task's code and `user-check` fast fixes are written before their tests so the user can try them sooner. Their tests come after the user's OK (hardening tickets, or `review-change`), and each one is watched failing by temporarily reverting the change it guards. A test that still passes with the change reverted proves nothing; rewrite it.
+
 ## Done when
 
 - Every new behavior has a test that was watched failing for the right reason.
-- Minimal implementation, full suite green, output clean.
+- Minimal implementation, touched-module tests green, output clean.
 - Each test would fail under a realistic mutation: wrong branch, missing side effect, missing input validation.
 
 Read [testing-rules](references/testing-rules.md) when writing or changing tests, choosing fakes over mocks, or checking what a test really catches.
