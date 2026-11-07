@@ -15,7 +15,7 @@ requires: [firebase CLI when target=firebase, tailscale CLI when target=tailscal
 ---
 
 > **TL;DR** Builds the change and deploys to PROFILE.md targets with output attached as evidence; never reruns the suite; fires when review passes and the run ships.
-> **Related**: skill://review-change (gate before delivery; owns the one suite run), skill://user-check (approved build; reuses build identity), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://implement (tickets to close), skill://open-pr (land step when delivery = pr), skill://android-env (worktrees share the build ledger)
+> **Related**: skill://review-change (gate before delivery; owns the one suite run), skill://user-check (approved build; reuses build identity), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://implement (tickets to close), skill://open-pr (land step when delivery = pr), skill://android-env (worktrees share the build ledger), skill://ship-to-trunk (trunk runs: deliver ships the flip)
 
 # Deliver
 
@@ -28,6 +28,10 @@ passed; this stage adds no code.
    `review-change`, with `<sha>` equal to HEAD. HEAD moved since → back to
    `review-change` (it reruns the suite once); missing user check → back to
    `user-check`. Fixes go back through `implement` + `review-change`.
+   `trunk` run: deliver fires once, after the flip PR merged (ledger `flag:
+   <Key> flipped (PR #<n>)`), and ships `main` at that merge sha; the gate
+   is the flip PR's (`user-check: ok`, thorough review green over the
+   feature's merged range). Slices never fire deliver (`ship-to-trunk`).
 
 2. Pick the delivery mode, in precedence order (session override > project
    config > global defaults):
@@ -52,7 +56,9 @@ passed; this stage adds no code.
      what is on the device; versionName is `<semver>-<branch-slug>.<n>`
      (`1.3.0-reminders.2`, `n` = that branch's install count, `main.<n>` on
      main), so no two installs ever share a name. Gradle wiring missing → stop and ask for it to
-     land on main first; never add it in a worktree.
+     land on main first; never add it in a worktree. Trunk worktree
+     branches `<slug>/<NN>-<ticket>` keep that shape: the last segment is
+     the build-identity slug.
    - Run the project build with its `$GRADLE_ARGS` and capture the log to
      `.scratch/<slug>/build.log`. A failed build stops everything — a
      deploy never starts on a red build.
@@ -64,6 +70,9 @@ passed; this stage adds no code.
      the user asks for bumps it (minor by default, once for all its
      features), on main, then builds with `allocate --release` for the
      plain `1.4.0` name; see [Build identity](references/build-identity.md).
+     `trunk`: the flip PR is that release and carries the bump; slices
+     never bump, so a release workflow on push to main publishes nothing
+     for them.
 
 4. Deploy per target, in listed order. Mobile distribution has dedicated
    playbooks — dispatch, don't improvise: `firebase` target on an Android
@@ -108,7 +117,10 @@ passed; this stage adds no code.
      merged/open state go in the summary.
    - `main` → the commit(s) go to the default branch per the consent ledger
      (`commit+push to the project repo`); report the commit id.
-   Neither bumps semver; that waits for a release (step 3).
+   - `trunk` → already landed: slices merged via `implement`/`open-pr`, the
+     flip PR merged with user approval; report the flip PR url + merge sha
+     and the `slice:` ledger lines.
+   `pr`/`main` never bump semver; that waits for a release (step 3).
    Missing delivery answer on a standalone run → ask once, never infer `main`.
 
 8. Post the delivery summary — the run's last message, always this shape:

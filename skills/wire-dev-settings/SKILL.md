@@ -6,33 +6,44 @@ description: >-
   restart), local debug overrides, hidden entry points, and a playground of
   prototype screens (Showkase catalog, deep links). Use when adding feature
   flags, dev toggles, an environment switcher, prototype screen links, or an
-  in-app playground.
+  in-app playground, or a release flag that keeps trunk work merge dark.
 interaction: afk
 requires: []
 ---
 
-> **TL;DR** Wires a debug-only developer settings screen with reactive Firebase Remote Config flags, overrides, and a playground; fires when adding feature flags.
-> **Related**: skill://preview-compose (prototype screens)
+> **TL;DR** Wires a debug-only developer settings screen with release flags (unfinished trunk work dark), reactive Firebase Remote Config ops flags, overrides, and a playground; fires when adding feature flags.
+> **Related**: skill://preview-compose (prototype screens), skill://ship-to-trunk (when release flags are added, flipped, removed)
 
 # Wire dev settings & flags
 
 Flags change behavior without shipping; dev settings surface them (and the
-prototype playground) on the device, out of the release path. Two mechanisms,
+prototype playground) on the device, out of the release path. Three kinds,
 chosen per flag - never one blob:
 
-1. **Remote flag (Firebase Remote Config)** - for anything that must change
-   AFTER install: kill switches, gradual rollouts, per-user targeting. Update
-   lands live from the console; the running app reacts.
-2. **Local debug toggle (DataStore, debug builds only)** - for development
+1. **Release flag** - keeps unfinished trunk work dark so slices merge to
+   `main` (`ship-to-trunk`). Typed key; the release value is a compile-time
+   constant `false` (per-build-type source set or a `BuildConfig` field) so R8
+   strips the gated code; debug reads a local override, with a forced-on
+   toggle in the dev settings screen. NEVER remote-enabled before its flip PR.
+   Added by ticket 01, flipped by the flip PR, removed by the cleanup ticket.
+2. **Ops/rollout flag (Firebase Remote Config)** - for a FINISHED feature
+   that must change AFTER install: kill switches, gradual rollouts, per-user
+   targeting. Update lands live from the console; the running app reacts.
+3. **Local debug toggle (DataStore, debug builds only)** - for development
    convenience: force a state, skip onboarding, fake data. Never exists in
    release code.
+
+Default (user ruling 2026-11-07): release flags only, even when Firebase is
+already in the project; add Remote Config only when a finished feature needs
+a rollout or kill switch.
 
 ## Decision rules
 
 1. Flag keys are typed (enum/sealed) with defaults in code; the remote/local
    value is a lookup into them, not a free string. MUST.
-2. Precedence in debug: local override > remote config > code default. In
-   release: remote > default. MUST.
+2. Precedence for ops flags, in debug: local override > remote config > code
+   default; in release: remote > default. Release flags: release = the
+   constant; debug = local override > code default. MUST.
 3. The remote listener is single and shared: one repository owning Firebase
    Remote Config's `addOnConfigUpdateListener`, calling `activate()` on update,
    exposing a `StateFlow<Flags>` the UI collects - screens re-compose live,

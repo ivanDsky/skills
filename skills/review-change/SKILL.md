@@ -13,7 +13,7 @@ requires: []
 ---
 
 > **TL;DR** Runs the effort-tiered review gate — scripted checks, screenshots, code review, dual-verdict subagent — owns the fix loop and the one full-suite run; fires after user-check OK and hardening, before deliver.
-> **Related**: skill://user-check (upstream: approved behavior + hardening tickets; behavior-changing fixes go back to it), skill://implement (upstream tickets), skill://deliver (downstream ship), skill://assess-teardown (teardown escalation), skill://scope-creep-detector (drift catch), skill://structure-checks (fast-tier command), skill://goldfish-review (earlier blind lenses; shares its triage rules), skill://micro-architecture (its ui-components payload grades the component-API axis)
+> **Related**: skill://user-check (upstream: approved behavior + hardening tickets; behavior-changing fixes go back to it), skill://implement (upstream tickets), skill://deliver (downstream ship), skill://assess-teardown (teardown escalation), skill://scope-creep-detector (drift catch), skill://structure-checks (fast-tier command), skill://goldfish-review (earlier blind lenses; shares its triage rules), skill://micro-architecture (its ui-components payload grades the component-API axis), skill://ship-to-trunk (trunk runs: fast tier per slice, thorough before the flip)
 
 # Review change
 
@@ -22,6 +22,20 @@ the one full-suite run, the ledger, and the teardown escalation. The user has
 already tried the change (`user-check`), so behavior is approved; this gate
 checks it is tested and cleanly designed. Findings and verdicts live in a
 file; chat carries only the user-facing report.
+
+**`trunk` runs** (`ship-to-trunk`) split the gate in two; `pr`/`main` runs
+keep the steps below unchanged:
+
+- **Per slice, before merge**: fast tier only (scripted checks, secret scan,
+  design-only reviewer over the slice diff `git diff origin/main...HEAD`).
+  Dark or non-behavioral slices skip step 1's `user-check` precondition;
+  fix rounds run the touched module's tests and leave the full suite to the
+  PR check.
+- **Once, before the flip PR**: thorough tier over the feature's merged range
+  (`git diff <base>..origin/main` scoped to its slice PRs), with the
+  `user-check: ok` precondition, and step 8's one full-suite run on
+  `origin/main`. Extra check, ❌ Important when missing: tests cover both
+  flag states (on and off), and the release default stays off until the flip.
 
 1. Pin the inputs: the diff vs base (`git diff <base>...HEAD` — verify the base
    resolves and the diff is non-empty before dispatching anything), the spec

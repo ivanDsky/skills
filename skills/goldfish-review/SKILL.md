@@ -14,7 +14,7 @@ requires: []
 ---
 
 > **TL;DR** Fresh subagents that only know the hypothesis and hard constraints each attack one angle of a feature before code exists; the parent merges their findings into numbered assumptions and shows the user where lenses disagree. No fresh subagent, no review — never a same-context stand-in.
-> **Related**: skill://run-intake (asks how many lenses), skill://draft-spec (stage A consumer), skill://write-tickets (stage B at its confirm gate), skill://review-change (stage C — the diff — and shared triage rules), skill://fan-out-research (same one-file-per-subagent contract), skill://grilling (irreversible forks), skill://micro-architecture, skill://design-architecture, skill://structure-checks
+> **Related**: skill://run-intake (asks how many lenses), skill://draft-spec (stage A consumer), skill://write-tickets (stage B at its confirm gate), skill://review-change (stage C — the diff — and shared triage rules), skill://fan-out-research (same one-file-per-subagent contract), skill://grilling (irreversible forks), skill://micro-architecture, skill://design-architecture, skill://structure-checks, skill://ship-to-trunk (file-structure lens: `trunk` tickets merge alone and dark)
 
 # Goldfish review
 

@@ -15,7 +15,7 @@ requires: [design-architecture for cross-app structure]
 ---
 
 > **TL;DR** Design the feature so that adding part N+1 is a new file and part N is untouched; every file owns one small thing; disjoint files = parallel agents with zero merge conflicts.
-> **Related**: skill://write-tickets (file-disjoint tickets are the output contract), skill://implement (parallel dispatch), skill://design-architecture (cross-app structure — this skill stops where that one starts), skill://senior-dev (the judgment defaults), skill://structure-checks (mechanical enforcement of one responsibility per file; S6 component API), skill://goldfish-review (patterns and file-structure lenses at stage B), skill://user-check (re-gate grades fast-fix code against this file split), skill://review-change (grades the component-API axis against references/ui-components.md), skill://preview-compose (components preview from parameters alone)
+> **Related**: skill://write-tickets (file-disjoint tickets are the output contract), skill://implement (parallel dispatch), skill://design-architecture (cross-app structure — this skill stops where that one starts), skill://senior-dev (the judgment defaults), skill://structure-checks (mechanical enforcement of one responsibility per file; S6 component API), skill://goldfish-review (patterns and file-structure lenses at stage B), skill://user-check (re-gate grades fast-fix code against this file split), skill://review-change (grades the component-API axis against references/ui-components.md), skill://preview-compose (components preview from parameters alone), skill://ship-to-trunk (`trunk` runs: additive slices, branch by abstraction, gate at the entry)
 
 # Micro-architecture — the shape of one feature
 
@@ -41,7 +41,9 @@ map:
 - **Shared surface is designed BEFORE fan-out**: the one file everyone
   would touch (a screen, a registry, DI wiring) is either built first in a
   tracer-bullet ticket, or split so each agent owns a distinct slice
-  (extension point + their own file).
+  (extension point + their own file). In `trunk` runs that shared edit
+  (registry, DI module, nav graph, `when` entry) is its own tiny ticket,
+  merged first, inert or gated.
 
 ## 2. Open/closed at file granularity
 
@@ -107,7 +109,18 @@ agents; (c) testable without scaffolding for unrelated concerns.
    before fanning out the rest.
 5. Hand the remaining variants to parallel agents; each adds files only.
 6. Registration/wiring lands in one closing ticket (or was a one-line slot
-   from step 2).
+   from step 2). `trunk` runs: the slot lands first instead, inert or
+   behind the release flag.
+
+### Trunk runs — every ticket merges dark
+
+- **Additive first**: new class/file/module beside the old one; callers
+  switch in a later slice behind the flag.
+- **Replacements**: branch by abstraction (seam over the old
+  implementation → new implementation behind it → flag selects → old one
+  deleted in the cleanup ticket); expand/contract for data and APIs.
+- **Gate at the entry** (route, menu item, DI choice), never scattered
+  checks. Rules: `ship-to-trunk`/references/slicing.md.
 
 ## 5. UI components — decompose by layer, not by Clean Architecture
 

@@ -1,11 +1,12 @@
 {
   "skill": "write-tickets",
   "positive": [
-    "The spec passed review \u2014 break it into tickets in the tracker",
+    "The spec passed review — break it into tickets in the tracker",
     "Turn this plan into dependency-ordered tickets, each with a checkable done condition and evidence",
     "We're building the export feature next; write the tickets so each one fits a single fresh subagent run",
     "Split the approved spec into tracer-bullet tickets, walking skeleton first",
-    "Cut tickets with a file map per ticket and a re-runnable evidence command; ask me how many blind design lenses to run"
+    "Cut tickets with a file map per ticket and a re-runnable evidence command; ask me how many blind design lenses to run",
+    "Split this spec into tickets that can each merge to main behind a flag"
   ],
   "negative": [
     {

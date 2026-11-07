@@ -95,7 +95,9 @@ feature.*
   needs "and"; several public types in one file (rules-architecture 20,
   `structure-checks` exceptions list); a shared `when`/registry that tickets
   must edit in parallel; file scopes that overlap between parallel tickets;
-  files that will exceed the size tripwire.
+  files that will exceed the size tripwire. In `trunk` runs: can each
+  ticket merge alone and dark — `flag:` named, live changes identified
+  (`live:`), shared-file edits first-merged (`ship-to-trunk`/references/slicing.md)?
 - Knowledge skill: `micro-architecture`, `structure-checks`
   (`references/rules-structure.md`). Evidence: the file maps and the files
   that exist today.

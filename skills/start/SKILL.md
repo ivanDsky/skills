@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Triages an ask — quick task, prototype, feature, unmapped codebase — prints the run plan, and fires the matching chain; use on /start.
-> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://user-check (hands-on check before review), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes)
+> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://user-check (hands-on check before review), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes), skill://ship-to-trunk (delivery = trunk: one small PR per ticket, merge dark, flip PR releases)
 
 # Start
 
@@ -62,7 +62,10 @@ first `/start` — never via a separate command the user had to remember.
    (TDD at the seams) → `user-check` on the whole epic (feedback rounds are
    fast fixes) → on OK, re-gate into hardening tickets → implement →
    `review-change` (suite once) → deliver → land. The user reviews code
-   last, in the PR.
+   last, in the PR. Delivery `trunk` differs: slices merge dark (fast review
+   each) as tickets close, `user-check` runs on a debug build from `main`
+   with the release flag forced on, and the flip PR waits for user-check OK
+   plus thorough review (`ship-to-trunk`).
 
 Frontier non-empty → the run plan lists in-flight tickets and offers resume
 (resume = jump straight to `implement`); the new ask is still classified
@@ -98,10 +101,19 @@ Exceptions (each bundles into the plan, never a separate round trip):
 - Delivery. PROFILE.md `## Delivery` `changes:` decides — `pr` → the plan
   lists `open-pr` after deliver and the run branch is cut before the first
   commit (several tickets or > ~20 files → a `gh stack`, one layer per
-  ticket); `main` → commits land on the default branch; `ask` (the default)
-  → one question ("PR, or straight to main?") answered for this run only.
-  Asked before `implement` starts, because the branch must exist before the
-  first commit.
+  ticket); `trunk` → the plan lists `ship-to-trunk`: no run branch, one
+  worktree + slice PR per ticket off fresh `origin/main`, ticket 01 adds the
+  release flag, the flip PR is the release (stacks only by its exception);
+  `main` → commits land on the default branch; `ask` (the default) → one
+  question ("trunk (small PRs into main), one PR, or straight to main?"),
+  recommending trunk when the run has several tickets, answered for this
+  run only. Asked before `implement` starts, because the branch must exist
+  before the first commit. Trunk needs a required PR check (a workflow on
+  `pull_request` that main's protection requires): missing → the plan's
+  first ticket is the check setup and slices wait for it plus the user's
+  branch protection (`ship-to-trunk`); local gates never substitute. No
+  `merge dark slices on green` consent line → say once that every PR waits
+  for the user.
 - UI tier. The ask builds or changes a reusable composable → infer the tier
   per module (`micro-architecture`/references/ui-components.md, "Tier
   first"): design-system, shared or published module → `library`;
@@ -148,10 +160,11 @@ closing the current one first (commit, stop, or hand off).
 | tickets | `write-tickets` | feature, prototype (ticket sets are parallel-first: minimal file overlap; device checks get one aggregate ticket, or none) |
 | research | `fan-out-research` | ticket/spec declares an Unknown |
 | implement | `implement` | ready frontier ticket; `user-check` fast fixes; re-gate hardening tickets |
-| user check | `user-check` | implement done (feature tickets) or quick-task code written — the user tries the whole change before any review; on OK it re-gates the run into hardening tickets |
+| user check | `user-check` | implement done (feature tickets) or quick-task code written — the user tries the whole change before any review (pr/main) or after the last slice merged dark, from `main` with the flag forced on and before the flip PR (trunk); on OK it re-gates the run into hardening tickets |
 | review | `review-change` | hardening tickets closed after `user-check` OK (quick task: right after OK) |
 | deliver | `deliver` | review passes and `suite: green @ HEAD` is ledgered |
-| land | `open-pr` | run's delivery decision = pr (PROFILE `## Delivery` `changes:` or session answer); fired by `deliver` |
+| land | `open-pr` | run's delivery decision = pr (PROFILE `## Delivery` `changes:` or session answer), fired by `deliver`; = trunk → once per slice PR and for the flip PR (`ship-to-trunk`) |
+| land | `ship-to-trunk` | delivery = trunk: slice size, fresh-base worktree per ticket, merge authority, live changes, flag lifecycle through the flip PR |
 | support | `android-env` | first Android command of a session fails, or before the first build/device action (bootstrap checklist) |
 | support | `web-env` | first web/Node command of a session fails, or before the first dev-server/build action (bootstrap checklist) |
 | support | `adopt-tool` | a new tool/capability is being adopted into the workflow |
@@ -186,7 +199,8 @@ method (framework-judged pixels, A/B on hardware, tokens with floors) →
 `senior-ux`; blind concept/design lenses → `goldfish-review`; mechanical
 file-structure and layering checks (Konsist) → `structure-checks`; PR
 description and landing → `open-pr`; stacked PRs per ticket (`gh stack`,
-fixes into the owning layer) → `open-pr`/references/stacks.md;
+fixes into the owning layer) → `open-pr`/references/stacks.md; trunk based
+/ small PRs / merge dark / keep main releasable → `ship-to-trunk`;
 throwaway one-page prototypes → `prototype`.
 
 Close calls (quick vs feature vs prototype): read

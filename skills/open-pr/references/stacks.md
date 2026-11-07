@@ -1,5 +1,7 @@
 # Stacked PRs (`gh stack`)
 
+> `trunk` runs: stacks are the exception (see `ship-to-trunk`) — only while a parent PR waits on the user; each layer merges as soon as it is green, never atomically.
+
 Read when a `pr` run spans more than ~20 changed files or several tickets,
 when a fix must land in a lower layer, or when the user asks for stacked PRs.
 A stack is a linear chain of branches, one PR per layer, each PR based on the

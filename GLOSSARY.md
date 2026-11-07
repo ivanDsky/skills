@@ -41,6 +41,11 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | State holder (plain) | `@Stable class XxxState` + `rememberXxxState()` owning a component's UI state and UI logic; lives in composition, unit-tested headless. Not a ViewModel. | controller, presenter |
 | Slot | A `@Composable` lambda parameter for a caller-varying region (`label`, `leadingIcon`); nullable with a `null` default when optional. | render prop, content param |
 | `XxxDefaults` | The public object holding a component's default values and `colors()` factories, so wrappers can reproduce them. | style class, config |
+| Trunk | `main`, kept releasable after every merge; in `changes: trunk` runs every ticket merges into it as its own PR within hours (`ship-to-trunk`). | integration branch, develop |
+| Slice PR | One ticket's small PR (one concern, ≤ ~400 changed lines) branched from fresh `origin/main` and merged on a green check; never bumps the release version. | stack layer, partial PR |
+| Release flag | Typed flag that keeps unfinished behavior dark: off in release builds, forced-on toggle in debug; added by the feature's first ticket, flipped by the flip PR, deleted by the cleanup ticket. Owned by `wire-dev-settings`. | feature toggle (ambiguous), kill switch (= ops flag) |
+| Flip PR | The PR that turns a release flag's release default on and bumps the version; the release of a trunk feature, merged only with user approval after user-check OK and thorough review. | launch PR, release branch |
+| Live change | A change no flag can hide (schema migration, persisted format, manifest/permission, dependency bump); ships backward compatible in its own PR with user approval. | breaking change |
 | Goldfish | Fresh-context subagent that has not seen the conversation; gets a brief file (hypothesis + hard constraints, or spec + file maps) and reviews one angle. | reviewer (reviewer = diff grader) |
 | Lens | One goldfish angle with its own objective and evidence (reuse, persona flows, data & migration, failure & resources, best version, verifiability; architecture, patterns, file structure). User picks the count: none / up to 3 / all. | persona, checklist |
 | Tension | Two lenses pulling opposite ways, kept visible with the parent's pick and why; never averaged. | conflict |

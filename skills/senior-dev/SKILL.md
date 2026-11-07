@@ -10,7 +10,7 @@ interaction: afk
 ---
 
 > **TL;DR** Ask first: why is this required, who decided, will the next change be easier, what am I not doing. Then: verify before trusting, change as little as correctness allows, never boot a device when a faster tool answers the question.
-> **Related**: skill://senior-ux (the UX version of these questions), skill://micro-architecture (how to split the work; its ui-components payload for reusable UI), skill://implement (stage mechanics), skill://user-check (re-gate asks these over the fast-fix diff), skill://review-change (the gate that grades this)
+> **Related**: skill://senior-ux (the UX version of these questions), skill://micro-architecture (how to split the work; its ui-components payload for reusable UI), skill://implement (stage mechanics), skill://user-check (re-gate asks these over the fast-fix diff), skill://review-change (the gate that grades this), skill://ship-to-trunk (merge-dark rules)
 
 # The questions (most important part — ask them, out loud, before acting)
 
@@ -35,6 +35,9 @@ interaction: afk
    no domain layer, use case or ViewModel for its own state. Name the tier
    (library = design-system/shared/published module, app = feature-local);
    it sets whether the rules are MUST or SHOULD.
+7. **Can this merge to main today without changing what a release build
+   does?** If not: put it behind a release flag, or it is a live change —
+   backward compatible and user-approved (`ship-to-trunk`).
 
 # The defaults (few and non-negotiable)
 
