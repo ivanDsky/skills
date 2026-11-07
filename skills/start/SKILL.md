@@ -104,11 +104,13 @@ Exceptions (each bundles into the plan, never a separate round trip):
   ticket); `trunk` → the plan lists `ship-to-trunk`: no run branch, one
   worktree + slice PR per ticket off fresh `origin/main`, ticket 01 adds the
   release flag, the flip PR is the release (stacks only by its exception);
-  `main` → commits land on the default branch; `ask` (the default) → one
-  question ("trunk (small PRs into main), one PR, or straight to main?"),
-  recommending trunk when the run has several tickets, answered for this
-  run only. Asked before `implement` starts, because the branch must exist
-  before the first commit. Trunk needs a required PR check (a workflow on
+  `main` → commits land on the default branch; `ask` (typed by the user at
+  setup, or an old PROFILE without the answer) → one question ("trunk
+  (small PRs into main), one PR, or straight to main?") answered for this
+  run only. The style is the user's per-project decision from
+  `init-profile` question 9; start never switches it on its own. Asked
+  before `implement` starts, because the branch must exist before the first
+  commit. Trunk needs a required PR check (a workflow on
   `pull_request` that main's protection requires): missing → the plan's
   first ticket is the check setup and slices wait for it plus the user's
   branch protection (`ship-to-trunk`); local gates never substitute. No

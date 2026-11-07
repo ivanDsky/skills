@@ -41,6 +41,7 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | State holder (plain) | `@Stable class XxxState` + `rememberXxxState()` owning a component's UI state and UI logic; lives in composition, unit-tested headless. Not a ViewModel. | controller, presenter |
 | Slot | A `@Composable` lambda parameter for a caller-varying region (`label`, `leadingIcon`); nullable with a `null` default when optional. | render prop, content param |
 | `XxxDefaults` | The public object holding a component's default values and `colors()` factories, so wrappers can reproduce them. | style class, config |
+| Development style | Per-project choice in `init-profile` question 9, recorded as PROFILE `changes:`: `default` (= `pr`: one PR or `gh stack` per run) or `trunk` (`ship-to-trunk`). Only the user switches it. | workflow mode, branching strategy |
 | Trunk | `main`, kept releasable after every merge; in `changes: trunk` runs every ticket merges into it as its own PR within hours (`ship-to-trunk`). | integration branch, develop |
 | Slice PR | One ticket's small PR (one concern, ≤ ~400 changed lines) branched from fresh `origin/main` and merged on a green check; never bumps the release version. | stack layer, partial PR |
 | Release flag | Typed flag that keeps unfinished behavior dark: off in release builds, forced-on toggle in debug; added by the feature's first ticket, flipped by the flip PR, deleted by the cleanup ticket. Owned by `wire-dev-settings`. | feature toggle (ambiguous), kill switch (= ops flag) |

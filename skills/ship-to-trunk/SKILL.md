@@ -25,6 +25,11 @@ hours, PRs are small enough to read in minutes, and **merge is separated from
 release** by flags. Main is always releasable; whether it releases is a
 decision, not a side effect.
 
+Opt-in per project: the user picks `default` or `trunk` in `init-profile`
+(development style), recorded as PROFILE `changes:`. This skill applies
+only to `changes: trunk` runs (or a run where the user answered trunk to
+start's `ask`); never switch a project to trunk on your own.
+
 ## Invariants (MUST)
 
 1. **Main is releasable after every merge**: it builds, the PR check passes,

@@ -4,7 +4,8 @@
     "/setup \u2014 configure this repo so /start has its project profile",
     "First run in this project: there's no PROFILE.md yet, set up the defaults",
     "I just installed the skillset in this repo \u2014 run the setup ritual (profile, tracker seed, entry line)",
-    "Set this project up for the flow: thorough effort, firebase deploy target, and check whether my global AGENTS.md exists"
+    "Set this project up for the flow: thorough effort, firebase deploy target, and check whether my global AGENTS.md exists",
+    "Set up PROFILE.md for this repo \u2014 we want the trunk-based development style, not one PR per run"
   ],
   "negative": [
     {
