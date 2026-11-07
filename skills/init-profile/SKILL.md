@@ -76,6 +76,20 @@ layer do not already answer.
    dependencies)? Recommend yes; it adds a test dependency. `yes` records the
    command under Testing style after `structure-checks` setup runs; `no`
    records `structure: none`.
+9. Development style: `default | trunk`.
+   - `default`: each run lands as one PR from its run branch, or a
+     `gh stack` for big runs, merged after user-check and review. Records
+     `changes: pr`.
+   - `trunk`: every ticket is its own small PR into main, unfinished
+     behavior merged dark behind a release flag, and the feature released
+     by a flip PR (`ship-to-trunk`). Records `changes: trunk` plus the
+     consent line `merge dark slices on green`; `trunk-ask` records trunk
+     without it, so every PR waits for the user.
+   - Recommend `trunk` when the repo already has a PR check that main
+     requires; otherwise recommend `default`, and say that trunk's first
+     run will start with the check-setup ticket.
+   - `main` (straight to the default branch) and `ask` (start asks every
+     run) stay available as typed answers.
 
 Send the batch and stop. Never a second batch.
 
@@ -116,11 +130,11 @@ Send the batch and stop. Never a second batch.
 - publish: ask               # ask (default: start asks each run) | always | off
 
 ## Delivery
-- changes: ask              # ask (default: start asks each run) | trunk (small PRs into main, ship-to-trunk) | pr | main
+- changes: pr               # from question 9 (development style): pr (= default) | trunk (small PRs into main, ship-to-trunk) | main | ask (start asks each run)
 
 ## Consent ledger            # what the agent may do without asking
 - pre-approved: merge to main after green review; lint fixes; dependency bumps; secret-free fixture redaction; commit+push to the project repo
-# - pre-approved: merge dark slices on green   # trunk projects: agent merges dark/non-behavioral slice PRs on green check + clean fast review; flip PRs and live changes still ask
+# - pre-approved: merge dark slices on green   # written on a `trunk` answer (not `trunk-ask`): agent merges dark/non-behavioral slice PRs on green check + clean fast review; flip PRs and live changes still ask
 - always ask: public pushes; publish/delete; runs longer than ~30 min of dispatch; anything touching user data
 
 ## Environment facts         # stated once, never re-derived
@@ -150,12 +164,12 @@ also lands the one-time Gradle wiring from
 `-PagentVersionCode`/`-PagentVersionName`), so worktrees never edit build
 files; `## Review site` is seeded
 (`ask`) so each run can opt into the localhost review dashboard; `##
-Delivery` is seeded (`ask`) so each run chooses trunk (small PRs into main,
-`ship-to-trunk`), one PR, or straight to main before the first commit; `## Consent
+Delivery` is written from question 9 (`default` → `pr`, `trunk` → `trunk`;
+`ask` only when the user typed it), so start never has to ask a decided
+project PR-vs-trunk; `## Consent
 ledger` is seeded with the defaults above (merge-to-main after green review
 is the standard stop point — the agent never infers consent from silence;
-a trunk project adds the commented `merge dark slices on green` line only
-when the user opts in)
+the `merge dark slices on green` line is written only on a `trunk` answer)
 and `## Environment facts` is seeded empty so one-time facts (device
 topology, LAN exposure, naming) are captured instead of re-derived every
 session; missing
@@ -187,7 +201,9 @@ Then, in order:
 Existing PROFILE.md → show the proposed edits as a diff and apply only
 accepted lines; never overwrite care-axes silently. Missing pieces elsewhere —
 global layer, entry line, `.scratch/` — get one offer each. Nothing to change
-→ say so in one line.
+→ say so in one line. A PROFILE with `changes: ask` or no `## Delivery`
+section gets question 9 offered once (development style); the answer is
+written back as a diff line like any other edit.
 
 ## Decision rules
 
