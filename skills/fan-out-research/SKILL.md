@@ -31,8 +31,11 @@ unknown; findings live on disk — chat replies are status, never findings.
 ## 2. Dispatch
 
 1. One subagent per unknown, all dispatched at once, no shared state — a
-   failed unknown costs one file, not the batch. Subagent thinking follows
-   the effort level (low / medium / high for fast / standard / thorough).
+   failed unknown costs one file, not the batch. Agent per
+   `start`/references/effort-mapping.md's reviewer/research table: `scout`
+   for code/repo questions, `task` for web/primary-source questions.
+   Subagent thinking (spawn `effort`) follows the effort level (low /
+   medium / high for fast / standard / thorough).
 2. The brief is minimal — follow the template in
    [finding-format.md](references/finding-format.md): the question verbatim
    with its ticket backlink, the ABSOLUTE findings path

@@ -10,6 +10,8 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 |---|---|---|
 | Stage | One named step of the /start flow (intake, orientation, spec, tickets, research, implement, user check, review, deliver). | phase |
 | Effort level | fast / standard / thorough; quality-vs-speed setting. Per task by default (`thorough` = architecture/planning/big-view only); run default comes from PROFILE.md, per-session override wins for the default. | dial (retired, T005), mode |
+| Tier | Per-ticket `tier: mechanical / standard / deep`: how much judgment the work needs; picks implementer agent, model and spawn effort (`start`/references/effort-mapping.md, *Tier → agent and model*). Independent of effort level. | model tier, difficulty, size |
+| Caveman voice | Terse register for chat, briefs, agent reports, ledgers and findings files: answer first, no ceremony, every negation and code/path/number verbatim (`start` § Voice, upstream `caveman` skill). Questions, warnings and persisted human docs stay plain prose. | brief mode, compressed style |
 | Gear | Intake batch size: focused (5–8) or deep (20–30). | mode |
 | Care-axes | Ranked quality priorities in PROFILE.md; drive review order + rules-payload selection. | preferences |
 | Run plan | start's output: stages × fires/skips × HITL/AFK × gates for one run. | agenda |

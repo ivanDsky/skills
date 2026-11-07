@@ -41,8 +41,15 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
    demoable or verifiable outcome. Over budget → split vertically (a thinner
    slice), never by layer. One mechanical change with a wide blast radius →
    expand–contract batches: add the new form beside the old, migrate call
-   sites in batches, delete the old form last. `trunk` runs add a hard cap:
+   sites in batches (each batch ticket `tier: mechanical`), delete the old
+   form last. `trunk` runs add a hard cap:
    ≤ ~400 changed lines, one concern — split before publishing, never after.
+   Mixed ticket — mostly mechanical with a judgment core → split into one
+   `mechanical` ticket (wiring, registration, resources, call-site batches)
+   and one `standard`/`deep` ticket for the core, ordered by the real
+   dependency. Still vertical, never by layer, each with its own checkable
+   DoD; a mechanical DoD may be "compiles + touched-module tests green".
+   Never split below that: a piece with no DoD of its own stays merged.
 4. Every ticket carries ALL mandatory fields:
    - **What to build** — end-to-end behavior from the user's perspective, not
      a layer list. No file paths or line numbers; they go stale. Exception: a
@@ -71,6 +78,12 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
      `live: <what> — <why backward compatible>` for a change no flag can hide
      (migration, persisted format, manifest/permission, dependency bump),
      which becomes its own user-approved ticket.
+   - **tier** — `tier: mechanical | standard | deep`: how much judgment the
+     work needs; it picks agent, model and spawn effort
+     (`start`/references/effort-mapping.md, *Tier → agent and model*).
+     `mechanical` only when *What to build* plus the brief leave zero design
+     decisions (exact names, signatures and target files known). In doubt →
+     `standard`.
 5. Parallel-safe, and make it the DEFAULT: tickets are designed to run in
    parallel with minimal overlap — serialization is the exception that needs
    a reason, not the norm. Mark a ticket parallel-safe only when its file
@@ -100,12 +113,13 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
    publish there natively and use its real blocking links.
 7. Prototype sets: DoD = the question answered or the thing demoable; the
    last ticket carries the `deploy:` flag (`main | standalone | none`).
-8. Confirm by effort: each ticket carries an `effort:` frontmatter field
-   (`fast | standard | thorough`) per the per-task rules in `start`'s effort
-   mapping — thorough only for architecture/planning/big-view tickets. List
-   every downgrade below the run default with a reason; if a different level
-   would likely accelerate development, ask the user. fast/standard — publish
-   and report the numbered list (title, effort, blocked-by, what it delivers).
+8. Confirm by effort: each ticket carries `effort:` (`fast | standard |
+   thorough`) and `tier:` frontmatter fields — effort per the per-task rules
+   in `start`'s effort mapping (thorough only for architecture/planning/
+   big-view tickets), tier per item 4. List every downgrade below the run
+   default with a reason; if a different level would likely accelerate
+   development, ask the user. fast/standard — publish and report the
+   numbered list (title, effort / tier, blocked-by, what it delivers).
    Thorough — show the list and wait: confirm granularity, blocking edges, and
    split/merge before publishing.
 9. Design review (stage B, `goldfish-review`): before publishing, when the

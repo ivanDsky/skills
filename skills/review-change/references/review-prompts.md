@@ -5,6 +5,8 @@ dual-verdict subagent.
 
 ## Shared brief shape (minimal, never session history)
 
+- Voice line: "report in caveman voice; hunks, spec quotes and file:line
+  refs verbatim" (`start` § Voice).
 - Diff command + commit list (`git diff <base>...HEAD`,
   `git log <base>..HEAD --oneline`).
 - Spec excerpt with its numbered assumptions.
@@ -35,7 +37,7 @@ Findings graded Critical / Important / Minor, each citing the owning hunk.
 End with the coverage rows (axis — what was checked — count); an axis with no
 evidence is `cannot-verify`, not ✅.
 
-## Dual-verdict subagent (thorough) — fresh context, most capable model
+## Dual-verdict subagent (thorough) — fresh context, model per `start`/references/effort-mapping.md reviewer table
 
 Same brief. Two separate verdicts in one report:
 

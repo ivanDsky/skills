@@ -3,11 +3,15 @@
 ## Brief file: `.scratch/<slug>/briefs/NN-brief.md`
 
 One brief per ticket; exact values (numbers, strings, signatures, test cases)
-appear only here, verbatim.
+appear only here, verbatim. A `mechanical` brief carries every value the
+worker needs: names, signatures, target files, verbatim strings. The
+mechanical worker (Haiku) makes no decisions; a missing value means BLOCKED,
+never a guess.
 
 ```markdown
 # Brief: NN — <ticket title>
 
+Tier: <mechanical | standard | deep> → <agent>[, model] (`start`/references/effort-mapping.md)
 Ticket: <path — source of requirements>
 Spec: <backlink path — binding authority; its assumptions count as decisions>
 File scope: <paths this ticket may touch; disjoint for parallel-safe tickets>
@@ -39,9 +43,12 @@ skill wall; the worker reads only what a line names. Selection:
 Event triggers (creating a file, editing a shared variant site, introducing
 a pattern) live in `implement` §3 and are not repeated here.
 
-The dispatch prompt carries three things only: one line on where this ticket
+The dispatch prompt carries four things only: one line on where this ticket
 fits, the brief path introduced as "read this first — it is your
-requirements", and the report path + contract below.
+requirements", the report path + contract below, and the voice line
+"report and reply in caveman voice; values, paths, errors verbatim"
+(`start` § Voice). The controller writes briefs and ledger lines in the
+same voice.
 
 ## Report file: `.scratch/<slug>/reports/NN-report.md`
 
@@ -68,5 +75,6 @@ addendum file and resumes the same worker.
 - Ticket close: `NN: done (commits <base7>..<head7>, evidence <path>)`
 - `trunk` runs add `ship-to-trunk`'s ledger lines (`slice:`, `flag:`,
   `live:`)
-- Deviation: `Ruling: <what> — <why> — <cost if wrong>`
+- Deviation: `Ruling: <what> — <why> — <cost if wrong>` (tier escalation:
+  `Ruling: NN escalated <from>→<to> — <why> — <cost if wrong>`)
 - Deferred finding: `NN deferred: <concern> (for review-change)`

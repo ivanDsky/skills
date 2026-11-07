@@ -14,7 +14,8 @@ Constraints: answer from code, docs, or primary sources only; follow every
 claim to the source that owns it. If the answer is user preference, reply
 BLOCKED — a preference has no primary source.
 Write findings to: <abs>/.scratch/<slug>/research/<NN>-<topic>.md
-Use the finding template below exactly. Cite only sources you actually
+Use the finding template below exactly, in caveman voice: fragments fine,
+every not/never/only, path, number and quote verbatim. Cite only sources you actually
 opened — an absolute file path with line refs, or a URL. A claim without a
 citation does not belong in the file.
 Reply ≤5 lines, status only: DONE + the findings path, or BLOCKED + reason.
