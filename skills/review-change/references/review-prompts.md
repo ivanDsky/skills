@@ -5,8 +5,8 @@ dual-verdict subagent.
 
 ## Shared brief shape (minimal, never session history)
 
-- Voice line: "report in caveman voice; hunks, spec quotes and file:line
-  refs verbatim" (`start` § Voice).
+- The voice line from `start` § Voice (short-note thinking, caveman
+  report), plus: hunks, spec quotes and file:line refs verbatim.
 - Diff command + commit list (`git diff <base>...HEAD`,
   `git log <base>..HEAD --oneline`).
 - Spec excerpt with its numbered assumptions.

@@ -45,10 +45,9 @@ a pattern) live in `implement` §3 and are not repeated here.
 
 The dispatch prompt carries four things only: one line on where this ticket
 fits, the brief path introduced as "read this first — it is your
-requirements", the report path + contract below, and the voice line
-"report and reply in caveman voice; values, paths, errors verbatim"
-(`start` § Voice). The controller writes briefs and ledger lines in the
-same voice.
+requirements", the report path + contract below, and the voice line from
+`start` § Voice (short-note thinking, caveman report). The controller
+writes briefs and ledger lines in the same voice.
 
 ## Report file: `.scratch/<slug>/reports/NN-report.md`
 
