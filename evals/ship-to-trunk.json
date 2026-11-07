@@ -1,0 +1,28 @@
+{
+  "skill": "ship-to-trunk",
+  "positive": [
+    "Our PRs are huge and keep conflicting \u2014 switch the agents to trunk based development with small PRs",
+    "Can this half-done feature merge to main today without shipping it?",
+    "Each ticket should be its own short-lived branch merged into main within hours",
+    "Keep main always releasable while 20 agent PRs land per feature",
+    "Which of these changes can't hide behind a flag and must ship live?"
+  ],
+  "negative": [
+    {
+      "prompt": "Add a Remote Config kill switch and a debug toggle screen",
+      "owner": "wire-dev-settings"
+    },
+    {
+      "prompt": "Write the PR description with before/after screenshots for this branch",
+      "owner": "open-pr"
+    },
+    {
+      "prompt": "Break this approved spec into tickets",
+      "owner": "write-tickets"
+    },
+    {
+      "prompt": "Build the release APK and send it to my phone",
+      "owner": "deliver"
+    }
+  ]
+}

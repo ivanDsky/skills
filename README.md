@@ -51,7 +51,8 @@ round, an independent architect decides fix-forward vs teardown.
 `adopt-tool` (one-pass capability adoption checklist: verify → route → wire → mandate → navigate → eval → demo → ship from repo) ·
 `goldfish-review` (fresh-context lenses on a concept or design before code: reuse, persona flows, data, failure, best version, verifiability; architecture, patterns, file structure — you choose none / up to 3 / all) ·
 `structure-checks` (Konsist suite for Kotlin: one public type per file, layer dependencies, shrink-only allowlist, opt-in component-API check — the mechanical backstop for file structure) ·
-`open-pr` (PR as a 2-minute read: summary, before/after screenshot-test captures, major changes, top-3 review checks with line links, optional diagram; big runs as a per-ticket `gh stack` with fixes landing in the owning layer; start asks PR or straight to main) ·
+`open-pr` (PR as a 2-minute read: summary, before/after screenshot-test captures, major changes, top-3 review checks with line links, optional diagram; big runs as a per-ticket `gh stack` with fixes landing in the owning layer; start asks trunk, one PR, or straight to main) ·
+`ship-to-trunk` (trunk-based delivery: every ticket a small slice PR merged into main within hours behind a release flag, live changes backward compatible and user-approved, the flip PR as the release, a cleanup ticket removes the flag) ·
 `prototype` (quick throwaway prototype: one task → one self-contained HTML page, 2-3 switchable variants judged with senior-ux on your phone, one subagent per task + an index page; small picks ported straight into the app, big ones through graduate-prototype)
 
 **Adapted (owned text, credited sources):**

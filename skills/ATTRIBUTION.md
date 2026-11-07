@@ -17,3 +17,5 @@ Adapt-tier, Apache-2.0: `goldfish-review` and the triage/convergence sections of
 Adapt-tier, Apache-2.0: `micro-architecture/references/ui-components.md` paraphrases the androidx Compose Component API Guidelines and Compose API Guidelines (androidx/androidx, `compose/docs/`, commit not pinned; requirement levels kept), and adapts ideas from chrisbanes/skills `compose-component-design` and `compose-state-and-effects` (commit not pinned). No upstream text is copied. Cited only, not adapted: Android developer docs (state hoisting, state holders), Bumble Tech "Refining Compose API for design systems" and Stream "Composition patterns in Jetpack Compose".
 
 MIT: `design-architecture/references/rules-architecture.md` uses the five-part rule template and bias list of ciembor/agent-rules-books, Copyright (c) 2026 Maciej Ciemborowicz.
+
+Ours: `ship-to-trunk` is authored for ivanDsky/skills. Cited only, not adapted: Ian Johnson "Trunk-Based Development with Short-Lived Branches" (dev.to/tacoda) and Igor Grieder "Agentic Git Workflow" (dev.to/igor_grieder). No text is copied.
