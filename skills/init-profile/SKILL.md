@@ -87,6 +87,12 @@ answer.
      by a flip PR (`ship-to-trunk`). Records `changes: trunk` plus the
      consent line `merge dark slices on green`; `trunk-ask` records trunk
      without it, so every PR waits for the user.
+   - `trunk-local` (typed answer, never recommended): trunk with no PR CI —
+     CI runs on main only, after each merge. Records `changes: trunk`,
+     `pr-check: none` with the local suite command in its comment, and the
+     consent line `merge dark slices on green` worded "on green LOCAL suite
+     (rebased onto fresh origin/main) + clean fast review; a red main stops
+     merges". Offer it only when the user says PRs run no CI by design.
    - Recommend `trunk` when the repo already has a PR check that main
      requires; otherwise recommend `default`, and say that trunk's first
      run will start with the check-setup ticket.
@@ -133,10 +139,11 @@ Send the batch and stop. Never a second batch.
 
 ## Delivery
 - changes: pr               # from question 9 (development style): pr (= default) | trunk (small PRs into main, ship-to-trunk) | main | ask (start asks each run)
+# - pr-check: none   # written only on a `trunk-local` answer: merge gate is local: `<suite>` green on the PR branch rebased onto fresh origin/main; CI on main only. Absent (default) → trunk waits on main's required PR check
 
 ## Consent ledger            # what the agent may do without asking
 - pre-approved: merge to main after green review; lint fixes; dependency bumps; secret-free fixture redaction; commit+push to the project repo
-# - pre-approved: merge dark slices on green   # written on a `trunk` answer (not `trunk-ask`): agent merges dark/non-behavioral slice PRs on green check + clean fast review; flip PRs and live changes still ask
+# - pre-approved: merge dark slices on green   # written on a `trunk` answer (not `trunk-ask`): agent merges dark/non-behavioral slice PRs on green check + clean fast review; flip PRs and live changes still ask. `trunk-local`: "on green LOCAL suite + clean fast review"
 - always ask: public pushes; publish/delete; runs longer than ~30 min of dispatch; anything touching user data
 
 ## Environment facts         # stated once, never re-derived
@@ -171,7 +178,8 @@ Delivery` is written from question 9 (`default` → `pr`, `trunk` → `trunk`;
 project PR-vs-trunk; `## Consent
 ledger` is seeded with the defaults above (merge-to-main after green review
 is the standard stop point — the agent never infers consent from silence;
-the `merge dark slices on green` line is written only on a `trunk` answer)
+the `merge dark slices on green` line is written only on a `trunk` or
+`trunk-local` answer; `pr-check: none` only on `trunk-local`)
 and `## Environment facts` is seeded empty so one-time facts (device
 topology, LAN exposure, naming) are captured instead of re-derived every
 session; missing

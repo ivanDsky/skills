@@ -1,10 +1,10 @@
 # Merge loop — one ticket, one PR
 
 Read when dispatching a ticket in a `trunk` run, when a slice PR conflicts,
-or when the repo has no PR check. Flags verified against `gh` 2.96.0
-`--help` (2026-11-07): `pr merge --squash --delete-branch --auto
---match-head-commit`, `pr checks --watch --fail-fast --required`,
-`pr update-branch --rebase`.
+when the repo has no PR check, or when PROFILE says `pr-check: none`.
+Flags verified against `gh` 2.96.0 `--help` (2026-11-07): `pr merge
+--squash --delete-branch --auto --match-head-commit`, `pr checks --watch
+--fail-fast --required`, `pr update-branch --rebase`.
 
 ## Per ticket
 
@@ -15,7 +15,7 @@ git worktree add -b <slug>/<NN>-<ticket> ../<repo>-wt/<NN> origin/main
 git fetch origin && git rebase origin/main      # re-run the gates if main moved
 git push -u origin HEAD
 gh pr create --base main --title "<conventional title>" --body-file .scratch/<slug>/pr-<NN>.md
-gh pr checks <n> --watch --fail-fast --required
+gh pr checks <n> --watch --fail-fast --required   # skip when PROFILE says pr-check: none (see below)
 gh pr merge <n> --squash --delete-branch --match-head-commit <sha>   # authority: SKILL.md table
 git worktree remove ../<repo>-wt/<NN>
 ```
@@ -31,10 +31,34 @@ git worktree remove ../<repo>-wt/<NN>
   The title is the changelog line.
 - Body: `open-pr` slice template (≤ ~120 words).
 
+## `pr-check: none` — local merge gate
+
+Opt-in, read from PROFILE `## Delivery`: the repo runs no PR CI and main's
+post-merge workflow is the safety net. `pr-check:` absent or naming a
+workflow → the loop above, unchanged. With `none`, never call
+`gh pr checks` (it errors "no checks reported"); the step becomes:
+
+```bash
+git fetch origin && git rebase origin/main
+<suite>                                          # PROFILE's pr-check comment command, e.g. ./gradlew assembleDebug test
+git fetch origin                                 # origin/main moved since the rebase → rebase + suite again
+git push --force-with-lease origin HEAD
+gh pr merge <n> --squash --delete-branch --match-head-commit <sha>   # <sha> = the head the suite ran on
+```
+
+- `<suite>`: the command in the `pr-check: none` comment; none written →
+  assemble debug + unit `runner:` + `structure:` (when set).
+- A rebase that pulled in new commits always re-runs the suite; merge only
+  on a green suite over exactly `<sha>` rebased onto the current
+  `origin/main`.
+- `review-change` fast tier stays required. The PR summary reports
+  `local suite green on <sha>; no PR CI by design` (`open-pr`).
+
 ## Main moved while the PR waits
 
 `gh pr update-branch <n> --rebase`, wait for the check again, then merge
-with the new head sha. Rebasing is the slice author's job, never the next
+with the new head sha (`pr-check: none`: rebase locally and re-run the
+suite, as above). Rebasing is the slice author's job, never the next
 ticket's.
 
 ## Conflicts
@@ -49,7 +73,9 @@ ticket's.
 
 ## No required PR check — trunk precondition
 
-Trunk mode does not start without CI as the judge. Detect: no workflow in
+Trunk mode does not start without CI as the judge, unless PROFILE says
+`pr-check: none` (the local gate above is then the judge; skip this
+section). Detect: no workflow in
 `.github/workflows/` with an `on: pull_request` trigger, or `gh api
 repos/{owner}/{repo}/branches/main/protection` shows no required status
 check. Then:

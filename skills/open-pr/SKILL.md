@@ -94,7 +94,10 @@ commit screenshots to the run branch.
 
 Only when the PROFILE consent ledger pre-approves merge-to-main AND review is
 green AND, if checks exist, `gh pr checks` is green (no CI → say "no CI";
-it is not a pass). Then `gh pr merge --squash --delete-branch`; the squash
+it is not a pass). Exception: PROFILE `pr-check: none` → the local suite on
+the branch rebased onto fresh `origin/main` is the pass, and the summary
+says so ("local suite green on <sha>; no PR CI by design"). Then
+`gh pr merge --squash --delete-branch`; the squash
 body is the Summary. Stack: mark layers ready (`gh stack submit --open`),
 then `gh stack merge --yes --merge` (atomic) and `gh stack sync --prune`.
 Pending/red checks → leave open and report. After merge:
@@ -107,7 +110,8 @@ Pending/red checks → leave open and report. After merge:
 `ship-to-trunk` (`ship-to-trunk`/references/merge-loop.md). What changes here:
 
 1. **Slice PR** (dark or non-behavioral): no user-check precondition; it
-   needs the PR check green + `review-change` fast tier clean. Body to
+   needs the PR check green (`pr-check: none`: local suite green on the
+   rebased head) + `review-change` fast tier clean. Body to
    `.scratch/<slug>/pr-<NN>.md`, **≤ ~120 words**, no screenshots or diagram:
    ```markdown
    <what-this-slice-does>

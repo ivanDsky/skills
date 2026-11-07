@@ -32,8 +32,9 @@ start's `ask`); never switch a project to trunk on your own.
 
 ## Invariants (MUST)
 
-1. **Main is releasable after every merge**: it builds, the PR check passes,
-   and no unfinished user-visible behavior is reachable in a release build.
+1. **Main is releasable after every merge**: it builds, the PR check passes
+   (`pr-check: none`: the local suite on the rebased head), and no
+   unfinished user-visible behavior is reachable in a release build.
 2. **One ticket = one PR**, one concern, ≤ ~400 changed lines (generated
    files, goldens and lockfiles excluded). Bigger → split the ticket before
    coding, never after.
@@ -61,7 +62,7 @@ flowchart LR
   A[ticket ready] --> B[worktree from origin/main]
   B --> C[TDD + local gates]
   C --> D[rebase, PR]
-  D --> E{PR check + fast review}
+  D --> E{PR check or local suite + fast review}
   E -->|green, dark| F[agent merges]
   E -->|flip or live change| G[user approves, merge]
   F --> H[remove worktree, next ticket]
@@ -75,13 +76,14 @@ Commands, conflicts and the no-CI fallback:
 
 | PR kind | Who merges |
 |---|---|
-| Slice, dark or non-behavioral, check green + fast review clean | agent, when the consent ledger has `merge dark slices on green` |
+| Slice, dark or non-behavioral, check green (`pr-check: none`: local suite green on the rebased branch) + fast review clean | agent, when the consent ledger has `merge dark slices on green` |
 | Bug fix (live by nature) | agent on green, same as PROFILE's fix rules; patch bump per project policy |
 | Unflaggable live change (invariant 7) | user approves the PR |
 | Flip PR (release) | user approves, after user-check OK and thorough review |
 
 No consent line → every PR waits for the user; say so once in the run plan,
-never infer consent from silence.
+never infer consent from silence. With `pr-check: none`, main's post-merge
+workflow is the safety net: a red main stops all merges (Red main below).
 
 ## Feature lifecycle
 
@@ -121,8 +123,10 @@ never infer consent from silence.
   a workflow on `pull_request` that main's branch protection requires.
   Missing → the run's first ticket is the check setup (one ordinary PR,
   user-approved); slices start only after it merged and the user turned on
-  protection. Local gates never stand in for it
-  ([references/merge-loop.md](references/merge-loop.md)).
+  protection. Local gates never stand in for it, unless PROFILE says
+  `pr-check: none` — an opt-in project ruling: CI runs on main only and the
+  merge gate is the local suite on the branch rebased onto fresh
+  `origin/main` ([references/merge-loop.md](references/merge-loop.md)).
 
 ## Ledger
 
