@@ -21,7 +21,7 @@ fast fix can need judgment: never derive one from the other.
 | tier | work | implementer dispatch | spawn `effort` |
 |---|---|---|---|
 | `mechanical` | fully specified edits: renames, DI/nav registration, strings/resources, gradle deps, fixtures, moving code with no behavior change, call-site migration batches | `agent: sonic`, no `model` | `lo` |
-| `standard` | ordinary feature/fix work with local decisions | `agent: task`, no `model` (Sonnet medium) | from ticket `effort:` (fast → `lo`, standard → `med`, thorough → `hi`) |
+| `standard` | ordinary feature/fix work with local decisions | `agent: task`, no `model` (Sonnet medium) | from ticket `effort:` (fast → `lo`, standard → omit, thorough → `hi`) |
 | `deep` | new module/boundary, concurrency/state-machine logic, cross-cutting refactor design, anything where a wrong call is expensive to unwind | `agent: task`, `model: anthropic/claude-opus-5-5:high` | `hi` |
 
 Defaults when write-tickets did not set `tier:`: `effort: fast` → `standard`;
@@ -33,16 +33,18 @@ Reviewer and research dispatch:
 
 | use | dispatch |
 |---|---|
-| fast review tier, design-only reviewer | `agent: reviewer`, `model: anthropic/claude-haiku-5-5:low` when every reviewed ticket was `mechanical`, else no `model` (Sonnet high) |
+| fast review tier, design-only reviewer | `agent: reviewer`, spawn `effort: lo`; `model: anthropic/claude-haiku-5-5:low` when every reviewed ticket was `mechanical`, else no `model` (Sonnet) |
 | standard review tier, code reviewer | `agent: reviewer`, no `model` (Sonnet high, a stronger tier than the Sonnet-medium implementer) |
 | thorough dual-verdict / fresh visual reviewer | `agent: reviewer`, `model: anthropic/claude-opus-5-5:high` |
 | fan-out-research, code/repo questions | `agent: scout` (Haiku), no `model` |
-| fan-out-research, web/primary-source questions | `agent: task`, no `model`; spawn `effort` per the effort table (low/med/hi) |
+| fan-out-research, web/primary-source questions | `agent: task`, no `model`; spawn `effort` fast → `lo`, standard → omit, thorough → `hi` |
 | brief context gathering (neighbor interfaces, file-scope facts) | `agent: scout` |
 
 - Never pass `model` to `scout` or `sonic`: the harness pins them to Haiku,
   and a per-call `model` on a pinned agent is a preflight conflict error.
-- Spawn `effort` is `lo | med | hi` only; never request higher.
+- Spawn `effort` is `lo`, omitted or `hi`. Never pass `med`: measured
+  2026-11-07, `med` ran at high thinking, same as `hi`; omitting it keeps
+  the agent's default (medium for `task`). Never request above `hi`.
 - Escalation (cheap first, pay only on failure): a `mechanical` worker that
   returns BLOCKED or NEEDS_CONTEXT twice, or fails its DoD after one fix
   round, is re-dispatched one tier up (`standard`, then `deep`). Ledger:
