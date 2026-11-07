@@ -29,13 +29,16 @@ worker/scout/reviewer/challenger reports, the ledger, findings files
 (`review.md`, `regate.md`, research findings). Not installed → the floor:
 answer first; no greeting, hedging, recap or closer; fragments fine, but
 every not/never/no/only stays; code, paths, numbers and errors verbatim;
-≤20 words per sentence. A dispatch prompt asks the worker for the same
-voice in its report, because subagents do not inherit the session's mode.
+≤20 words per sentence. Every dispatch prompt carries one voice line —
+"think in short notes: fact, decision, next step; report and reply in
+caveman voice; values, paths, errors verbatim" — because subagents do not
+inherit the session's mode.
 Plain full sentences instead: questions to the user (ask tool), security or
 irreversible-action warnings, and anything persisted for humans — code,
 comments, commits, PR bodies, specs, tickets, check docs, `REPORT.md`.
-Thinking cost is the spawn `effort` (references/effort-mapping.md), not
-the voice.
+The thinking half of the line is best effort: the model may not follow it,
+and the displayed thinking may be a harness summary. The real thinking
+budget is the spawn `effort` (references/effort-mapping.md).
 
 ## Read first
 
