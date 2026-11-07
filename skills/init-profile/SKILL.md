@@ -52,9 +52,11 @@ session override > project config > global layer > skill body > skill defaults.
 
 ## 3. Ask ONE batch (intake style)
 
-Numbered questions, arrow line with the recommendation, "yes" accepts, one-word
-replies. Lookups are never questions: ask only what the repo and the global
-layer do not already answer.
+One ask-tool call carries the whole batch (`run-intake` step 4: one entry per
+question, recommendation first and marked; plain-text numbered questions
+with arrow lines only when the harness has no ask tool). Lookups are never
+questions: ask only what the repo and the global layer do not already
+answer.
 
 1. Care-axes rank — 3, most important first, each optionally with up to 2
    hard-rule sub-bullets. The rank order is the review priority order,
