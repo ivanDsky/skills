@@ -64,7 +64,7 @@ recollection.
 3. Report contract: the worker writes a report file and replies in at most
    15 lines — status DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT,
    commits, one-line test summary, `device:` and `structure:` lines,
-   concerns.
+   concerns. Briefs, reports and ledger in caveman voice (`start` § Voice).
 4. Workers never spawn subagents — no helpers, no reviewers. Review belongs
    to review-change.
 5. Knobs, enforced at dispatch: dispatch per the ticket's `tier:` using

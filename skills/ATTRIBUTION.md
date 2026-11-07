@@ -19,3 +19,5 @@ Adapt-tier, Apache-2.0: `micro-architecture/references/ui-components.md` paraphr
 MIT: `design-architecture/references/rules-architecture.md` uses the five-part rule template and bias list of ciembor/agent-rules-books, Copyright (c) 2026 Maciej Ciemborowicz.
 
 Ours: `ship-to-trunk` is authored for ivanDsky/skills. Cited only, not adapted: Ian Johnson "Trunk-Based Development with Short-Lived Branches" (dev.to/tacoda) and Igor Grieder "Agentic Git Workflow" (dev.to/igor_grieder). No text is copied.
+
+Apache-2.0, external dependency (not vendored): `start` § Voice points at the `caveman` skill from JuliusBrussee/caveman (Copyright 2026 Julius Brussee), installed separately; its five-rule fallback floor paraphrases that skill's rules. No upstream text is copied.

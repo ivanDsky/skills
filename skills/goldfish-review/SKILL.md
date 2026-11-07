@@ -60,7 +60,8 @@ line.
    shared state. The dispatch prompt is: the lens name, the brief path, the
    lens file section to follow, the ABSOLUTE findings path
    `.scratch/<slug>/goldfish/<stage>-<lens>.md`, and the reply contract
-   (≤5 lines, status only). Subagent thinking follows effort (low / medium /
+   (≤5 lines, status only; file and reply in caveman voice, `start` §
+   Voice). Subagent thinking follows effort (low / medium /
    high for fast / standard / thorough).
 3. **Findings format** (in the file): per finding — id (`<lens>-1`), the claim
    in one sentence, the evidence (repo path, doc URL, quoted brief line — a

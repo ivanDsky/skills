@@ -21,7 +21,8 @@ Run the review gate over the whole change, then own what follows: fix rounds,
 the one full-suite run, the ledger, and the teardown escalation. The user has
 already tried the change (`user-check`), so behavior is approved; this gate
 checks it is tested and cleanly designed. Findings and verdicts live in a
-file; chat carries only the user-facing report.
+file; chat carries only the user-facing report. Both, plus reviewer reports
+and `regate.md`, use caveman voice (`start` § Voice).
 
 **`trunk` runs** (`ship-to-trunk`) split the gate in two; `pr`/`main` runs
 keep the steps below unchanged:

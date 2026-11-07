@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Triages an ask — quick task, prototype, feature, unmapped codebase — prints the run plan, and fires the matching chain; use on /start.
-> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://user-check (hands-on check before review), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes), skill://ship-to-trunk (delivery = trunk: one small PR per ticket, merge dark, flip PR releases)
+> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://user-check (hands-on check before review), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes), skill://ship-to-trunk (delivery = trunk: one small PR per ticket, merge dark, flip PR releases), skill://caveman (external: terse voice for chat, briefs, reports, ledgers)
 
 # Start
 
@@ -19,6 +19,23 @@ Classify the ask, read project state, print the run plan, fire the chain.
 One run = one classification; the chain skills own everything after the plan.
 Setup is part of this run: an unset project gets configured here, inside the
 first `/start` — never via a separate command the user had to remember.
+
+## Voice (every chain skill)
+
+Text that only the user reads in chat, or only agents read, uses the
+caveman voice (`skill://caveman`, installed from JuliusBrussee/caveman):
+chat replies and status lines, controller briefs and dispatch prompts,
+worker/scout/reviewer/challenger reports, the ledger, findings files
+(`review.md`, `regate.md`, research findings). Not installed → the floor:
+answer first; no greeting, hedging, recap or closer; fragments fine, but
+every not/never/no/only stays; code, paths, numbers and errors verbatim;
+≤20 words per sentence. A dispatch prompt asks the worker for the same
+voice in its report, because subagents do not inherit the session's mode.
+Plain full sentences instead: questions to the user (ask tool), security or
+irreversible-action warnings, and anything persisted for humans — code,
+comments, commits, PR bodies, specs, tickets, check docs, `REPORT.md`.
+Thinking cost is the spawn `effort` (references/effort-mapping.md), not
+the voice.
 
 ## Read first
 
