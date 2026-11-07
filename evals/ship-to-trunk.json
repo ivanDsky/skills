@@ -5,7 +5,8 @@
     "Can this half-done feature merge to main today without shipping it?",
     "Each ticket should be its own short-lived branch merged into main within hours",
     "Keep main always releasable while 20 agent PRs land per feature",
-    "Which of these changes can't hide behind a flag and must ship live?"
+    "Which of these changes can't hide behind a flag and must ship live?",
+    "We dropped PR CI \u2014 main runs the tests after merge. How do agents merge slice PRs with no checks?"
   ],
   "negative": [
     {

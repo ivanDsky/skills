@@ -135,7 +135,9 @@ Exceptions (each bundles into the plan, never a separate round trip):
   commit. Trunk needs a required PR check (a workflow on
   `pull_request` that main's protection requires): missing → the plan's
   first ticket is the check setup and slices wait for it plus the user's
-  branch protection (`ship-to-trunk`); local gates never substitute. No
+  branch protection (`ship-to-trunk`); local gates substitute only when
+  PROFILE says `pr-check: none` (CI on main only; merge gate = local suite
+  on the rebased branch). No
   `merge dark slices on green` consent line → say once that every PR waits
   for the user.
 - UI tier. The ask builds or changes a reusable composable → infer the tier
