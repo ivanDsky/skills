@@ -15,6 +15,7 @@ Neighbor interfaces: <signatures/contracts from earlier tickets this brief canno
 Unknowns: <one link per resolved findings file, or "none">
 DoD: <the checkable condition>
 Evidence: <re-runnable command with an exit code; screenshot/deploy output only on the device-acceptance ticket>
+Trunk: <`trunk` runs only — worktree from origin/main @ <sha7>; flag: <Key> | none; live: <what> — <why backward compatible>, or omit>
 Standards: <≤5 lines, see below>
 ```
 
@@ -49,6 +50,7 @@ The worker writes the full report there and replies in at most 15 lines:
 ```
 status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
 commits: <base7>..<head7>
+pr: <`trunk` runs — #<n> merged @ <sha7> | waiting on user (<why>)>
 tests: <one line — runner, passed/failed>
 dod: <met? evidence path>
 skipped: <what>
@@ -64,5 +66,7 @@ addendum file and resumes the same worker.
 ## Ledger lines (`.scratch/<slug>/ledger.md`, append-only)
 
 - Ticket close: `NN: done (commits <base7>..<head7>, evidence <path>)`
+- `trunk` runs add `ship-to-trunk`'s ledger lines (`slice:`, `flag:`,
+  `live:`)
 - Deviation: `Ruling: <what> — <why> — <cost if wrong>`
 - Deferred finding: `NN deferred: <concern> (for review-change)`

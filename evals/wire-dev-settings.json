@@ -4,7 +4,8 @@
     "Add a feature flag so I can toggle the new card stack remotely",
     "I want a dev settings screen with toggles and links to prototype screens",
     "Make the new onboarding skippable from my phone without shipping a new build",
-    "Set up a playground where I can browse all the composables"
+    "Set up a playground where I can browse all the composables",
+    "Add a release flag so the unfinished checkout flow stays dark while its slices merge to main"
   ],
   "negative": [
     {
@@ -18,6 +19,10 @@
     {
       "prompt": "Design the module boundaries for the flags system",
       "owner": "design-architecture"
+    },
+    {
+      "prompt": "Should this half-done feature merge to main now?",
+      "owner": "ship-to-trunk"
     }
   ]
 }

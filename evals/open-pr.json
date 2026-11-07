@@ -24,6 +24,10 @@
     {
       "prompt": "The run is done — let me try the build before you open any PR",
       "owner": "user-check"
+    },
+    {
+      "prompt": "Switch our runs to small PRs merged into main every few hours",
+      "owner": "ship-to-trunk"
     }
   ]
 }

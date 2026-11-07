@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Executes tracker tickets one fresh subagent per ticket in tracer-bullet order, fanning out research first; fires when the frontier has ready tickets, for user-check fast fixes, and for hardening tickets.
-> **Related**: skill://write-tickets (upstream tickets), skill://fan-out-research (declared unknowns), skill://user-check (downstream: user tries the epic; sends fast fixes and hardening tickets back), skill://review-change (gate after hardening), skill://graduate-prototype (prototype re-entry), skill://structure-checks (`structure:` before DONE)
+> **Related**: skill://write-tickets (upstream tickets), skill://fan-out-research (declared unknowns), skill://user-check (downstream: user tries the epic; sends fast fixes and hardening tickets back), skill://review-change (gate after hardening), skill://graduate-prototype (prototype re-entry), skill://structure-checks (`structure:` before DONE), skill://ship-to-trunk (`trunk` delivery: one worktree + PR per ticket, merge rules)
 
 # Implement
 
@@ -32,6 +32,12 @@ recollection.
    before each next ticket; concurrent parallel-safe tickets share one
    layer. A fix (review round, fast fix) commits into the layer that owns
    the file, then `gh stack rebase --upstack` (`open-pr`/references/stacks.md).
+   Delivery `trunk` → no run branch. Each ticket's worker gets its own
+   worktree from freshly fetched `origin/main` and ends with its PR merged
+   per `ship-to-trunk`/references/merge-loop.md (merge authority: the
+   `ship-to-trunk` table; flip and live PRs wait for the user). Frontier =
+   tickets whose parents' PRs are MERGED. Stacks only under
+   `ship-to-trunk`'s exception.
 2. Claim: set `status: claimed` before any work.
 3. A ticket with `Unknowns` gets research subagents first, one per unknown, in
    parallel; link every findings file into the ticket before coding starts.
@@ -134,17 +140,23 @@ recollection.
 ## 5. Close and loop
 
 1. DoD evidence must exist or the ticket stays open. On close: append the
-   ledger line, take the next frontier ticket.
+   ledger line, take the next frontier ticket. `trunk`: close = PR merged,
+   ledgered `slice: <NN> PR #<n> merged @ <sha>`.
 2. Every deviation from ticket or spec lands as
    `Ruling: what — why — cost if wrong`.
 3. Frontier empty → hand off by ticket kind. Feature tickets → `user-check`
    (the user tries the whole epic, not each ticket). Hardening tickets from
-   `user-check`'s re-gate → `review-change`.
+   `user-check`'s re-gate → `review-change`. `trunk`: hand off once the
+   last feature slice merged — the user checks a debug build from `main`
+   with the flag forced on; the flip and cleanup tickets wait for
+   user-check OK and thorough review (`ship-to-trunk` lifecycle).
 4. Fast-fix briefs from `user-check` (`mode: fast-fix`, F-ids listed): the
    quality bar is off on purpose. No tests, no refactor, no `structure:`;
    only the smallest change the user asked for, committed `fast(F<n>): …`.
    The section-3 never-cuts (validation, security, accessibility, data
-   loss) still hold. The re-gate pays the rest down.
+   loss) still hold. The re-gate pays the rest down. `trunk`: each fast fix
+   and each hardening ticket is a new slice — own worktree, own PR, same
+   merge loop.
 5. Debug on (PROFILE.md): append one ≤4-line entry per ticket to
    `.scratch/run-log.md`.
 

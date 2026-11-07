@@ -13,7 +13,7 @@ requires: []
 ---
 
 > **TL;DR** Interviews once with recommended one-word defaults, then writes PROFILE.md and seeds tracker and scratch; fires on a project's first start.
-> **Related**: skill://start (first run), skill://integrate-skill (repo onboarding), skill://structure-checks (opt-in question 8; writes the `structure:` line)
+> **Related**: skill://start (first run), skill://integrate-skill (repo onboarding), skill://structure-checks (opt-in question 8; writes the `structure:` line), skill://ship-to-trunk (`changes: trunk`, the `merge dark slices on green` consent line)
 
 # Init profile
 
@@ -116,10 +116,11 @@ Send the batch and stop. Never a second batch.
 - publish: ask               # ask (default: start asks each run) | always | off
 
 ## Delivery
-- changes: ask              # ask (default: start asks each run) | pr | main
+- changes: ask              # ask (default: start asks each run) | trunk (small PRs into main, ship-to-trunk) | pr | main
 
 ## Consent ledger            # what the agent may do without asking
 - pre-approved: merge to main after green review; lint fixes; dependency bumps; secret-free fixture redaction; commit+push to the project repo
+# - pre-approved: merge dark slices on green   # trunk projects: agent merges dark/non-behavioral slice PRs on green check + clean fast review; flip PRs and live changes still ask
 - always ask: public pushes; publish/delete; runs longer than ~30 min of dispatch; anything touching user data
 
 ## Environment facts         # stated once, never re-derived
@@ -149,10 +150,12 @@ also lands the one-time Gradle wiring from
 `-PagentVersionCode`/`-PagentVersionName`), so worktrees never edit build
 files; `## Review site` is seeded
 (`ask`) so each run can opt into the localhost review dashboard; `##
-Delivery` is seeded (`ask`) so each run chooses PR or straight to main
-before the first commit; `## Consent
+Delivery` is seeded (`ask`) so each run chooses trunk (small PRs into main,
+`ship-to-trunk`), one PR, or straight to main before the first commit; `## Consent
 ledger` is seeded with the defaults above (merge-to-main after green review
-is the standard stop point — the agent never infers consent from silence)
+is the standard stop point — the agent never infers consent from silence;
+a trunk project adds the commented `merge dark slices on green` line only
+when the user opts in)
 and `## Environment facts` is seeded empty so one-time facts (device
 topology, LAN exposure, naming) are captured instead of re-derived every
 session; missing

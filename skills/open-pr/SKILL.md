@@ -7,13 +7,14 @@ description: >-
   reviewer must check with line links, and a small diagram when structure
   changed. Use when deliver reaches its land step with delivery = pr, when
   the user says "open a PR", "make a pull request", "PR this" or "stack the
-  PRs per ticket", or when a finished branch needs a PR description.
+  PRs per ticket", when a trunk run needs a slice PR or the flip PR body and
+  merge, or when a finished branch needs a PR description.
 interaction: afk
 requires: [gh CLI logged in to the project's remote, gh-stack extension for stacked runs]
 ---
 
 > **TL;DR** Opens the run's PR — or a per-ticket `gh stack` for big runs — as a 2-minute read: summary, before/after screenshots, major changes, top-3 review checks with line links, optional diagram; merges only on green review; fires from `deliver` when delivery is `pr`.
-> **Related**: skill://deliver (fires it), skill://user-check (OK required before any PR body), skill://review-change (verdict + `suite: green` the merge depends on; findings feed the top 3), skill://preview-compose (screenshot captures), skill://tdd (screenshot-test ladder), skill://archify (diagram when structure changed), skill://implement (commits on the run branch or stack layers), skill://start (asks pr vs main), skill://init-profile (seeds `delivery:`)
+> **Related**: skill://deliver (fires it), skill://user-check (OK required before any PR body; trunk: before the flip PR only), skill://review-change (verdict + `suite: green` the merge depends on; findings feed the top 3), skill://preview-compose (screenshot captures), skill://tdd (screenshot-test ladder), skill://archify (diagram when structure changed), skill://implement (commits on the run branch or stack layers), skill://start (asks pr vs main), skill://init-profile (seeds `delivery:`), skill://ship-to-trunk (trunk runs: slice/flip PRs, merge authority)
 
 # Open PR
 
@@ -26,7 +27,8 @@ everything else is short. Template and budgets:
 
 1. The ledger carries `user-check: ok` (or `skipped`) and `suite: green @
    <sha>` with `<sha>` equal to HEAD (`deliver` step 1). Review not green or
-   not run → open as **draft**, never merge.
+   not run → open as **draft**, never merge. `trunk` runs: this gate binds
+   the flip PR only; slices follow [Trunk runs](#trunk-runs).
 2. Branch = the run slug (kebab-case), cut before the run's first commit so
    `implement` commits on it. Run already committed on local `main`,
    unpushed → `git switch -c <slug>` and reset local `main` to `origin/main`.
@@ -98,6 +100,32 @@ then `gh stack merge --yes --merge` (atomic) and `gh stack sync --prune`.
 Pending/red checks → leave open and report. After merge:
 `git switch main && git pull`, then any post-merge step in PROFILE
 `Environment facts` (skills repo: re-install with `npx skills add`).
+
+## Trunk runs
+
+`changes: trunk` → one PR per ticket, rules and commands in
+`ship-to-trunk` (`ship-to-trunk`/references/merge-loop.md). What changes here:
+
+1. **Slice PR** (dark or non-behavioral): no user-check precondition; it
+   needs the PR check green + `review-change` fast tier clean. Body to
+   `.scratch/<slug>/pr-<NN>.md`, **≤ ~120 words**, no screenshots or diagram:
+   ```markdown
+   <what-this-slice-does>
+   **Flag:** dark behind `<Key>` | no behavior change | live: <what> — <why-backward-compatible>
+   **Changes:** ≤3 bullets
+   **check:** <workflow-name> green @ <sha>
+   **Not verified:** <one-line-or-none>
+   ```
+2. **Flip PR** (release default on + version bump + changelog) is the
+   release: full body from steps 2–4 (summary, before/after, top-3 checks
+   over the feature's merged range) and step 1's gate (`user-check: ok`,
+   thorough review green).
+3. **Merge** per the `ship-to-trunk` authority table, never step 5's
+   blanket consent: `gh pr merge <n> --squash --delete-branch
+   --match-head-commit <sha>`. Squash title = conventional-commit PR title.
+   Ledger: `slice: <NN> PR #<n> merged @ <sha>`.
+4. Stacks only as `ship-to-trunk`'s exception; layers merge as soon as
+   green, never `gh stack merge` atomically.
 
 ## 6. Report
 

@@ -13,7 +13,7 @@ requires: []
 ---
 
 > **TL;DR** Hands the finished change to the user to try before review, loops on their feedback with fast fixes, then on OK re-gates the run (spec vs feedback vs code, senior-dev + architecture) into hardening tickets; fires after implement.
-> **Related**: skill://implement (upstream; runs fast fixes and hardening tickets), skill://review-change (fires after hardening), skill://deliver (owns build identity; reuses this build), skill://deploy-tailscale (device install), skill://web-env (LAN dev server), skill://senior-dev (re-gate questions), skill://micro-architecture (re-gate file split), skill://design-architecture (re-gate dependency rules), skill://write-tickets (hardening tickets), skill://review-site (publishes the check doc), skill://assess-teardown (stuck feedback loop)
+> **Related**: skill://implement (upstream; runs fast fixes and hardening tickets), skill://review-change (fires after hardening), skill://deliver (owns build identity; reuses this build), skill://deploy-tailscale (device install), skill://web-env (LAN dev server), skill://senior-dev (re-gate questions), skill://micro-architecture (re-gate file split), skill://design-architecture (re-gate dependency rules), skill://write-tickets (hardening tickets), skill://review-site (publishes the check doc), skill://assess-teardown (stuck feedback loop), skill://ship-to-trunk (trunk runs: check from main, flag forced on)
 
 # User check
 
@@ -27,6 +27,14 @@ epic), not per ticket.
 implement ─> build ─> user tries ─┬─ feedback ─> fast fix ─> build ...
                                   └─ OK ─> re-gate ─> hardening tickets ─> implement ─> review-change
 ```
+
+**`trunk` runs** (`ship-to-trunk`): the check runs once, after the feature's
+last slice merged, on a debug build from `main` with the release flag forced
+on (the first verify step says how to force it). Fast fixes and hardening
+tickets are new slice PRs off fresh `main`, still dark — never commits on a
+run branch; the re-gate diffs the feature's merged range. The ledger
+`user-check: ok <versionName> @ <sha>` is what the flip PR requires; slices
+need none.
 
 ## 1. Gate in (cheap)
 
