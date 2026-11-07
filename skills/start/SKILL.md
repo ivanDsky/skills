@@ -93,6 +93,8 @@ normally either way.
 Print one line per stage: fires/skips · HITL or AFK (read each skill's
 `interaction` frontmatter, effort overrides applied) · gate · artifact path.
 Ask at most one question, only if triage is genuinely ambiguous — then fire.
+Every question to the user, here and in every chain skill, goes through the
+harness's ask tool (`run-intake` step 4), never as plain text ending a turn.
 Exceptions (each bundles into the plan, never a separate round trip):
 - Review-site publish. PROFILE.md `Review site publish:` decides — `always`
   → the plan lists `review-site` firing after deliver; `off` → skip

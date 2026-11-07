@@ -58,10 +58,16 @@ never a second batch.
      eyes on the concept before I draft the spec: none / up to 3 / all
      lenses?" (`goldfish-review`). Recommended default: up to 3 at standard,
      all at thorough. Each lens costs one subagent run; say so.
-4. Format every question so a one-word reply answers it: number it, word it so
-   "yes" accepts your recommendation, and put the recommendation on an arrow
-   line. Then send the batch and stop — the reply "1-4 yes, 5: no" must be a
-   complete answer.
+4. Ask through the harness's ask tool (`ask`, `AskUserQuestion` or
+   equivalent), never as plain-text questions that end the turn. The whole
+   batch goes in ONE call: one entry per question with a short header, 2–4
+   options, your recommendation first and marked recommended; open-ended
+   questions list the likely answers and leave the rest to the tool's free
+   text. Any context the user needs to decide (findings, a draft) goes in
+   the message before the call. Plain-text fallback, only when the harness
+   has no ask tool: number each question, word it so "yes" accepts the
+   recommendation, put the recommendation on an arrow line, send and stop —
+   "1-4 yes, 5: no" must be a complete answer.
 
    ```
    ❓ **1 — Auth**: Add OAuth login on top of email/password?

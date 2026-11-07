@@ -27,8 +27,9 @@ frame-by-frame video analysis is below it.
 
 ## 1. Question batch first (one batch, intake format)
 
-Before touching any device, send ONE batch (numbered, arrow defaults, "1-3 yes
-4: text" answers it):
+Before touching any device, send ONE batch through the ask tool (one call,
+`run-intake` step 4; the screenshot request rides along as a note in the
+message before it):
 
 - Expected vs actual, in one line each.
 - Always, or sometimes? If sometimes: after which action / on which data?
