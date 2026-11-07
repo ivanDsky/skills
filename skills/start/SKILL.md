@@ -145,8 +145,9 @@ own), **designer** (decides what the thing should be, before code),
 **diagnostician** (finds cause, fixes nothing yet), **challenger** (a
 `goldfish-review` lens: fresh context, one angle, finds what is wrong with a
 concept or design, fixes and decides nothing). The dispatch table
-below is hat-routed: `implement` dispatches implementers, `review-change`
-dispatches a reviewer on a stronger tier, `goldfish-review` dispatches
+below is hat-routed: `implement` dispatches implementers by ticket `tier:`,
+`review-change` dispatches reviewers (agent and model for both:
+references/effort-mapping.md, *Tier → agent and model*), `goldfish-review` dispatches
 challengers, `diagnose-bug` stays
 diagnostician until the fix is a ticket. Never let one agent wear two hats
 on the same work product — the implementer "reviewing" its own diff is the
@@ -191,8 +192,8 @@ be asked): "let me try it first" / hands-on check → `user-check`; Compose UI �
 `wire-dev-settings`; animations → `animation-vocabulary` + `apple-design`;
 principles → `emil-design-eng`, `ui-ux-pro-max`; diagrams → `archify`;
 architecture → `design-architecture`; screenshots/tests → `tdd`
-(`references/android-testing.md`); web testing ladder (React-first, browser
-as the emulator of web) → `tdd` (`references/web-testing.md`); web/Node
+(`tdd`/references/android-testing.md); web testing ladder (React-first, browser
+as the emulator of web) → `tdd` (`tdd`/references/web-testing.md); web/Node
 environment bootstrap → `web-env`; Android tooling (renders, analysis, docs,
 emulators, deploys, signals) → `android-cli`; environment bootstrap (PATH,
 local.properties, worktree git, device connect, Gradle triage, Studio

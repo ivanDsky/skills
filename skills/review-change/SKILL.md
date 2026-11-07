@@ -53,8 +53,8 @@ keep the steps below unchanged:
    now — written by the implementer and watched failing by temporarily
    reverting the change. A missing one is ❌ Important.
    - **Fast**: lint + typecheck/compile, plus visual evidence of every touched UI
-     surface following the UI verification ladder (`tdd` skill,
-     references/android-testing.md): JVM screenshot tests (Roborazzi / AGP
+     surface following the UI verification ladder
+     (`tdd`/references/android-testing.md): JVM screenshot tests (Roborazzi / AGP
      preview suites) or `android preview render` first; emulator/device only
      when no JVM capture exists for
      that surface, and never inside a fix round. On Android,
@@ -62,7 +62,8 @@ keep the steps below unchanged:
      the touched files. On Kotlin diffs, run PROFILE.md's `structure:` command
      (`structure-checks`) yourself: red is ❌ Important; not configured on a
      Kotlin diff is `cannot-verify`, said out loud. Plus one design-only
-     reviewer subagent (diff, tickets' file maps, `rules-architecture.md`, and
+     reviewer subagent (agent/model per `start`/references/effort-mapping.md's
+     reviewer table; diff, tickets' file maps, `rules-architecture.md`, and
      `ui-components.md` when the diff has public composables) that fills the
      step-5 architecture, component API, file-structure and patterns rows. A
      prototype run caps here plus the demo, at any effort. Plus, before
@@ -70,10 +71,11 @@ keep the steps below unchanged:
      one secret scan over the diff and new fixtures (keys, tokens,
      session IDs, connection strings) — audited cost of skipping: a
      JSESSIONID shipped to GitHub and had to be redacted.
-   - **Standard**: plus one reviewer subagent on a stronger tier than the
-     implementer.
-   - **Thorough**: plus one fresh-context dual-verdict subagent on the most
-     capable model.
+   - **Standard**: plus one code-reviewer subagent, dispatched per
+     `start`/references/effort-mapping.md's reviewer table (stronger than
+     the implementer by default).
+   - **Thorough**: plus one fresh-context dual-verdict subagent, model per
+     the same reviewer table (the fresh visual reviewer too).
 3. Brief reviewers minimally: diff command, commit list, spec excerpt,
    care-axes with their rules payloads, relevant ledger lines, and the evidence
    ladder — reviewers cite JVM screenshot-test captures as proof and never boot

@@ -35,7 +35,7 @@ Findings graded Critical / Important / Minor, each citing the owning hunk.
 End with the coverage rows (axis — what was checked — count); an axis with no
 evidence is `cannot-verify`, not ✅.
 
-## Dual-verdict subagent (thorough) — fresh context, most capable model
+## Dual-verdict subagent (thorough) — fresh context, model per `start`/references/effort-mapping.md reviewer table
 
 Same brief. Two separate verdicts in one report:
 

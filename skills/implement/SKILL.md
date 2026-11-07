@@ -43,7 +43,9 @@ recollection.
    parallel; link every findings file into the ticket before coding starts.
    Fan-out per ticket effort level (ticket `effort:` field, run default as
    fallback): fast = none (research only when a ticket is
-   blocked), standard = cap 3, thorough = full parallel.
+   blocked), standard = cap 3, thorough = full parallel. Agent per
+   `start`/references/effort-mapping.md's reviewer/research table: `scout`
+   for code/repo questions, `task` for web/primary sources.
 
 ## 2. Dispatch
 
@@ -53,7 +55,10 @@ recollection.
    blocking edges. Never two implementers on one tree — if scopes overlap,
    serialize and ledger the `Ruling:`.
 2. The brief is a FILE: the ticket, the spec backlink, neighbor interfaces,
-   and a Standards block (at most 5 lines — see dispatch.md). The dispatch
+   and a Standards block (at most 5 lines — see dispatch.md). Neighbor
+   interfaces and file-scope facts come from one `scout` dispatch, not from
+   the controller reading files — unless the ledger or earlier reports
+   already hold them. The dispatch
    prompt holds only the brief path, one line of context, and the report
    contract. Never paste session history into a dispatch.
 3. Report contract: the worker writes a report file and replies in at most
@@ -62,10 +67,11 @@ recollection.
    concerns.
 4. Workers never spawn subagents — no helpers, no reviewers. Review belongs
    to review-change.
-5. Knobs, enforced at dispatch: implementer on the cheapest capable tier;
-   subagent thinking follows the ticket's `effort:` field (fall back to the
-   run default when absent) — low / medium / high for fast / standard /
-   thorough.
+5. Knobs, enforced at dispatch: dispatch per the ticket's `tier:` using
+   `start`/references/effort-mapping.md's *Tier → agent and model* table
+   (agent, model and spawn `effort`); never pass `model` to scout/sonic
+   (config-pinned); escalation per the same section. Missing `tier:` → the
+   table's defaults. Missing `effort:` → fall back to the run default.
 
 ## 3. Inside the ticket — layered skills
 

@@ -85,6 +85,8 @@ self-sufficient — no other skills need to be installed.
 - **Debug run log**: `debug: on` makes every skill append a ≤4-line entry to
   `.scratch/run-log.md` — what fired, what it contributed, what went too deep
   and why.
+- **Model routing**: each ticket's `tier:` picks agent, model and spawn
+  effort from one table (`start`/references/effort-mapping.md).
 
 Precedence: session > project > global user > skill defaults.
 Vocabulary: [GLOSSARY.md](GLOSSARY.md).
