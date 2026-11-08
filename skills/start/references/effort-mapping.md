@@ -21,7 +21,7 @@ fast fix can need judgment: never derive one from the other.
 | tier | work | implementer dispatch | spawn `effort` |
 |---|---|---|---|
 | `mechanical` | fully specified edits: renames, DI/nav registration, strings/resources, gradle deps, fixtures, moving code with no behavior change, call-site migration batches | `agent: sonic`, no `model` | `lo` |
-| `standard` | ordinary feature/fix work with local decisions | `agent: task`, no `model` (Sonnet medium) | from ticket `effort:` (fast → `lo`, standard → omit, thorough → `hi`) |
+| `standard` | ordinary feature/fix work with local decisions | ticket `effort: fast` → `agent: task`, `model: anthropic/claude-haiku-5-5:high` (cheap, so high thinking: a weak implementer costs more in fix loops than in tokens); `effort: standard`/`thorough` → `agent: task`, no `model` (Sonnet medium) | fast → omit (the `:high` model suffix sets thinking); standard → omit, thorough → `hi` |
 | `deep` | new module/boundary, concurrency/state-machine logic, cross-cutting refactor design, anything where a wrong call is expensive to unwind | `agent: task`, `model: anthropic/claude-opus-5-5:high` | `hi` |
 
 Defaults when write-tickets did not set `tier:`: `effort: fast` → `standard`;
@@ -33,11 +33,11 @@ Reviewer and research dispatch:
 
 | use | dispatch |
 |---|---|
-| fast review tier, design-only reviewer | `agent: reviewer`, spawn `effort: lo`; `model: anthropic/claude-haiku-5-5:low` when every reviewed ticket was `mechanical`, else no `model` (Sonnet) |
+| fast review tier, design-only reviewer | `agent: reviewer`, spawn `effort: lo`; `model: anthropic/claude-haiku-5-5:low` when every reviewed ticket is `mechanical` or `effort: fast`, else no `model` (Sonnet) |
 | standard review tier, code reviewer | `agent: reviewer`, no `model` (Sonnet high, a stronger tier than the Sonnet-medium implementer) |
 | thorough dual-verdict / fresh visual reviewer | `agent: reviewer`, `model: anthropic/claude-opus-5-5:high` |
 | fan-out-research, code/repo questions | `agent: scout` (Haiku), no `model` |
-| fan-out-research, web/primary-source questions | `agent: task`, no `model`; spawn `effort` fast → `lo`, standard → omit, thorough → `hi` |
+| fan-out-research, web/primary-source questions | ticket `effort: fast` → `agent: task`, `model: anthropic/claude-haiku-5-5:low`, spawn `effort: lo`; standard → `agent: task`, no `model`, omit `effort`; thorough → `agent: task`, no `model`, `hi` |
 | brief context gathering (neighbor interfaces, file-scope facts) | `agent: scout` |
 
 - Never pass `model` to `scout` or `sonic`: the harness pins them to Haiku,
@@ -45,10 +45,12 @@ Reviewer and research dispatch:
 - Spawn `effort` is `lo`, omitted or `hi`. Never pass `med`: measured
   2026-11-07, `med` ran at high thinking, same as `hi`; omitting it keeps
   the agent's default (medium for `task`). Never request above `hi`.
-- Escalation (cheap first, pay only on failure): a `mechanical` worker that
-  returns BLOCKED or NEEDS_CONTEXT twice, or fails its DoD after one fix
-  round, is re-dispatched one tier up (`standard`, then `deep`). Ledger:
-  `Ruling: NN escalated <from>→<to> — <why> — <cost if wrong>`. Never
+- Escalation (cheap first, pay only on failure): a `mechanical` worker or a
+  Haiku `effort: fast` worker that returns BLOCKED or NEEDS_CONTEXT twice,
+  or fails its DoD after one fix round, is re-dispatched one tier up
+  (`mechanical` → `standard`; Haiku fast → Sonnet: `agent: task`, no
+  `model`; then `deep`). Ledger: `Ruling: NN escalated <from>→<to> — <why>
+  — <cost if wrong>` (Haiku step: `escalated haiku→standard`). Never
   escalate pre-emptively.
 
 ## Rules
