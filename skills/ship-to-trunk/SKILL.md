@@ -42,8 +42,9 @@ start's `ask`); never switch a project to trunk on your own.
    finding: merge it, split it, or drop it.
 4. **Fresh base**: each ticket starts in its own worktree from
    `origin/main` fetched at dispatch, and rebases onto `origin/main` right
-   before the PR and again before merge. Never branch off another
-   unmerged ticket by default.
+   before the PR and again before merge (`pr-check: none`: one rebase, right
+   before the suite, after fast review; the PR opens after the suite and
+   merges at once). Never branch off another unmerged ticket by default.
 5. **Dark until flipped**: a ticket whose behavior is not finished lands
    behind a **release flag** that is off in release builds
    (`wire-dev-settings` owns the code). Refactors, tests, additive unused
@@ -62,7 +63,12 @@ flowchart LR
   A[ticket ready] --> B[worktree from origin/main]
   B --> C[TDD + local gates]
   C --> D[rebase, PR]
-  D --> E{PR check or local suite + fast review}
+  D --> E{PR check + fast review}
+  C -.->|pr-check: none| N[fast review, rebase, suite]
+  N -.-> P[PR]
+  P -.-> E2{authority}
+  E2 -.->|dark| F
+  E2 -.->|flip or live change| G
   E -->|green, dark| F[agent merges]
   E -->|flip or live change| G[user approves, merge]
   F --> H[remove worktree, next ticket]

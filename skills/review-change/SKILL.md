@@ -31,8 +31,10 @@ keep the steps below unchanged:
   design-only reviewer over the slice diff `git diff origin/main...HEAD`).
   Dark or non-behavioral slices skip step 1's `user-check` precondition;
   fix rounds run the touched module's tests and leave the full suite to the
-  PR check (`pr-check: none`: to the local suite `ship-to-trunk` runs on the
-  rebased head before merge).
+  PR check. `pr-check: none`: this tier runs before the PR is opened, then
+  `ship-to-trunk` rebases and runs the local suite. A rebase conflict
+  resolved by hand → fast tier again over the resolution diff only; a clean
+  rebase is never re-reviewed.
 - **Once, before the flip PR**: thorough tier over the feature's merged range
   (`git diff <base>..origin/main` scoped to its slice PRs), with the
   `user-check: ok` precondition, and step 8's one full-suite run on

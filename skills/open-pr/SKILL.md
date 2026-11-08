@@ -111,7 +111,10 @@ Pending/red checks → leave open and report. After merge:
 
 1. **Slice PR** (dark or non-behavioral): no user-check precondition; it
    needs the PR check green (`pr-check: none`: local suite green on the
-   rebased head) + `review-change` fast tier clean. Body to
+   rebased head) + `review-change` fast tier clean. `pr-check: none`: both
+   pass before the PR exists — write the body once, after review, then
+   `gh pr create` and merge back to back; check line `local suite green on
+   <sha>; no PR CI by design`. Body to
    `.scratch/<slug>/pr-<NN>.md`, **≤ ~120 words**, no screenshots or diagram:
    ```markdown
    <what-this-slice-does>
