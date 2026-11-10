@@ -48,7 +48,7 @@ git worktree add -b <slug>/<NN>-<ticket> ../<repo>-wt/<NN> origin/main
 # 2. review-change fast tier over `git diff origin/main...HEAD`, fix rounds until clean
 git fetch origin && git rebase origin/main       # 3.
 <suite>                                          # 4. PROFILE's pr-check comment command, e.g. ./gradlew assembleDebug test
-git fetch origin                                 # 5. origin/main moved → rebase + suite again
+git fetch origin                                 # 5. origin/main moved → rerun rule below: related → rebase + suite again; unrelated → push the green head as is
 git push -u --force-with-lease origin HEAD       # 6.
 gh pr create --base main --title "<conventional title>" --body-file .scratch/<slug>/pr-<NN>.md   # 7.
 gh pr merge <n> --squash --delete-branch --match-head-commit <sha>   # 8. immediately; <sha> = the head the suite ran on
@@ -57,11 +57,26 @@ git worktree remove ../<repo>-wt/<NN>
 
 - `<suite>`: the command in the `pr-check: none` comment; none written →
   assemble debug + unit `runner:` + `structure:` (when set).
-- A rebase that pulled in new commits always re-runs the suite — the build
-  tool's incremental cache keeps that cheap, and it catches API breaks
-  between modules that touch no shared file. Never skip it because the
-  changed files do not overlap. Merge only on a green suite over exactly
-  `<sha>` rebased onto the current `origin/main`.
+- Main moved during the suite (step 5) → rerun only when it matters,
+  judged over the new commits `git diff --name-only <base>..origin/main`
+  (`<base>` = the main sha the suite ran on) against the ticket's own
+  `git diff --name-only <base>...HEAD`, mapped to build modules:
+  - **Rerun** (rebase + suite again) when a module main changed and a
+    module the ticket changed are the same, or either depends on the other
+    transitively (project dependencies in the build files;
+    `./gradlew <module>:dependencies` lists them as `project :x`) — this is
+    what catches an API break in a module the ticket never touched; or when
+    main touched the shared build setup (`build-logic/`, `gradle/`, root
+    build/settings/properties files, the `structure:` rules module).
+  - **Otherwise push the green head without rebasing.** Two modules that
+    only share a consumer (both feed `:app`) are unrelated.
+    The squash merge lands on the newer main; main's post-merge workflow is
+    the net, and a red main stops merges (`ship-to-trunk` safety net).
+  - No module graph (single-module repo, build files unreadable) → rerun.
+  - A textual conflict at merge (`gh pr merge` refuses) → rebase,
+    Conflicts below, suite again.
+  Ledger the call either way: `merge: <NN> main moved <k> commits —
+  rerun|push (<modules>)`.
 - Step 8 runs right after step 7 only when the authority table lets the
   agent merge (dark/non-behavioral slice + consent line). Otherwise
   (unflaggable live change, flip PR) the PR opens after review and suite
@@ -73,8 +88,9 @@ git worktree remove ../<repo>-wt/<NN>
 
 `gh pr update-branch <n> --rebase`, wait for the check again, then merge
 with the new head sha. `pr-check: none`: applies only to a PR waiting for
-user approval — rebase locally and re-run the suite (steps 3–6 above).
-Rebasing is the slice author's job, never the next ticket's.
+user approval — same rerun rule as step 5 (related → rebase and re-run the
+suite; unrelated → merge as is). Rebasing is the slice author's job, never
+the next ticket's.
 
 ## Conflicts
 
