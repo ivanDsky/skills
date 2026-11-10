@@ -22,7 +22,7 @@ fast fix can need judgment: never derive one from the other.
 |---|---|---|---|
 | `mechanical` | fully specified edits: renames, DI/nav registration, strings/resources, gradle deps, fixtures, moving code with no behavior change, call-site migration batches | `agent: sonic`, no `model` | `lo` |
 | `standard` | ordinary feature/fix work with local decisions | ticket `effort: fast` → `agent: task`, `model: anthropic/claude-haiku-5-5:high` (cheap, so high thinking: a weak implementer costs more in fix loops than in tokens); `effort: standard`/`thorough` → `agent: task`, no `model` (Sonnet medium) | fast → omit (the `:high` model suffix sets thinking); standard → omit, thorough → `hi` |
-| `deep` | new module/boundary, concurrency/state-machine logic, cross-cutting refactor design, anything where a wrong call is expensive to unwind | `agent: task`, `model: anthropic/claude-opus-5-5:high` | `hi` |
+| `deep` | new module/boundary, concurrency/state-machine logic, cross-cutting refactor design, anything where a wrong call is expensive to unwind | `agent: task`, `model: anthropic/claude-fable-5-2:high` | `hi` |
 
 Defaults when write-tickets did not set `tier:`: `effort: fast` → `standard`;
 `standard` → `standard`; `thorough` → `deep` only if the ticket is
@@ -35,7 +35,7 @@ Reviewer and research dispatch:
 |---|---|
 | fast review tier, design-only reviewer | `agent: reviewer`, spawn `effort: lo`; `model: anthropic/claude-haiku-5-5:low` when every reviewed ticket is `mechanical` or `effort: fast`, else no `model` (Sonnet) |
 | standard review tier, code reviewer | `agent: reviewer`, no `model` (Sonnet high, a stronger tier than the Sonnet-medium implementer) |
-| thorough dual-verdict / fresh visual reviewer | `agent: reviewer`, `model: anthropic/claude-opus-5-5:high` |
+| thorough dual-verdict / fresh visual reviewer | `agent: reviewer`, `model: anthropic/claude-fable-5-2:high` |
 | fan-out-research, code/repo questions | `agent: scout` (Haiku), no `model` |
 | fan-out-research, web/primary-source questions | ticket `effort: fast` → `agent: task`, `model: anthropic/claude-haiku-5-5:low`, spawn `effort: lo`; standard → `agent: task`, no `model`, omit `effort`; thorough → `agent: task`, no `model`, `hi` |
 | brief context gathering (neighbor interfaces, file-scope facts) | `agent: scout` |
