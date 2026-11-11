@@ -33,8 +33,8 @@ environment config — run it during onboarding, `init-profile`/`map-codebase`).
 | Dependency version lookup | `android studio version-lookup` | `implement`, dependency-bump tickets |
 | Official docs search/fetch | `android docs search "<query>"` → `android docs fetch kb://...` | `draft-spec`, `fan-out-research`, `implement` |
 | Scripted emulator control | `android emulator list/create/start/stop` | `tdd` ladder last rung, `diagnose-bug` — scripted, never hand-launched |
-| Deploy APK without launching | `android install --apks=<apk>` (incremental, faster than adb) | `deliver`, `deploy-tailscale` verify installs |
-| Deploy + launch | `android run --apks=<apk> --activity=<...>` | `deliver` local target |
+| Deploy APK without launching | `android install --apks="$APK_PATH"` (incremental, faster than adb; APK from `ship_apk.py --build-only`) | `deliver`, `deploy-tailscale` verify installs |
+| Deploy + launch | `android run --apks="$APK_PATH" --activity=<...>` | `deliver` local target |
 | Screen capture with annotations | `android screen capture --annotate` | `diagnose-bug` evidence, `review-site` screenshots |
 | UI hierarchy to JSON | `android layout --output hierarchy.json` | `review-ux` scripted checks (touch targets, density), `diagnose-bug` |
 | Crashlytics stability telemetry | `android signals` | `diagnose-bug` — crash evidence before any repro |

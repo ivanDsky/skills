@@ -43,12 +43,12 @@ full suite, a reviewer or `structure:` here; they run after the OK.
 
 ## 2. Put it in their hands
 
-- **Android**: build identity from `deliver`
-  (`deliver`/references/build-identity.md): `allocate`, build with
-  `$GRADLE_ARGS`, copy to `$APK_NAME`, log to `.scratch/<slug>/build.log`.
-  Install via the PROFILE `tailscale` target (`deploy-tailscale`) or
-  `adb install -r`. Confirm with `build_identity.py which`. Environment
-  friction → `android-env` checklist.
+- **Android**: `deliver`'s `ship_apk.py`
+  (`deliver`/references/build-identity.md): builds with an allocated
+  identity, verifies it, names it `$APK_NAME` and Taildrops it to the PROFILE
+  device. adb instead: `ship_apk.py --build-only`, then
+  `adb install -r "$APK_PATH"`. Confirm with `build_identity.py which`.
+  Environment friction → `android-env` checklist.
 - **Web**: dev server on the LAN URL (`web-env`).
 - **No runtime** (library, docs, skills repo): diff summary plus one demo
   command's real output.

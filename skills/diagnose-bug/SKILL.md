@@ -65,9 +65,9 @@ than ten shell commands. Only reproduce what remains unexplained.
    - Note in PROFILE.md so the next run skips discovery.
 4. **Temporary in-app instrumentation** - when remote logs are too thin:
    add a debug-only event ring buffer (file or logcat tag) around the
-   suspected path, ship a debug build via `deploy-tailscale` (identity from
-   `deliver`'s build-identity allocator, so it never collides with a
-   parallel worktree's install), have the user reproduce once, pull the log
+   suspected path, ship a debug build with `deliver`'s `ship_apk.py`
+   (allocated identity, so it never collides with a parallel worktree's
+   install; `--build-only` + `adb install -r "$APK_PATH"` over adb), have the user reproduce once, pull the log
    file back. Which branch is on the phone right now:
    `build_identity.py which`. Cheap, targeted, disposable.
 5. **Emulator repro** - only for what rungs 1-4 cannot explain, typically
