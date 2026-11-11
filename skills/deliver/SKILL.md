@@ -48,27 +48,34 @@ passed; this stage adds no code.
    before the first build (PATH, `local.properties`, stale-incremental
    triage) — deliver has no time to rediscover environment fixes. The
    `user-check` build is reused when its sha equals HEAD and the variant
-   matches the target; `build_identity.py which` names it. Otherwise:
-   - **Build identity before the build**, because parallel worktrees share
-     one phone: `scripts/build_identity.py allocate`, per
-     [Build identity](references/build-identity.md). It takes a unique
-     versionCode from the ledger shared by all worktrees, never lower than
-     what is on the device; versionName is `<semver>-<branch-slug>.<n>`
-     (`1.3.0-reminders.2`, `n` = that branch's install count, `main.<n>` on
-     main), so no two installs ever share a name. Gradle wiring missing → stop and ask for it to
-     land on main first; never add it in a worktree. Trunk worktree
-     branches `<slug>/<NN>-<ticket>` keep that shape: the last segment is
-     the build-identity slug.
-   - Run the project build with its `$GRADLE_ARGS` and capture the log to
-     `.scratch/<slug>/build.log`. A failed build stops everything — a
-     deploy never starts on a red build.
-   - Copy the artifact to `$APK_NAME`
-     (`<app_name>-<version_name>-<code>-<debug|release>.apk`) before any
-     deploy target touches it. Deploy targets and evidence lines reference
-     that name, never Gradle's `app-<variant>.apk`.
+   matches the target; `build_identity.py which` names it, and
+   `ship_apk.py --apk .scratch/<slug>/$APK_NAME` re-sends it. Otherwise:
+   - **Every installable build is `scripts/ship_apk.py`**, per
+     [Build identity](references/build-identity.md): one command allocates
+     the identity, builds with it, checks the APK's real versionCode,
+     versionName and package with `aapt2 dump badging`, copies it to
+     `.scratch/<slug>/$APK_NAME`, Taildrops it to the PROFILE device
+     (`--build-only` skips the send for adb, serve or Firebase) and appends
+     sha256 and size to `.scratch/<slug>/ledger.md`. A manual
+     allocate → gradlew → cp sequence is never shipped; the harness refuses
+     raw `tailscale file cp` and `adb install` of a non-canonical name.
+     The allocator takes a unique versionCode from the ledger shared by all
+     worktrees, never lower than what is on the device; versionName is
+     `<semver>-<branch-slug>.<n>` (`1.3.0-reminders.2`, `n` = that branch's
+     install count, `main.<n>` on main; `--slug S` overrides the slug), so
+     no two installs ever share a name. Gradle wiring missing (the script
+     refuses on a version mismatch) → stop and ask for it to land on main
+     first; never add it in a worktree. Trunk worktree branches
+     `<slug>/<NN>-<ticket>` keep that shape: the last segment is the
+     build-identity slug.
+   - A failed build stops everything — a deploy never starts on a red
+     build. The script prints the log tail and `.scratch/<slug>/build.log`.
+   - Deploy targets and evidence lines reference `$APK_NAME`
+     (`<app_name>-<version_name>-<code>-<debug|release>.apk`), never Gradle's
+     `app-<variant>.apk`.
    - Semver is NOT bumped by installs or by landing on main. Only a release
      the user asks for bumps it (minor by default, once for all its
-     features), on main, then builds with `allocate --release` for the
+     features), on main, then builds with `ship_apk.py --release` for the
      plain `1.4.0` name; see [Build identity](references/build-identity.md).
      `trunk`: the flip PR is that release and carries the bump; slices
      never bump, so a release workflow on push to main publishes nothing

@@ -111,10 +111,10 @@ recollection.
      that is acceptance evidence, owned by `user-check` and the user. A flow you
      would verify by hand becomes a persisted semantic JVM test (recipe in
      the same reference). Report `device: none`; any use needs
-     `device: used because <reason>`, and the installed build gets its
-     identity from `deliver`'s allocator first (`deliver`/references/build-identity.md):
-     a unique versionCode from the ledger shared by all
-     worktrees, so parallel agents never downgrade or overwrite each other.
+     `device: used because <reason>`, and the installed build comes from
+     `deliver`'s `ship_apk.py` (`deliver`/references/build-identity.md):
+     a unique versionCode from the ledger shared by all worktrees, so
+     parallel agents never downgrade or overwrite each other.
      Environment/build friction (missing adb, SDK, suspicious Gradle red)
      goes through `android-env`'s checklist before being believed or
      re-derived.

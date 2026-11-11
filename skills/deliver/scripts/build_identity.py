@@ -8,6 +8,8 @@ committed): <git-common-dir>/agent-builds/versions.jsonl, one line per install.
             versionCode = max(ledger, installed on device, committed) + 1;
             versionName = <semver>-<slug>.<n>: semver is the release line from
             PROFILE.md (untouched here), n counts installs per slug.
+            slug = last branch segment, or --slug S (lowercase [a-z0-9-],
+            up to 24 chars).
             --release (main only): versionName = plain <semver>, once per semver.
             Prints KEY=VALUE lines (shell-evalable).
   which     what is on the device: installed versionCode -> ledger record.
@@ -139,7 +141,7 @@ def cmd_allocate(a):
         sys.exit(f"build_identity: version '{semver}' is not major.minor.patch")
     branch = git("rev-parse", "--abbrev-ref", "HEAD", cwd=root)
     sha = git("rev-parse", "--short", "HEAD", cwd=root)
-    slug = slug_for(branch, sha)
+    slug = a.slug or slug_for(branch, sha)
     d = ledger_dir(root)
     ledger = d / "versions.jsonl"
     devices = device_codes(a.app_id, a.serial)
@@ -207,12 +209,15 @@ def main():
     al.add_argument("--serial", help="adb serial (default: every connected device)")
     al.add_argument("--release", action="store_true",
                     help="release build from main: versionName = plain semver, once per semver")
+    al.add_argument("--slug", help="explicit slug (lowercase [a-z0-9-], up to 24 chars; default: last branch segment)")
     wh = sub.add_parser("which")
     wh.add_argument("--app-id", help="default: PROFILE.md `- app-id:`")
     wh.add_argument("--serial")
     ls = sub.add_parser("list")
     ls.add_argument("-n", type=int, default=10)
     a = p.parse_args()
+    if getattr(a, "slug", None) and not (len(a.slug) <= 24 and re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", a.slug)):
+        sys.exit(f"build_identity: --slug '{a.slug}' must be lowercase [a-z0-9-], up to 24 chars")
     for key, attr in (("app-id", "app_id"), ("app-name", "app_name"), ("version", "semver")):
         if hasattr(a, attr) and not getattr(a, attr):
             setattr(a, attr, profile_value(a.root, key))

@@ -49,13 +49,15 @@ not this skill — they stay in `deliver`.
 
 ## 3. Build
 
-Gradle, per the PROFILE.md runner: `./gradlew assembleRelease` (APK) or
-`./gradlew bundleRelease` (AAB — the same distribute command takes it).
-Distribute the canonical-named artifact
-`<app_name>-<version_name>-<code>-<debug|release>.apk` (deliver's build
-identity: unique versionCode and name from the shared ledger); the release
-notes lead with the versionName (`1.3.0-reminders.2`, or plain `1.4.0` for a
-release) so testers see which build and branch arrived.
+APK: `deliver`'s `ship_apk.py --build-only --variant release` (a release
+cut: `--release` instead, which implies the release variant) builds it with the allocated identity,
+verifies it with `aapt2 dump badging` and names it
+`<app_name>-<version_name>-<code>-<debug|release>.apk` at `$APK_PATH`
+(unique versionCode and name from the shared ledger). AAB: `./gradlew
+bundleRelease` with the `$GRADLE_ARGS` from `build_identity.py allocate`
+(the same distribute command takes it). The release notes lead with the
+versionName (`1.3.0-reminders.2`, or plain `1.4.0` for a release) so
+testers see which build and branch arrived.
 
 - Signing: App Distribution accepts a debug-signed build, and for a small
   personal tester set that is the sanctioned fallback; a real
@@ -66,7 +68,7 @@ release) so testers see which build and branch arrived.
 ## 4. Distribute
 
 ```
-firebase appdistribution:distribute app-release.apk --app <APP_ID> \
+firebase appdistribution:distribute "$APK_PATH" --app <APP_ID> \
     --groups qa-team --release-notes "<one line per shipped ticket>"
 ```
 

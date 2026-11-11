@@ -7,6 +7,10 @@ Everything below is grounded in the official docs listed in
 
 ## Taildrop (`tailscale file cp`)
 
+Agents never run `cp` directly: `deliver`'s `ship_apk.py` does, and the
+harness hook refuses a raw `tailscale file cp` (`--targets` stays allowed).
+The flags below are for reading the script and debugging a failed send.
+
 - Usage: `tailscale file cp <files...> <target>:` — the trailing colon marks
   the target host. Flags: `--targets` (list valid targets), `--name=<name>`
   (rename on arrival; use for stdin), `--verbose`, `--update-interval=<time>`
@@ -23,12 +27,14 @@ Everything below is grounded in the official docs listed in
   interrupted transfer can usually resume for up to an hour — except when the
   receiver is macOS or iOS.
 - Evidence recipe (Android test device, adb connected):
-  1. `shasum -a 256 app/build/outputs/apk/debug/app-debug.apk`
-  2. `tailscale file cp <apk> <device>: --verbose`
-  3. `adb shell stat -c '%s' /sdcard/Download/app-debug.apk` — compare bytes
-     with the local size; hash on-device with `adb shell sha256sum <path>`
-     when the device image provides it. No adb → user confirms the size in
-     Downloads; record both sizes in the ledger.
+  1. `eval "$(python3 ~/.agents/skills/deliver/scripts/ship_apk.py)"` —
+     builds, verifies, sends with `tailscale file cp`, and appends the
+     ledger line with `$SHA256` and `$BYTES` for `$APK_PATH`.
+  2. `adb shell stat -c '%s' /sdcard/Download/$APK_NAME` — compare with
+     `$BYTES`; hash on-device with `adb shell sha256sum
+     /sdcard/Download/$APK_NAME` against `$SHA256` when the device image
+     provides it. No adb → user confirms the size in Downloads; record both
+     sizes in the ledger.
 
 ## Serve (`tailscale serve`)
 
