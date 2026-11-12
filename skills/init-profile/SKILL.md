@@ -140,6 +140,7 @@ Send the batch and stop. Never a second batch.
 ## Delivery
 - changes: pr               # from question 9 (development style): pr (= default) | trunk (small PRs into main, ship-to-trunk) | main | ask (start asks each run)
 # - pr-check: none   # written only on a `trunk-local` answer: merge gate is local: `<suite>` green on the PR branch rebased onto fresh origin/main; CI on main only. Absent (default) → trunk waits on main's required PR check
+# - main-check: <workflow file>   # optional, `pr-check: none` only: main's post-merge workflow watched by ship-to-trunk's main_health.py; absent → the `release:` workflow
 
 ## Consent ledger            # what the agent may do without asking
 - pre-approved: merge to main after green review; lint fixes; dependency bumps; secret-free fixture redaction; commit+push to the project repo

@@ -6,7 +6,8 @@
     "Each ticket should be its own short-lived branch merged into main within hours",
     "Keep main always releasable while 20 agent PRs land per feature",
     "Which of these changes can't hide behind a flag and must ship live?",
-    "We dropped PR CI \u2014 main runs the tests after merge. How do agents merge slice PRs with no checks?"
+    "We dropped PR CI \u2014 main runs the tests after merge. How do agents merge slice PRs with no checks?",
+    "Main CI went red after the agents merged three slices \u2014 who reverts, and should the other agents keep merging meanwhile?"
   ],
   "negative": [
     {

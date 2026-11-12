@@ -51,7 +51,9 @@ git fetch origin && git rebase origin/main       # 3.
 git fetch origin                                 # 5. origin/main moved → rerun rule below: related → rebase + suite again; unrelated → push the green head as is
 git push -u --force-with-lease origin HEAD       # 6.
 gh pr create --base main --title "<conventional title>" --body-file .scratch/<slug>/pr-<NN>.md   # 7.
+python3 ~/.agents/skills/ship-to-trunk/scripts/main_health.py status   # red (exit 3) → `main_health.py hold --pr <n> --who <id>`, PR and worktree stay, skip the rest (Red main)
 gh pr merge <n> --squash --delete-branch --match-head-commit <sha>   # 8. immediately; <sha> = the head the suite ran on
+# never watch main after the merge (no gh run watch/view/list): report and stop; the orchestrator's watcher does
 git worktree remove ../<repo>-wt/<NN>
 ```
 
@@ -71,7 +73,7 @@ git worktree remove ../<repo>-wt/<NN>
   - **Otherwise push the green head without rebasing.** Two modules that
     only share a consumer (both feed `:app`) are unrelated.
     The squash merge lands on the newer main; main's post-merge workflow is
-    the net, and a red main stops merges (`ship-to-trunk` safety net).
+    the net, and a red main stops merges (Red main below).
   - No module graph (single-module repo, build files unreadable) → rerun.
   - A textual conflict at merge (`gh pr merge` refuses) → rebase,
     Conflicts below, suite again.
@@ -125,9 +127,51 @@ check. Then:
 
 ## Red main
 
-A merge turned the main check red → stop merging. Next PR = `git revert`
-of the culprit squash commit (agent may merge it on green), then the
-ticket is reopened. Fix forward only for a one-line obvious fix.
+`pr-check: <workflow>` or no key: a merge turned the main check red →
+stop merging. Next PR = `git revert` of the culprit squash commit (agent
+may merge it on green), then the ticket is reopened. Fix forward only for
+a one-line obvious fix.
+
+`pr-check: none`: main's verdict lives in a shared ledger,
+`<git-common-dir>/agent-builds/main-health.jsonl` (every worktree sees
+it, next to the build ledger), read and written only by
+`MH=~/.agents/skills/ship-to-trunk/scripts/main_health.py` (workflow:
+PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
+
+- **Workers never wait on main.** A main run takes up to half an hour and
+  ends green almost every time; a worker that waits idles. After step 8 the
+  worker reports and stops: no `gh run watch`, `gh run view` or `gh run
+  list`.
+- **One watcher per orchestrator** (each runs its own; the ledger dedupes
+  runs): `python3 $MH watch --who <run slug>` as one background bash job
+  (async, costs no turns), started after the run's first merge and again
+  after any later merge, the fix PR included, when none is running. It
+  exits once no main run is pending: 0 green, 3 red, printing `main red at
+  <sha> (run <id>), range <last green>..<red sha>`. `status` reads only the
+  ledger, so it stays red until a watcher records the next green run.
+- **Red → every merge stops except the fix.** `status` exits 3: the worker
+  still runs review, suite, push and `gh pr create`, then `main_health.py
+  hold --pr <n> --who <id>`, keeps its worktree, reports `held, main red`
+  and stops with the PR open.
+- **Culprit**: `gh run view <id> --log-failed` → failing Gradle task →
+  module; each commit in the range → `git diff --name-only <sha>^ <sha>`
+  → modules. One match is the culprit. Several (cancelled runs make one red
+  run cover many merges) → the most likely first, the next if main stays
+  red. Never bisect on CI.
+- **Owner**: the orchestrator whose merge is the culprit runs
+  `main_health.py claim --who <id> --culprit <sha|#PR>`, then opens the fix
+  PR: `git revert` of the culprit squash commit (the ticket reopens), or a
+  fix forward when it is one obvious line; record it with `claim … --fix-pr
+  <n>`. The fix PR merges despite `status` exit 3, never skipping the local
+  suite or fast review.
+  Everyone else reads the claim in `status` and opens no second fix. A
+  claim idle for 30 min with no merged fix → `claim --takeover` (refused
+  while a merged fix has no red run after it yet).
+- **Green again**: the watcher records the green run, which closes the
+  incident. `main_health.py held` lists the held PRs still open; the
+  orchestrator merges each from its kept worktree after `status` is green,
+  under the step-5 rerun rule (main moved: related → rebase + suite again,
+  force-push; unrelated → merge as is), then removes the worktree.
 
 ## Release workflows on push
 

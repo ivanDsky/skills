@@ -37,7 +37,14 @@ recollection.
    per `ship-to-trunk`/references/merge-loop.md (merge authority: the
    `ship-to-trunk` table; flip and live PRs wait for the user). Frontier =
    tickets whose parents' PRs are MERGED. Stacks only under
-   `ship-to-trunk`'s exception.
+   `ship-to-trunk`'s exception. `pr-check: none`: workers never wait on
+   main CI (they call `main_health.py status` before merging and hold on
+   red). The orchestrator runs one `main_health.py watch --who <slug>`
+   background bash job, started after the run's first merge and after a
+   later merge when none is running; on red it attributes the culprit and
+   claims and fixes it when the culprit is its own merge; on green after
+   red it merges the PRs `held` lists (rerun rule). Flow:
+   `ship-to-trunk`/references/merge-loop.md § Red main.
 2. Claim: set `status: claimed` before any work.
 3. A ticket with `Unknowns` gets research subagents first, one per unknown, in
    parallel; link every findings file into the ticket before coding starts.
