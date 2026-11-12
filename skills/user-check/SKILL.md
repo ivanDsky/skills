@@ -55,14 +55,15 @@ full suite, a reviewer or `structure:` here; they run after the OK.
 
 ## 3. Ask once, then stop
 
-One message: build name (`versionName`), how to open it, 2–4 numbered verify
-steps with exact entry points (deep link, `adb shell am start`, tap path) and
-the expected result of each, the vetoable spec assumptions, then
-"reply `ok`, or feedback by id". Feature runs also write
-`.scratch/<slug>/review/REVIEW.md` per
+One ask-tool call (`start` § Waiting on the user — a chat message sends no
+notification): build name (`versionName`), how to open it, 2–4 numbered
+verify steps with exact entry points (deep link, `adb shell am start`, tap
+path) and the expected result of each, the vetoable spec assumptions, then
+one free-text field "`ok`, or feedback by id", nothing prefilled. Feature
+runs also write `.scratch/<slug>/review/REVIEW.md` per
 [check-doc.md](references/check-doc.md) and publish it via `review-site` when
-the run's publish decision is yes. Quick tasks get the message only. Wait for
-the answer; never continue on silence.
+the run's publish decision is yes. Quick tasks get the form only. Wait for
+the answer; an empty answer is silence — ask again, never continue on it.
 
 ## 4. Feedback → fast fix → step 1
 

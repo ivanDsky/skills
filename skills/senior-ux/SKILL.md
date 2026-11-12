@@ -51,7 +51,7 @@ interaction: afk
   orientation. Error copy tells the truth about the cause. Motion: exit
   faster than enter, tokenized, reduced-motion fallbacks.
 
-## HITL gates (stop and ask)
+## HITL gates (stop and ask — ask tool, `start` § Waiting on the user)
 
 - Parameters/variant choice before implementation locks (the A/B verdict is
   the user's, always).

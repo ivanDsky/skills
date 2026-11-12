@@ -89,13 +89,14 @@ The flow's only standing blocking gate besides intake. ONE message:
    the FULL assumption list A1..An — the assumptions are the point, show all
    of them, not a sample.
 2. End with exactly: "Correct me or I go." No second question, no menu, no
-   approval form.
+   approve/reject choice.
 3. Blocking by effort (prototype never blocks, any effort):
-   - **fast** — post and proceed in the same run; later corrections become
-     ticket edits.
-   - **standard / thorough** — end the turn on the checkpoint. Any reply that
-     is not a correction counts as "go"; silence = the user saw it, the run
-     resumes on their return.
+   - **fast** — post in chat and proceed in the same run; later corrections
+     become ticket edits.
+   - **standard / thorough** — post it through the ask tool (`start` §
+     Waiting on the user): the digest as the form text, one free-text field
+     "Corrections (empty = go)". Any answer that is not a correction counts
+     as "go".
 4. Log the checkpoint in `.scratch/<slug>/ledger.md` (posted, and later: the
    verdict).
 

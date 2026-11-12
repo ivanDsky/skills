@@ -46,8 +46,9 @@ a pattern) live in `implement` §3 and are not repeated here.
 The dispatch prompt carries four things only: one line on where this ticket
 fits, the brief path introduced as "read this first — it is your
 requirements", the report path + contract below, and the voice line from
-`start` § Voice (short-note thinking, caveman report). The controller
-writes briefs and ledger lines in the same voice. `trunk` runs with
+`start` § Voice (short-note thinking, caveman report), which also says
+"never ask the user; questions go in the report as NEEDS_CONTEXT". The
+controller writes briefs and ledger lines in the same voice. `trunk` runs with
 `pr-check: none` add a fifth: "after merge, do not watch or poll main CI;
 report and stop (`main_health.py status` red → hold, don't merge)".
 

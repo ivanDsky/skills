@@ -82,7 +82,8 @@ git worktree remove ../<repo>-wt/<NN>
 - Step 8 runs right after step 7 only when the authority table lets the
   agent merge (dark/non-behavioral slice + consent line). Otherwise
   (unflaggable live change, flip PR) the PR opens after review and suite
-  passed and waits only for the user.
+  passed and waits only for the user: the worker reports `waiting on user`,
+  the orchestrator asks through the ask tool (`start` § Waiting on the user).
 - Write the PR body once, after step 2 (`open-pr` slice template); its
   check line reads `local suite green on <sha>; no PR CI by design`.
 
@@ -98,7 +99,8 @@ the next ticket's.
 
 1. Rebase locally, resolve, re-run the gates, force-push with
    `--force-with-lease` (the slice branch only — never main).
-2. Resolution keeps both intents. Unsure which side wins → stop and ask;
+2. Resolution keeps both intents. Unsure which side wins → stop; a worker
+   reports BLOCKED, the orchestrator asks the user (ask tool);
    never drop the other ticket's change to get green.
 3. Conflict > ~50 lines, or in a file another in-flight ticket owns → the
    tickets were mis-sliced: pause the later ticket, report, re-slice
