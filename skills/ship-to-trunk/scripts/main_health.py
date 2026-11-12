@@ -180,13 +180,16 @@ def claim_line(state):
     return f"claim: {c['who']} culprit {c['culprit']}{fix}, {int(age_s(c['at']) // 60)} min ago"
 
 
-def record_new_runs(root, wf, led, who, runs):
+def record_new_runs(root, wf, led, who):
     """Record finished success/failure runs newer than the last recorded one,
-    oldest first; an empty ledger takes only the newest. Returns them."""
+    oldest first; an empty ledger takes only the newest. Queried by
+    conclusion: superseded pushes cancel most runs, so an unfiltered list can
+    hold no finished run at all. Returns them."""
     state = State(led.read())
     floor = state.last["run"] if state.last else None
-    done = sorted((r for r in runs if r["status"] == "completed" and r["conclusion"] in (GREEN, RED)
-                   and (floor is None or r["databaseId"] > floor)), key=lambda r: r["databaseId"])
+    finished = list_runs(root, wf, limit=10, status=GREEN) + list_runs(root, wf, limit=10, status=RED)
+    done = sorted((r for r in finished if floor is None or r["databaseId"] > floor),
+                  key=lambda r: r["databaseId"])
     if floor is None:
         done = done[-1:]
     return [r for r in done if led.append(run_record(r, who), unique_run=True)]
@@ -197,7 +200,7 @@ def cmd_watch(a, root, wf, led):
     changed = False
     while True:
         runs = list_runs(root, wf)
-        for _ in record_new_runs(root, wf, led, a.who, runs):
+        for _ in record_new_runs(root, wf, led, a.who):
             state = State(led.read())
             if state.verdict != prev:
                 print(red_line(root, wf, state) if state.verdict == "red"
@@ -220,7 +223,7 @@ def cmd_watch(a, root, wf, led):
 def cmd_status(a, root, wf, led):
     state = State(led.read())
     if not state.last:
-        record_new_runs(root, wf, led, "status", list_runs(root, wf))
+        record_new_runs(root, wf, led, "status")
         state = State(led.read())
     if state.verdict != "red":
         line = state.verdict if not state.last else f"green at {state.last['sha'][:9]} (run {state.last['run']})"
