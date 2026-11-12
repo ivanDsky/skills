@@ -58,7 +58,7 @@ interaction: afk
   decision; mistakes go into the ledger with cost and cause; review your
   own diff as the grader before handing off.
 
-## HITL gates (stop and ask)
+## HITL gates (stop and ask — ask tool, `start` § Waiting on the user)
 
 - Idea/approach verification before nontrivial work (the approach sketch,
   one paragraph, user confirms).

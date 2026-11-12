@@ -76,7 +76,7 @@ than ten shell commands. Only reproduce what remains unexplained.
    agents burning tap/screencap cycles on the device produced screenshots
    that were discarded in every audited session.
 6. **Screen recording + frame analysis** - LAST and with the user in the
-   loop: ask the USER to record the phone (they see it live) and, if frame
+   loop: ask the USER (ask tool) to record the phone (they see it live) and, if frame
    analysis is truly needed, to mark the moment ("it flickers right after the
    card leaves the stack"). An agent scrubbing unmarked video is the
    costliest path in the codebase.

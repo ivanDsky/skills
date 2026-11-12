@@ -144,11 +144,13 @@ recollection.
 - DONE_WITH_CONCERNS: concerns go to the ledger as deferred findings for
   review-change. DONE: nothing extra.
 - NEEDS_CONTEXT: answer as a brief addendum file, resume the same worker.
+  Only the user can answer → the orchestrator asks through the ask tool
+  first (`start` § Waiting on the user); workers never ask the user.
 - BLOCKED: ledger a `Ruling:`, reopen the ticket, take another frontier
-  ticket. Four things stop the run and ask the user: an irreversible or
-  destructive operation, a security-sensitive action, a side effect outside
-  the worktree norms say to ask about first, a ticket so broken every path
-  forward is a guess.
+  ticket. Four things stop the run and ask the user (ask tool, `start` §
+  Waiting on the user): an irreversible or destructive operation, a
+  security-sensitive action, a side effect outside the worktree norms say
+  to ask about first, a ticket so broken every path forward is a guess.
 
 ## 5. Close and loop
 

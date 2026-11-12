@@ -25,8 +25,9 @@ Each finding gets exactly one response, recorded in the findings file:
   it that way" is not evidence. A finding that says the work is hard to
   understand is never contestable — fix the unclear part.
 - **ESCALATE** — the finding is right but the fix changes a spec decision or
-  an interface other tickets rely on: ledger a `Ruling:` and ask the user
-  or the controller; do not decide alone.
+  an interface other tickets rely on: ledger a `Ruling:` and escalate — a
+  worker to its orchestrator, the orchestrator to the user through the ask
+  tool (`start` § Waiting on the user); do not decide alone.
 - **DECLINE** — out of scope for this change; allowed only for a Minor, with
   the ledger line `Ruling: minor <what> deferred — <why>`.
 

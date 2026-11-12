@@ -118,13 +118,14 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
    in `start`'s effort mapping (thorough only for architecture/planning/
    big-view tickets), tier per item 4. List every downgrade below the run
    default with a reason; if a different level would likely accelerate
-   development, ask the user. fast/standard — publish and report the
+   development, ask the user (ask tool). fast/standard — publish and report the
    numbered list (title, effort / tier, blocked-by, what it delivers).
    Thorough — show the list and wait: confirm granularity, blocking edges, and
-   split/merge before publishing.
+   split/merge before publishing, through the ask tool (`start` § Waiting on
+   the user; the list goes inside the form).
 9. Design review (stage B, `goldfish-review`): before publishing, when the
    set adds a module or boundary or the run is thorough, ask the user in the
-   same confirm message whether they want a blind design review — none / up
+   same confirm form whether they want a blind design review — none / up
    to 3 / all lenses (recommended: all at thorough, up to 3 otherwise). fast,
    or nothing architectural → skip silently. Findings land as ticket edits
    or file-map changes, never a second interview.

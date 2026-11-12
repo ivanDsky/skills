@@ -31,14 +31,40 @@ answer first; no greeting, hedging, recap or closer; fragments fine, but
 every not/never/no/only stays; code, paths, numbers and errors verbatim;
 ≤20 words per sentence. Every dispatch prompt carries one voice line —
 "think in short notes: fact, decision, next step; report and reply in
-caveman voice; values, paths, errors verbatim" — because subagents do not
-inherit the session's mode.
+caveman voice; values, paths, errors verbatim; never ask the user —
+questions go in the report as NEEDS_CONTEXT" — because subagents do not
+inherit the session's mode and only the orchestrator talks to the user.
 Plain full sentences instead: questions to the user (ask tool), security or
 irreversible-action warnings, and anything persisted for humans — code,
 comments, commits, PR bodies, specs, tickets, check docs, `REPORT.md`.
 The thinking half of the line is best effort: the model may not follow it,
 and the displayed thinking may be a harness summary. The real thinking
 budget is the spawn `effort` (references/effort-mapping.md).
+
+## Waiting on the user (every chain skill)
+
+This rule binds the orchestrator — the top-level agent in the user's
+session. Subagents and workers never talk to the user: they never call the
+ask tool, and they report BLOCKED or NEEDS_CONTEXT to the orchestrator,
+which asks the user when only the user can answer.
+
+The user gets a notification only when the orchestrator calls the harness's
+ask tool (`ask`, `AskUserQuestion` or equivalent); a chat message that ends
+the turn reaches nobody. So every point where the run needs the user ends in
+one ask-tool call, never in chat text: a question or decision; an approval
+(a PR only the user may merge, a destructive or public action, a downgrade
+of review rigor); a checkpoint (spec digest, ticket list); a hands-on step
+(`user-check`'s try-it message, recording the phone, a console log); a
+worker's BLOCKED or NEEDS_CONTEXT only the user can clear.
+
+- The context goes inside the form (digest, verify steps, PR link, options);
+  the chat reply holds no second copy.
+- Approvals and irreversible actions never preselect the approving option:
+  an omitted or unchecked answer means not approved, so the run keeps
+  waiting or asks again — it never acts on silence.
+- Reports that need nothing back (merged, delivered, a verdict) stay chat.
+- Harness without an ask tool → one plain message whose last line is the
+  question (`run-intake` step 4 fallback).
 
 ## Read first
 
@@ -114,7 +140,7 @@ Print one line per stage: fires/skips · HITL or AFK (read each skill's
 `interaction` frontmatter, effort overrides applied) · gate · artifact path.
 Ask at most one question, only if triage is genuinely ambiguous — then fire.
 Every question to the user, here and in every chain skill, goes through the
-harness's ask tool (`run-intake` step 4), never as plain text ending a turn.
+harness's ask tool (§ Waiting on the user), never as plain text ending a turn.
 Exceptions (each bundles into the plan, never a separate round trip):
 - Review-site publish. PROFILE.md `Review site publish:` decides — `always`
   → the plan lists `review-site` firing after deliver; `off` → skip

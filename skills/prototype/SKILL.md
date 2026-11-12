@@ -90,9 +90,10 @@ Rules for every page — full checklist in the brief:
    .scratch/<slug>/prototype` and reply with the LAN URL
    `http://<lan-ip>:8766/` (tailnet address from PROFILE `Environment facts`
    when the phone is remote), never localhost.
-3. Ask one message per batch: per page, the question, the variants in one
-   line each, and "which one, or which parts of each?" The verdict is the
-   user's (senior-ux HITL gate); never pick for them.
+3. Ask one ask-tool form per batch (`start` § Waiting on the user): the LAN
+   URL, per page the question, the variants in one line each, and "which
+   one, or which parts of each?" The verdict is the user's (senior-ux HITL
+   gate); never pick for them, never preselect one.
 
 ## 4. After the verdict — port it
 
