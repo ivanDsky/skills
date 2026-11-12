@@ -89,7 +89,10 @@ Commands, conflicts and the no-CI fallback:
 
 No consent line → every PR waits for the user; say so once in the run plan,
 never infer consent from silence. With `pr-check: none`, main's post-merge
-workflow is the safety net: a red main stops all merges (Red main below).
+workflow is the safety net: workers never wait on it (merge, report, next
+ticket); the orchestrator's background watcher records its verdict in a
+shared main-health ledger, and a red main stops all merges but the fix
+(Red main below).
 
 ## Feature lifecycle
 
@@ -124,7 +127,10 @@ workflow is the safety net: a red main stops all merges (Red main below).
   dropping the other side.
 - **Red main** (check fails after a merge): the next PR is the revert of
   the culprit, before any other merge. Fix forward only when the fix is
-  one line and obvious.
+  one line and obvious. `pr-check: none`: `scripts/main_health.py` keeps
+  the verdict, the claim (one owner, 30-min takeover) and held PRs;
+  workers call its `status` before merging and hold on red
+  ([references/merge-loop.md](references/merge-loop.md) § Red main).
 - **No required PR check → no trunk.** Trunk mode needs CI as the judge:
   a workflow on `pull_request` that main's branch protection requires.
   Missing → the run's first ticket is the check setup (one ordinary PR,
@@ -139,7 +145,9 @@ workflow is the safety net: a red main stops all merges (Red main below).
 One line per event in `.scratch/<slug>/ledger.md`:
 `slice: <NN> PR #<n> merged @ <sha>` ·
 `flag: <Key> added | flipped | removed (PR #<n>)` ·
-`live: <NN> <what> approved by user`.
+`live: <NN> <what> approved by user` ·
+`held: <NN> PR #<n> (main red)` ·
+`main: red @ <sha7> culprit <sha7|#PR> → fix PR #<n>`.
 
 Footer: authored for ivanDsky/skills. Cited only: Ian Johnson, "Trunk-Based
 Development with Short-Lived Branches" (dev.to/tacoda) and Igor Grieder,
