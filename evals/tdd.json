@@ -4,7 +4,10 @@
     "Add pagination to the API client — write the failing test first",
     "Fix this null-deref bug using TDD",
     "Implement the retry logic red-green-refactor style",
-    "We need tests for this new parser before you write the implementation"
+    "We need tests for this new parser before you write the implementation",
+    "The user approved the build — which tests do the fast fixes still need? Only the changed logic, no pin tests for the visual tweaks",
+    "Should this change get a hex color assertion next to the golden, or a flag-off test for a flag we delete next week?",
+    "Decide which goldens this composable needs and quarantine the test that flaked twice"
   ],
   "negative": [
     {
@@ -18,6 +21,14 @@
     {
       "prompt": "Set up CI to run the test suite on every push",
       "owner": "none"
+    },
+    {
+      "prompt": "Audit the whole repo for bloat and list dead code and redundant test files to delete",
+      "owner": "ponytail-audit"
+    },
+    {
+      "prompt": "Add multipreview @Previews for this card and hook them into the preview screenshot tests",
+      "owner": "preview-compose"
     }
   ]
 }

@@ -92,8 +92,9 @@ recollection.
 1. Scope: skills/ponytail governs — understand → reuse → adapt → extend →
    new code last; the smallest change that fully solves; never cut
    validation, security, accessibility, or data-loss handling.
-2. Process: skills/tdd at the seams — one failing test, minimal code to pass;
-   non-trivial logic leaves one small test behind.
+2. Process: skills/tdd at the seams — one failing test, minimal code to pass.
+   Which tests to write and which not: `tdd` § What to test, what not to;
+   each new test's one-line bug goes in the report for the PR body.
 3. Guard: skills/scope-creep-detector the moment a diff touches files the
    ticket never named — its keep / split / justify verdicts decide.
 4. Knowledge: read what the brief's Standards block names, nothing more.

@@ -79,8 +79,9 @@ studio/test/gradle-managed-devices; AGP Compose preview screenshot testing.)
    or `android preview render` (Android CLI — renders @Previews to PNG, no
    device, no IDE, no Gradle test setup; ideal when the project lacks a
    Roborazzi suite).
-   One capture per state/size/dark variant; diff in CI. Catches what semantics
-   miss: overflow, spacing, alignment, theme breakage.
+   Which states, sizes and themes get a capture: SKILL.md § What to test,
+   what not to (Goldens); diff in CI. Catches what semantics miss: overflow,
+   spacing, alignment, theme breakage.
 4. **Instrumented UI tests on a Gradle Managed Device** — headless ATD images
    (API 27+), configured in Gradle for reproducibility. Only for what the JVM
    cannot see: real input pipeline, window insets/focus, density, text shaping.
@@ -97,10 +98,10 @@ default; device/emulator screenshots appear only at acceptance (rung 5).
 Persistence rule: rung-3 captures are committed artifacts, not disposable
 output. When a user reports "still not right" — colors, spacing, state
 rendering — the response is `runner` (re-run the screenshot suite) and a diff
-against the reference images, never an emulator boot. Record colors and theme
-values as assertions or capture variants (light/dark/font-scale), so any
-visual claim from a previous round is re-verifiable in seconds by any later
-run without a device.
+against the reference images, never an emulator boot. Colors and theme
+values live in the light/dark captures, never in hex or dp assertions next
+to a golden, so any visual claim from a previous round is re-verifiable in
+seconds by any later run without a device.
 
 ## Tap flow → persisted JVM test (instead of guessing coordinates)
 
