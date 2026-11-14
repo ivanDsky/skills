@@ -59,6 +59,11 @@ worker's BLOCKED or NEEDS_CONTEXT only the user can clear.
 
 - The context goes inside the form (digest, verify steps, PR link, options);
   the chat reply holds no second copy.
+- Visual context (a prototype, design options, drawings, screenshots, a
+  review page) reaches the user only as a served URL — they are on a tablet
+  or phone. Never a local file path, never "I'll send it next". Follow
+  `prototype` § 3 Serve (served directory, long-lived server, tailnet URL,
+  curl check) before the ask.
 - Approvals and irreversible actions never preselect the approving option:
   an omitted or unchecked answer means not approved, so the run keeps
   waiting or asks again — it never acts on silence.

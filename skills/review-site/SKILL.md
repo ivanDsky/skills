@@ -54,12 +54,14 @@ anytime; it overwrites in place.
 python3 -m http.server 8765 --bind 0.0.0.0 --directory .scratch/<slug>/site
 ```
 
-Bound to all interfaces so the page opens from any device on the LAN/tailnet —
-reply with the machine's LAN URL, not localhost: `http://<lan-ip>:8765`
-(LAN IP: `ipconfig getifaddr en0` on macOS, `hostname -I | awk '{print $1}'`
-on Linux; the generator prints the serve command). Reachable only inside the
-local network — anything beyond (public URL, tunnel) is a one-way door:
-confirm before exposing, same rule as `deploy-tailscale` funnel.
+Bound to all interfaces so the page opens from any device on the LAN/tailnet.
+Hand it out under `prototype` § 3 Serve: a long-lived server (never one that
+dies with the turn), the tailnet URL first and the LAN URL second
+(`http://<ip>:8765`, never localhost or a file path; the generator prints the
+serve command), and its curl check (with retries) right before the
+link goes out. Reachable only inside the local network — anything beyond
+(public URL, tunnel) is a one-way door: confirm before exposing, same rule
+as `deploy-tailscale` funnel.
 
 ## 4. Keep it small
 

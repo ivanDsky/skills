@@ -341,7 +341,7 @@ shows in a screenshot, it is real, whatever the code says.
 
 ### 2.8 Report
 
-Tell the user, briefly: the style dealt (name and seed) and any redraws with their reasons; the face
+Tell the user, briefly: the screens as a served, checked URL (`prototype` § 3 Serve; never a file path); the style dealt (name and seed) and any redraws with their reasons; the face
 you chose and the signature element; each screen's one question; any check you allowed and why (for example `--allow icon-chips` for node-type
 tiles in a builder); and the sample data that must be replaced with real data, listed so it can be
 found.
