@@ -37,14 +37,18 @@ recollection.
    per `ship-to-trunk`/references/merge-loop.md (merge authority: the
    `ship-to-trunk` table; flip and live PRs wait for the user). Frontier =
    tickets whose parents' PRs are MERGED. Stacks only under
-   `ship-to-trunk`'s exception. `pr-check: none`: workers never wait on
-   main CI (they call `main_health.py status` before merging and hold on
-   red). The orchestrator runs one `main_health.py watch --who <slug>`
-   background bash job, started after the run's first merge and after a
-   later merge when none is running; on red it attributes the culprit and
-   claims and fixes it when the culprit is its own merge; on green after
-   red it merges the PRs `held` lists (rerun rule). Flow:
-   `ship-to-trunk`/references/merge-loop.md § Red main.
+   `ship-to-trunk`'s exception. `pr-check: none`: a worker ends at "branch
+   pushed, ready" (fast review done, no suite, no rebase, no PR, no merge,
+   no polling); the orchestrator owns the merge lane
+   (`ship-to-trunk`/references/merge-loop.md: `merge_lane.py land`, one
+   ticket at a time as a background bash job) and calls `main_health.py
+   status` before merging, holding on red. The orchestrator also runs one
+   `main_health.py watch --who <slug>` background bash job, started after
+   the run's first merge and after a later merge when none is running; on
+   red it attributes the culprit and claims and fixes it when the culprit
+   is its own merge; on green after red it lands the PRs `held` lists
+   with `merge_lane.py land` on their kept worktrees (rerun rule applied by
+   the script). Flow: `ship-to-trunk`/references/merge-loop.md § Red main.
 2. Claim: set `status: claimed` before any work.
 3. A ticket with `Unknowns` gets research subagents first, one per unknown, in
    parallel; link every findings file into the ticket before coding starts.
@@ -156,7 +160,9 @@ recollection.
 
 1. DoD evidence must exist or the ticket stays open. On close: append the
    ledger line, take the next frontier ticket. `trunk`: close = PR merged,
-   ledgered `slice: <NN> PR #<n> merged @ <sha>`.
+   ledgered `slice: <NN> PR #<n> merged @ <sha>`. `pr-check: none`: the
+   ticket stays `claimed` from `ready` until the lane merges it; the
+   frontier counts only merged parents (no change in meaning).
 2. Every deviation from ticket or spec lands as
    `Ruling: what — why — cost if wrong`.
 3. Frontier empty → hand off by ticket kind. Feature tickets → `user-check`
