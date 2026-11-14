@@ -8,8 +8,8 @@ here.
 | effort | subagent thinking (spawn `effort`) | reviewer model | research fan-out | intake gear | blind review (`goldfish-review`) | spec checkpoint | ticket confirm | review tier |
 |---|---|---|---|---|---|---|---|---|
 | fast | low | see *Tier → agent and model* | skip (only when a ticket is blocked) | focused | none (not asked) | post-and-proceed | none | lint + screenshots + design-only reviewer |
-| standard | medium | see *Tier → agent and model* | 1 per unknown, cap 3 | focused | asked; recommend up to 3 (stage B only if architecture-heavy) | blocking | none | one code reviewer (also fills the design rows), not two |
-| thorough | high | see *Tier → agent and model* | full parallel fan-out | deep if high stakes, else focused | asked; recommend all, stages A and B | blocking | blocking (edges + sizing) | + dual-verdict + visual reviewer, once per feature range before the flip (`pr`/`main`: once per change), never per slice |
+| standard | medium | see *Tier → agent and model* | 1 per unknown, cap 3 | focused | stage A: 0–2 lenses by risk after the checkpoint, not asked; stage B asked, recommend up to 3, only if architecture-heavy | blocking | none | one code reviewer (also fills the design rows), not two |
+| thorough | high | see *Tier → agent and model* | full parallel fan-out | deep if high stakes, else focused | stage A: 0–2 lenses by risk after the checkpoint, not asked; stage B asked, recommend all | blocking | blocking (edges + sizing) | + dual-verdict + visual reviewer, once per feature range before the flip (`pr`/`main`: once per change), never per slice |
 
 ## Tier → agent and model
 

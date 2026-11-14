@@ -12,7 +12,11 @@ Common ask for every lens: *find what is wrong, missing, or expensive from
 your angle; cite evidence; propose one disposition; do not redesign the
 feature.*
 
-## Stage A — concept (input: hypothesis + hard constraints)
+## Stage A — concept (input: hypothesis + hard constraints + out of scope)
+
+Runs only after the user confirmed scope, at most 2 lenses (SKILL.md § 1).
+A finding that re-adds an Out-of-scope item is declined, so spend the
+effort inside the confirmed scope.
 
 ### reuse
 - Objective: what already exists (in this repo, the platform, the stdlib, an

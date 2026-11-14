@@ -1,20 +1,20 @@
 ---
 name: goldfish-review
 description: >-
-  Challenge a feature concept (stage A, before the spec) or a design (stage B,
-  before tickets) with fresh-context subagents that never saw the
-  conversation — one lens each: reuse, persona flows, data and migration,
-  failure and resources, best version, verifiability; then architecture,
-  patterns, file structure. The user chooses none, up to 3, or all lenses.
-  Use when the user asks for fresh eyes, a blind review, a devil's advocate or
-  second opinion on a plan, when intake's blind-review answer is not none, or
-  when write-tickets reaches its design-review step.
+  Challenge a feature concept (stage A, once the user confirmed scope) or a
+  design (stage B, before tickets) with fresh-context subagents that never
+  saw the conversation — one lens each: reuse, persona flows, data and
+  migration, failure and resources, best version, verifiability; then
+  architecture, patterns, file structure. Use when the user asks for fresh
+  eyes, a blind review, a devil's advocate or second opinion on a plan, when
+  a spec checkpoint has passed, or when write-tickets reaches its
+  design-review step.
 interaction: mixed
 requires: []
 ---
 
 > **TL;DR** Fresh subagents that only know the hypothesis and hard constraints each attack one angle of a feature before code exists; the parent merges their findings into numbered assumptions and shows the user where lenses disagree. No fresh subagent, no review — never a same-context stand-in.
-> **Related**: skill://run-intake (asks how many lenses), skill://draft-spec (stage A consumer), skill://write-tickets (stage B at its confirm gate), skill://review-change (stage C — the diff — and shared triage rules), skill://fan-out-research (same one-file-per-subagent contract), skill://grilling (irreversible forks), skill://micro-architecture, skill://design-architecture, skill://structure-checks, skill://ship-to-trunk (file-structure lens: `trunk` tickets merge alone and dark)
+> **Related**: skill://draft-spec (stage A follows its checkpoint), skill://run-intake (prior-art step), skill://write-tickets (stage B at its confirm gate), skill://review-change (stage C — the diff — and shared triage rules), skill://fan-out-research (same one-file-per-subagent contract), skill://grilling (irreversible forks), skill://micro-architecture, skill://design-architecture, skill://structure-checks, skill://ship-to-trunk (file-structure lens: `trunk` tickets merge alone and dark)
 
 # Goldfish review
 
@@ -29,31 +29,41 @@ multiplied.
 
 | Stage | When | Input | Lenses (catalog: [references/lenses.md](references/lenses.md)) |
 |---|---|---|---|
-| **A — concept** | after intake, before the spec is drafted | hypothesis + hard constraints | reuse, persona flows, data & migration, failure & resources, best version, verifiability |
+| **A — concept** | after the spec checkpoint confirms scope, before `write-tickets` | hypothesis + hard constraints + Out of scope | reuse, persona flows, data & migration, failure & resources, best version, verifiability |
 | **B — design** | `write-tickets` confirm gate | spec + module map + file maps | architecture, patterns, file structure |
 | **C — diff** | `review-change` | the diff | owned by `review-change` (axes + visual reviewer); not a mode here |
 
-The user decides the count — **none / up to 3 / all** — asked once per stage
-(stage A inside the `run-intake` batch, stage B in the `write-tickets`
-confirm message). Recommended default: fast → none, standard → up to 3,
-thorough → all. A "none" or silence on a fast run means no goldfish; never
-add one unasked.
+**Stage A — the orchestrator picks; the user is not asked.** Never before
+scope is confirmed: no checkpoint verdict yet, or a fast or prototype run
+whose checkpoint never blocks → no stage A. Then at most 2 lenses, the top 2
+rows below by cost if wrong; no row matches → 0 lenses, and the next digest
+says `stage A: skipped — low risk`. More than 2 only when the user asks.
+Ledger `Ruling: stage A lenses <a>, <b> — <risk>`.
 
-"Up to 3" = **reuse** (always the first lens: cheapest and most often decisive)
-+ two chosen by the top care-axes in PROFILE.md, or by what the feature
-touches when axes are silent (screens → persona flows; storage → data &
-migration; async/network → failure & resources). Say which two and why in one
-line.
+| The change … | Lens |
+|---|---|
+| stores, migrates or syncs data | data & migration |
+| touches network, background work, permissions or an external integration | failure & resources |
+| adds a screen, flow or authoring flow | persona flows |
+| has success criteria that need a device or elapsed time to prove | verifiability |
+| builds something sizable and the intake prior-art step did not run | reuse |
+
+Best version only when the user asks: it adds scope a confirmed spec cut.
+
+**Stage B — the user picks** none / up to 3 / all in the `write-tickets`
+confirm message. Recommended: fast → none, standard → up to 3, thorough →
+all. A "none", or silence on a fast run, means no goldfish; never add one
+unasked.
 
 ## 2. Run a stage
 
 1. **Write the brief file** `.scratch/<slug>/goldfish/brief.md`:
    - Stage A: the **hypothesis** — 2-3 sentences on what is being built and
-     for whom, written from the intake answers — plus the **Hard constraints**
-     list copied from `intake.md`. Nothing else: no discussion, no
-     rationale, no assumptions the lens could anchor on, no other lens's
-     findings. The hypothesis is also quoted in the spec digest, so a
-     miswritten one is visible and correctable.
+     for whom, written from the confirmed spec's Problem and Solution — plus
+     the **Hard constraints** list copied from `intake.md` and the spec's
+     **Out of scope** list (a lens never re-adds cut scope). Nothing else:
+     no discussion, no rationale, no assumptions the lens could anchor on,
+     no other lens's findings.
    - Stage B: spec Problem/Solution/Assumptions, the module map, the tickets'
      file maps. Still no conversation.
 2. **One fresh-context subagent per chosen lens**, all dispatched at once, no
@@ -83,9 +93,13 @@ line.
    non-goal / success criterion; contested only with evidence a lens could have
    read; comprehension complaints are never contestable). Irreversible forks
    (deploy, data migration, money, deletion) go to `grilling`, never into an
-   assumption. Stage A output lands in the spec (`draft-spec`); stage B
-   output lands as ticket edits or file-map changes — never a second
-   interview batch.
+   assumption. Stage A output edits the spec without a second checkpoint:
+   internal → `assumed:` lines; UX-visible → a new A-item applied as a
+   reversible default and listed in the next milestone digest (`start` §
+   Waiting on the user); a finding that adds scope beyond the confirmed
+   Solution → declined, reason `scope confirmed`, unless the user reopens
+   it. Stage B output lands as ticket edits or file-map changes — never a
+   second interview batch.
 
 ## 3. Anti-patterns
 
@@ -96,8 +110,9 @@ line.
   checkpoint stays the gate.
 - A lens with nothing new to say still reports "no findings, checked: …" with
   what it looked at; an empty file is not run.
-- Running all lenses by default: cost is one subagent each, and the user
-  chose the count.
+- Running stage A before scope is confirmed, or more than 2 lenses unasked:
+  one audited run produced 76 findings across 6 lenses on a scope that then
+  collapsed to an MVP.
 
 Adapted from the Elephant-Goldfish Model, github.com/google/elephant-goldfish-model
 (Apache-2.0): the fresh-context-reviewer idea, concept-stage lenses, the

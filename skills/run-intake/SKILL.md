@@ -12,7 +12,7 @@ requires: []
 ---
 
 > **TL;DR** Interviews the user in one batch of highest-impact questions with defaults, turning the rest into numbered assumptions; fires before a spec.
-> **Related**: skill://draft-spec (spec next), skill://start (chain entry), skill://goldfish-review (blind concept review, asked for here), skill://micro-architecture (pattern table for the extension question)
+> **Related**: skill://draft-spec (spec next), skill://start (chain entry), skill://goldfish-review (stage A runs after the spec checkpoint, never asked here), skill://micro-architecture (pattern table for the extension question)
 
 # Run intake
 
@@ -27,6 +27,12 @@ never a second batch.
    thing when you overscroll") are lookups too: resolve them to canonical
    animation names via `animation-vocabulary` and confirm the name inside the
    batch — one word answers it.
+   Domain and prior art: an ask with a creation or authoring flow, an
+   external integration, or a rule catalog runs the
+   [prior-art step](references/prior-art.md) before the batch is built —
+   the user's other projects, this app's conventions, the complete catalog,
+   and for authoring flows a "how does a user create one" walkthrough.
+   Questions it answers drop out; gaps it exposes join the batch.
 2. Pick the gear and say so in one line:
    - **Focused** (default): 5-8 highest-impact questions.
    - **Deep**: 20-30 questions, when the user asks for it or stakes are high —
@@ -54,10 +60,9 @@ never a second batch.
      files are free, but an interface + registry needs a second variant the
      user names. Also ask whether a part N+1 is on the roadmap. The answer
      becomes a numbered assumption in the spec ("Extension points").
-   - **Blind review** (standard and thorough runs; fast skips) — "Want fresh
-     eyes on the concept before I draft the spec: none / up to 3 / all
-     lenses?" (`goldfish-review`). Recommended default: up to 3 at standard,
-     all at thorough. Each lens costs one subagent run; say so.
+   - **Authoring walkthrough** — creation flows: the walkthrough from the
+     prior-art step goes in the message before the ask call; one question
+     confirms or corrects it. Screens are designed after it, never before.
 4. Ask through the harness's ask tool (`ask`, `AskUserQuestion` or
    equivalent), never as plain-text questions that end the turn. The whole
    batch goes in ONE call: one entry per question with a short header, 2–4
@@ -74,12 +79,16 @@ never a second batch.
    ➡️ yes
    ```
 5. Never ask what the repo or PROFILE.md already answers, and never re-ask a
-   settled decision.
-6. Write the handoff: answers plus the numbered assumption list (A1, A2, ...)
-   to `.scratch/<slug>/intake.md`, with a **Hard constraints** list (stack,
-   deadlines, "must not" statements — facts, never rationale; with the
-   hypothesis, all a blind reviewer will see). Each assumption is a concrete
-   reviewable statement ("A1: single tenant, Postgres only"). The spec stage
+   settled decision. A technical choice with no effect the user can see is
+   never a question: decide it and write it as an `assumed:` line.
+6. Write the handoff to `.scratch/<slug>/intake.md`: answers, the numbered
+   UX-visible assumption list (A1, A2, ...), the internal `assumed:` lines
+   (the split test: `draft-spec`/references/assumptions-and-scope-matrix.md
+   § Shown vs assumed), a link to `prior-art.md` when it exists, and a
+   **Hard constraints** list (stack, deadlines, "must not" statements —
+   facts, never rationale; a blind reviewer later sees only these, the
+   hypothesis and Out of scope). Each assumption is a concrete reviewable
+   statement ("A1: a draft board autosaves on exit"). The spec stage
    consumes that file; standalone runs put the same content in the reply.
 7. Read [Question craft](references/question-craft.md) when running the deep
    gear or when the batch is hard to fill with load-bearing questions.

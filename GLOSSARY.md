@@ -51,7 +51,7 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | Flip PR | The PR that turns a release flag's release default on and bumps the version; the release of a trunk feature, merged only with user approval after user-check OK and thorough review. | launch PR, release branch |
 | Live change | A change no flag can hide (schema migration, persisted format, manifest/permission, dependency bump); ships backward compatible in its own PR with user approval. | breaking change |
 | Goldfish | Fresh-context subagent that has not seen the conversation; gets a brief file (hypothesis + hard constraints, or spec + file maps) and reviews one angle. | reviewer (reviewer = diff grader) |
-| Lens | One goldfish angle with its own objective and evidence (reuse, persona flows, data & migration, failure & resources, best version, verifiability; architecture, patterns, file structure). User picks the count: none / up to 3 / all. | persona, checklist |
+| Lens | One goldfish angle with its own objective and evidence (reuse, persona flows, data & migration, failure & resources, best version, verifiability; architecture, patterns, file structure). Stage A: the orchestrator picks 0–2 by risk after scope is confirmed; stage B: the user picks none / up to 3 / all. | persona, checklist |
 | Tension | Two lenses pulling opposite ways, kept visible with the parent's pick and why; never averaged. | conflict |
 | Not run | A lens that produced no findings file; reported as missing coverage, never as clean. | skipped, passed |
 | Standards block | ≤5 lines in an implementer brief naming the rules this ticket must satisfy, picked by care-axes rank and ticket shape. | rules dump |
