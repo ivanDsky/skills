@@ -16,7 +16,8 @@ git fetch origin && git rebase origin/main      # re-run the gates if main moved
 git push -u origin HEAD
 gh pr create --base main --title "<conventional title>" --body-file .scratch/<slug>/pr-<NN>.md
 gh pr checks <n> --watch --fail-fast --required   # skip when PROFILE says pr-check: none (see below)
-gh pr merge <n> --squash --delete-branch --match-head-commit <sha>   # authority: SKILL.md table
+gh pr merge <n> --squash --match-head-commit <sha>   # authority: SKILL.md table; never --delete-branch (below)
+git push origin --delete <slug>/<NN>-<ticket>
 git worktree remove ../<repo>-wt/<NN>
 ```
 
@@ -26,6 +27,10 @@ git worktree remove ../<repo>-wt/<NN>
   the merge instead of slipping in.
 - `--auto` instead of waiting: only when branch protection requires the
   check (otherwise it merges immediately). Never `--admin`.
+- Never `--delete-branch` from a worktree: after merging, gh checks out
+  main locally, fails with "'main' is already checked out at …" and exits
+  non-zero although the PR merged. Any non-zero merge exit → `gh pr view
+  <n> --json state` decides before anything is retried.
 - Squash title = the PR title in conventional-commit form
   (`feat(play): …`, `fix: …`, `refactor: …`); `caveman-commit` rules apply.
   The title is the changelog line.
@@ -59,7 +64,7 @@ ML=~/.agents/skills/ship-to-trunk/scripts/merge_lane.py   # python3 $ML -h: queu
 Q=.scratch/<slug>/lane/queue.jsonl
 python3 $ML enqueue --queue $Q --nn <NN> --worktree ../<repo>-wt/<NN> --title "<conventional title>" \
   --body-file .scratch/<slug>/pr-<NN>.md [--no-merge] [--red-fix <culprit>]   # when a worker reports ready
-python3 $ML land --queue $Q --who <run slug> [--max 4]   # async; start whenever the queue is non-empty and no lane job runs
+python3 $ML land --queue $Q --who <run slug> [--max 4]   # async; start whenever the queue is non-empty; a second land exits 4 (lane busy)
 ```
 
 One `land` run: stack up to `--max` tickets (ticket 1 on `origin/main`,
@@ -72,9 +77,9 @@ git fetch origin && git rebase --onto origin/main <tested head of k-1>   # lands
 python3 ~/.agents/skills/ship-to-trunk/scripts/main_health.py status   # red (exit 3) → the rest stay queued, no PR opened
 git push -u --force-with-lease origin HEAD
 gh pr create --base main --title "<conventional title>" --body-file <body>   # an OPEN PR for the branch is reused (gh pr view <branch>)
-gh pr merge <n> --squash --delete-branch --match-head-commit <sha>   # immediately; <n> always passed (from a worktree a bare `gh pr merge` merges the current branch remotely, then fails locally with "main is already checked out" and leaves the remote branch behind); <sha> = the head the suite ran on
+gh pr merge <n> --squash --match-head-commit <sha>   # immediately; <n> always passed, never --delete-branch; non-zero exit → gh pr view <n> decides (MERGED = merged); <sha> = the head the suite ran on
 # never watch main after the merge (no gh run watch/view/list): the orchestrator's watcher does
-git worktree remove ../<repo>-wt/<NN>
+git push origin --delete <branch> && git worktree remove ../<repo>-wt/<NN> && git branch -D <branch>
 ```
 
 The PR exists only right before its merge: open about a minute, never a
@@ -97,14 +102,19 @@ Results (one JSON line per ticket) and what the orchestrator does next:
   is open after a green suite and is never merged by the lane. Ask the user
   through the ask tool (`start` § Waiting on the user). On approval:
   `main_health.py status`; green → apply the rerun rule below and `gh pr
-  merge <n> --squash --delete-branch --match-head-commit <sha>`; red →
+  merge <n> --squash --match-head-commit <sha>`; red →
   `main_health.py hold --pr <n> --who <id>` (Red main).
 - **claim_refused**: another orchestrator holds the red-main claim; report
   it, nothing merged.
 - **requeued**: nothing, the ticket is still queued and the next `land`
   takes it. A ticket stays `claimed` from `ready` until merged.
+- **invalid**: the worktree is gone, holds uncommitted changes, or its HEAD
+  moved after `enqueue` (a worker still running). Nothing touched; the
+  worker finishes, then the ticket is enqueued again.
 - **exit 3** (`main red; lane paused`): wait for the watcher to record
   green; only a `--red-fix` ticket lands meanwhile.
+- **exit 4** (`lane busy`): another `land` holds the lane; nothing touched.
+  Start no second job; the running one reports when it ends.
 
 - `<suite>`: the first backticked command in the `pr-check: none` comment
   that starts with a script in the repo (`./gradlew …`); none written →

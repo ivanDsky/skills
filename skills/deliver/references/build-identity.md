@@ -83,8 +83,10 @@ python3 $BI allocate --variant debug [--slug S]   # prints VERSION_CODE, VERSION
 - `--base-code` overrides the committed code when the project keeps it
   outside `app/build.gradle(.kts)` (version catalog, properties file).
 - Device unreachable → the code comes from the ledger and the committed
-  code only, with a warning on stderr. Installing over a build made outside
-  this clone can then still fail; `which` shows it.
+  code only, with a warning on stderr; ship it, never ask the user for a
+  code. Installing over a build made outside this clone can then still
+  fail as a downgrade; `which` names the installed code once the device is
+  reachable, and `--base-code` takes it for the one rebuild.
 - One allocation per build. Never reuse a code, never edit the ledger by
   hand, never install with `adb install -d` to force a downgrade.
 
