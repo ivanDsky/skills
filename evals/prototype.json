@@ -5,7 +5,9 @@
     "Quick sketch: would a bottom-sheet filter work better than a filter screen?",
     "Mock up the onboarding flow as a page I can open on my phone",
     "Prototype these three screens before we build them: settings, profile, paywall",
-    "Make a clickable demo of the sync state machine so I can see if it feels right"
+    "Make a clickable demo of the sync state machine so I can see if it feels right",
+    "The duel spec is frozen — run the contract sitting: every screen and state on phone and tablet plus the reveal motion, then freeze the reference screenshots",
+    "Let me approve every results-screen frame once up front so the build can run without asking me about design"
   ],
   "negative": [
     {
@@ -23,6 +25,10 @@
     {
       "prompt": "Write Compose previews for every state of the card",
       "owner": "preview-compose"
+    },
+    {
+      "prompt": "The UI contract is frozen — implement the results-screen tickets to their reference pairs",
+      "owner": "implement"
     }
   ]
 }
