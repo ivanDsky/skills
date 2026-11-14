@@ -1,0 +1,4 @@
+        applicationId = "com.example.puzzlebox"
+        // Agent builds pass -PagentVersionCode/-PagentVersionName (deliver build_identity.py); the fallback is the committed release value.
+        versionCode = providers.gradleProperty("agentVersionCode").orNull?.toInt() ?: 100
+        versionName = providers.gradleProperty("agentVersionName").orNull ?: "0.32.0"

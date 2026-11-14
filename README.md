@@ -104,9 +104,11 @@ skills/<name>/          # one directory per skill
 ├── SKILL.md            # required: YAML frontmatter + instructions
 ├── references/         # optional: detail docs, loaded only when needed
 └── scripts/            # optional: helper scripts the instructions call
+    └── tests/          # pytest suites + fixtures from real inputs; lint runs them
 evals/<name>.json       # routing trigger cases (>=3 positive, >=2 near-miss)
 docs/skill-template/    # copy to skills/<name>/ to start a new skill
-scripts/lint_skills.py  # ported from awesome-llm-apps (Apache-2.0)
+scripts/lint_skills.py  # ported from awesome-llm-apps (Apache-2.0); no argument = every skill
+scripts/test_skills.py  # runs every skills/*/scripts/tests with pytest (lint calls it)
 ```
 
 ## Writing a skill
@@ -126,6 +128,11 @@ scripts/lint_skills.py  # ported from awesome-llm-apps (Apache-2.0)
 4. Every skill gets `evals/<name>.json` trigger cases; routing failures are
    fixed by editing the description, never the eval.
 5. New and changed skills land through `integrate-skill` — lint PASS required.
+6. Every script ships with pytest tests under `scripts/tests/`, with fixtures
+   captured from real inputs (real PROFILE wording, real `gh`/`adb` output;
+   identifiers scrubbed). `python3 scripts/lint_skills.py [skills/<name>]`
+   runs them, so a failing script test fails lint. Uses `pytest` when
+   importable, else `uv run --with pytest`; neither available fails lint.
 
 ## Distribution
 
