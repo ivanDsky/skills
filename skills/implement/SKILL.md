@@ -162,7 +162,9 @@ recollection.
 ## 5. Close and loop
 
 1. DoD evidence must exist or the ticket stays open. On close: append the
-   ledger line, take the next frontier ticket. `trunk`: close = PR merged,
+   ledger line, take the next frontier ticket — no chat to the user per
+   ticket (`start` § Waiting on the user: milestone digests only).
+   `trunk`: close = PR merged,
    ledgered `slice: <NN> PR #<n> merged @ <sha>`. `pr-check: none`: the
    ticket stays `claimed` from `ready` until the lane merges it; the
    frontier counts only merged parents (no change in meaning).

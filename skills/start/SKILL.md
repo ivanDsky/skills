@@ -82,7 +82,13 @@ worker's BLOCKED or NEEDS_CONTEXT only the user can clear.
   an omitted or unchecked answer means not approved, so the run keeps
   waiting or asks again once — it never acts on silence — and every lane
   that does not depend on the answer keeps moving.
-- Reports that need nothing back (merged, delivered, a verdict) stay chat.
+- Progress reaches the user once per milestone — spec frozen, slices
+  merged, user-check build ready, review done, shipped — as one digest of
+  ≤10 lines: what landed, `assumed:` lines since the last digest, what is
+  next. A milestone that needs an answer puts the digest in its checkpoint
+  form instead. No chat per merge, ticket or verdict: between milestones the
+  ledger and `fleet-status` hold the state, and a turn that ends with
+  nothing new for the user is the status line alone.
 - Harness without an ask tool → one plain message whose last line is the
   question (`run-intake` step 4 fallback).
 - Every chat message that ends a turn closes with one line:
