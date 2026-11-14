@@ -1,0 +1,4 @@
+#!/bin/sh
+# Passthrough stand-in for the machine's build-slot hook: tests must never queue behind real builds.
+echo "$*" >> "$GH_FAKE_DIR/slot.log"
+exec "$@"

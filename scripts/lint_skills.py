@@ -7,7 +7,11 @@ If a skill-builder skill ever ships on main, make that the single source of trut
 skill_lint.py — validate an agent skill directory against the agentskills.io spec.
 
 Usage:
-    python3 skill_lint.py <skill-dir> [--strict] [--json]
+    python3 skill_lint.py [<skill-dir>] [--strict] [--json]
+
+With no <skill-dir>, lints every skills/*/ directory. Either way the skill's
+scripts/tests (pytest, see test_skills.py) run too, and a failing script test
+fails lint.
 
 Checks (spec: https://agentskills.io/specification, verified July 2026):
   * SKILL.md exists and has parseable YAML frontmatter
@@ -33,6 +37,8 @@ import json
 import os
 import re
 import sys
+
+import test_skills
 
 NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MAX_NAME = 64
@@ -359,33 +365,60 @@ def lint(skill_dir, strict=False):
     return errors, warnings
 
 
+def lint_with_tests(skill_dir, strict=False):
+    """lint() plus the skill's scripts/tests: a failing script test is a lint error."""
+    errors, warnings = lint(skill_dir, strict=strict)
+    for name, ok, output in test_skills.run_script_tests([skill_dir]):
+        if not ok:
+            errors.append("scripts/tests failed for %s:\n%s" % (name, output))
+    return errors, warnings
+
+
+def report(skill_dir, errors, warnings, strict):
+    print("Linting %s (strict=%s)" % (os.path.abspath(skill_dir), "on" if strict else "off"))
+    for msg in errors:
+        print("  ERROR: %s" % msg)
+    for msg in warnings:
+        print("  WARN:  %s" % msg)
+    verdict = "PASS" if not errors else "FAIL"
+    print("  %s — %d error(s), %d warning(s)" % (verdict, len(errors), len(warnings)))
+
+
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Validate an agent skill directory (agentskills.io spec).")
-    parser.add_argument("skill_dir", help="path to the skill directory (the folder containing SKILL.md)")
+    parser = argparse.ArgumentParser(description="Validate agent skill directories (agentskills.io spec) and run their script tests.")
+    parser.add_argument("skill_dir", nargs="?",
+                        help="path to one skill directory (the folder containing SKILL.md); default: every skills/*")
     parser.add_argument("--strict", action="store_true", help="promote spec-limit violations (500+ line body) to errors")
     parser.add_argument("--json", action="store_true", dest="as_json", help="emit machine-readable JSON")
     args = parser.parse_args(argv)
 
-    errors, warnings = lint(args.skill_dir, strict=args.strict)
+    if args.skill_dir:
+        dirs = [args.skill_dir]
+    else:
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, "skills")
+        dirs = sorted(os.path.join(root, d) for d in os.listdir(root) if os.path.isdir(os.path.join(root, d)))
 
-    if args.as_json:
-        print(json.dumps({
-            "skill": os.path.abspath(args.skill_dir),
+    results = []
+    for d in dirs:
+        errors, warnings = lint_with_tests(d, strict=args.strict)
+        results.append({
+            "skill": os.path.abspath(d),
             "strict": args.strict,
             "errors": errors,
             "warnings": warnings,
             "passed": not errors,
-        }, indent=2))
-    else:
-        print("Linting %s (strict=%s)" % (os.path.abspath(args.skill_dir), "on" if args.strict else "off"))
-        for msg in errors:
-            print("  ERROR: %s" % msg)
-        for msg in warnings:
-            print("  WARN:  %s" % msg)
-        verdict = "PASS" if not errors else "FAIL"
-        print("  %s — %d error(s), %d warning(s)" % (verdict, len(errors), len(warnings)))
+        })
 
-    return 1 if errors else 0
+    if args.as_json:
+        print(json.dumps(results[0] if args.skill_dir else results, indent=2))
+    else:
+        for r in results:
+            report(r["skill"], r["errors"], r["warnings"], args.strict)
+        if not args.skill_dir:
+            failed = [os.path.basename(r["skill"]) for r in results if not r["passed"]]
+            print("%d skill(s): %s" % (len(results), "PASS" if not failed else "FAIL (%s)" % ", ".join(failed)))
+
+    return 1 if any(not r["passed"] for r in results) else 0
 
 
 if __name__ == "__main__":

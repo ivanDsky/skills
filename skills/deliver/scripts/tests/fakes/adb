@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+"""Offline `adb` stand-in. $ADB_FAKE_CODES = comma list of installed versionCodes,
+one device each (serial emulator-5554, 5556, ...); unset or empty = no device.
+Output shapes follow `adb devices` and `adb shell dumpsys package <id>`."""
+import os
+import sys
+
+codes = [c for c in os.environ.get("ADB_FAKE_CODES", "").split(",") if c]
+serials = [f"emulator-{5554 + 2 * i}" for i in range(len(codes))]
+args = sys.argv[1:]
+if args == ["devices"]:
+    print("List of devices attached")
+    for s in serials:
+        print(f"{s}\tdevice")
+elif args[:1] == ["-s"] and args[2:5] == ["shell", "dumpsys", "package"]:
+    code = codes[serials.index(args[1])]
+    if code != "0":
+        print(f"Packages:\n  Package [{args[5]}] (a1b2c3d):\n    userId=10234\n"
+              f"    versionCode={code} minSdk=26 targetSdk=36\n    versionName=0.32.0")
+else:
+    sys.exit(1)
