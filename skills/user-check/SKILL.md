@@ -75,10 +75,11 @@ the answer; an empty answer is silence — ask again, never continue on it.
 
 ## 4. Feedback → fast fix → step 1
 
-- Collect the whole round first: number every point (`F1`, `F2`, …) in
-  `.scratch/<slug>/user-check.md` with the build it was given against,
-  quoted in the user's words, and fold in what the same gallery shows for
-  the same surface. Never dispatch a one-item round.
+- The user's reply is the whole round; never wait for more items. Number
+  every point (`F1`, `F2`, …) in `.scratch/<slug>/user-check.md` with the
+  build it was given against, quoted in the user's words. Widen an
+  instance-level point to its class on the same surface (one 43dp target →
+  check every target on that screen) before dispatching.
 - Layout, spacing or motion points are not fast fixes yet: prototype or
   dev-settings playground round first, values confirmed there, then applied
   (visual-gate.md § Feedback rounds).

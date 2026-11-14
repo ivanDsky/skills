@@ -69,13 +69,11 @@ the visual evidence; the build is for feel.
 
 ## Feedback rounds (step 4)
 
-**Batch.** The reply to the check form is the whole round; number every
-point `F1…` before dispatching anything. Then add what you would have
-reported from the same gallery and the same components (same surface, same
-class of defect: one 43dp target means check all targets in the screen). One
-implementer takes the whole batch in one go. A round with a single
-instance-level item is the most expensive unit; fold the class in or hold
-until the list is complete.
+**Batch.** The user's reply to the check form is the whole round; never
+wait for more items. Number every point `F1…` before dispatching anything,
+then widen each instance-level point to its class on the same surface and
+gallery (one 43dp target means check all targets in the screen). One
+implementer takes the whole batch in one go.
 
 **Prototype first.** An F-item that changes layout, spacing or motion is not
 a fast fix yet:
