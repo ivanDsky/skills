@@ -56,7 +56,11 @@ of these returns to the main session first.
 ## Captain brief
 
 Paste into the spawn task, filled in. `agent: task`; model and spawn
-`effort`: effort-mapping.md, *Orchestrator by stage*.
+`effort`: effort-mapping.md, *Orchestrator by stage*. The captain carries
+the skill://implement/references/hard-rules.md block verbatim, with exactly
+one line replaced: `Never merge or enable auto-merge; report ready.` becomes
+`Merge only through merge_lane.py (ship-to-trunk merge authority); never gh
+pr merge by hand.` Every other rule binds it as it binds a worker.
 
 ```
 Captain for <slug>, milestone: <name>. Done when: <checkable condition>.
@@ -64,8 +68,8 @@ Read first: .scratch/<slug>/resume.md; grep '^Decision:' .scratch/<slug>/ledger.
 Run this milestone as implement's controller (dispatch per skill://start/references/effort-mapping.md;
 ship-to-trunk / review-change / deliver as the milestone needs). Route and merge; never implement
 or review yourself.
-Workers get the skill://implement/references/hard-rules.md block verbatim (implement dispatch.md).
-You merge only through the merge lane, under ship-to-trunk merge authority and PROFILE ## Consent ledger.
+<hard-rules block, merge line replaced as above>
+Workers you spawn get the unmodified block verbatim (implement dispatch.md).
 Never call the ask tool, never post status. User-only questions: keep every other lane moving;
 stop when all lanes wait on the user. Never poll: workers and background jobs push results.
 Stop also after your second compaction: finish in-flight merges, then return `partial`.
@@ -101,8 +105,17 @@ fresh session: /new, then "Resume <slug> from .scratch/<slug>/resume.md".
 
 - Subagents cannot ask: the ask tool needs an interactive UI. Questions go in
   the captain's report.
-- Default `task.maxRecursionDepth` is 2: main → captain → workers and
-  reviewers. Workers never spawn subagents, so the depth holds.
+- Default `task.maxRecursionDepth` is 2: main → captain → its spawns, and
+  those spawns get no `task` tool. Checked: every spawn in the execution
+  chain is already a controller spawn, so the captain runs them itself and
+  nothing moves inline. Ticket implementers and fast-fix workers, the brief
+  `scout`, research subagents for Unknowns (`implement` §1.3,
+  `fan-out-research`), per-slice and range reviewers plus the dual-verdict
+  subagent (`review-change`), and the teardown architect (`assess-teardown`)
+  are all spawned by the controller. Workers never spawn (`implement` §2.4).
+  `scope-creep-detector` is a skill the worker applies inline, not a spawn.
+  The fix loop messages the author agent instead of spawning one.
+  Goldfish lenses run before spec freeze, from the main session.
 - Finished subagents park after the idle TTL; `write agent://<id>` revives
   them with their transcript.
 - The agent cannot switch the main session's model or open a new session:

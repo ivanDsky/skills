@@ -26,6 +26,7 @@ Hard rules (a guard hook blocks the bash ones):
 - Templates that are only files or catalog pages (architect brief, goldfish
   lenses, merge-loop fix workers) carry the one-line pointer
   `Hard rules: skill://implement/references/hard-rules.md` instead.
+- The captain (`start`/references/lifecycle.md § Captain brief) carries the block with only the merge line swapped for its merge_lane.py line.
 - The disk floor is 15 GB free unless `PROFILE.md` names another; the worker
   states the number it saw in its BLOCKED report.
 - A rule an agent breaks twice and a hook can detect becomes a guard case in
