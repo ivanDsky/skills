@@ -6,10 +6,12 @@ Usage:
 
 lint_skills.py calls run_script_tests() so a failing script test fails lint.
 One pytest process per tests directory (their conftest.py / fixtures never mix).
-Needs pytest (`python3 -m pip install pytest`); a missing pytest is a failure,
-not a skip. Exit codes: 0 all pass, 1 failure or pytest missing.
+Runner: `python -m pytest` when pytest is importable, else
+`uv run --with pytest python -m pytest` when uv is on PATH, else a failure
+(never a skip). Exit codes: 0 all pass, 1 failure or no pytest runner.
 """
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -34,11 +36,20 @@ def tests_dir(skill_dir):
     return d if d.is_dir() else None
 
 
+def pytest_command():
+    """argv prefix that runs pytest, or None."""
+    if subprocess.run([sys.executable, "-c", "import pytest"], capture_output=True).returncode == 0:
+        return [sys.executable, "-m", "pytest"]
+    if shutil.which("uv"):
+        return ["uv", "run", "--quiet", "--with", "pytest", "python", "-m", "pytest"]
+    return None
+
+
 def run_script_tests(skill_dirs=None):
     """[(skill name, ok, output)] — one entry per skill that has scripts/tests."""
     if skill_dirs is None:
         skill_dirs = sorted(p for p in SKILLS.iterdir() if p.is_dir())
-    have = subprocess.run([sys.executable, "-c", "import pytest"], capture_output=True).returncode == 0
+    pytest = pytest_command()
     env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
     results = []
     for skill in skill_dirs:
@@ -46,11 +57,11 @@ def run_script_tests(skill_dirs=None):
         if not d:
             continue
         name = Path(skill).resolve().name
-        if not have:
-            results.append((name, False, "pytest is not installed: python3 -m pip install pytest"))
+        if not pytest:
+            results.append((name, False, "no pytest runner: `python3 -m pip install pytest` or install uv"))
             continue
         ignores = [f"--ignore={d / f}" for f in UPSTREAM_ONLY.get(name, {})]
-        p = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", *ignores, str(d)],
+        p = subprocess.run([*pytest, "-q", "-p", "no:cacheprovider", *ignores, str(d)],
                            capture_output=True, text=True, env=env, cwd=str(REPO))
         results.append((name, p.returncode == 0, (p.stdout + p.stderr).strip()))
     return results

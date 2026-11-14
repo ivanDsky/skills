@@ -131,8 +131,8 @@ scripts/test_skills.py  # runs every skills/*/scripts/tests with pytest (lint ca
 6. Every script ships with pytest tests under `scripts/tests/`, with fixtures
    captured from real inputs (real PROFILE wording, real `gh`/`adb` output;
    identifiers scrubbed). `python3 scripts/lint_skills.py [skills/<name>]`
-   runs them, so a failing script test fails lint. Needs `pytest`
-   (`python3 -m pip install pytest`).
+   runs them, so a failing script test fails lint. Uses `pytest` when
+   importable, else `uv run --with pytest`; neither available fails lint.
 
 ## Distribution
 
