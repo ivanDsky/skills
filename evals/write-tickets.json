@@ -7,7 +7,8 @@
     "Split the approved spec into tracer-bullet tickets, walking skeleton first",
     "Cut tickets with a file map per ticket and a re-runnable evidence command; ask me how many blind design lenses to run",
     "Split this spec into tickets that can each merge to main behind a flag",
-    "Split this ticket: most of it is DI and nav registration, but the retry state machine needs real design \u2014 tag each piece with its tier"
+    "Split this ticket: most of it is DI and nav registration, but the retry state machine needs real design \u2014 tag each piece with its tier",
+    "Break the spec into tickets; each DoD asks only for the tests the test policy admits, never one per surface"
   ],
   "negative": [
     {

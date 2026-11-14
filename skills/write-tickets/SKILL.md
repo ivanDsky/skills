@@ -12,7 +12,7 @@ requires: []
 ---
 
 > **TL;DR** Breaks an approved spec into dependency-ordered tracer-bullet tickets with DoD and evidence in the local tracker; fires after a spec passes checkpoint.
-> **Related**: skill://draft-spec (upstream spec), skill://implement (downstream execution), skill://fan-out-research (Unknowns research), skill://structure-checks (file-map evidence), skill://goldfish-review (stage B design review), skill://user-check (re-gate fires this for hardening tickets: DoD includes "approved behavior unchanged", one ticket pins the baseline as tests), skill://ship-to-trunk (`changes: trunk`: every ticket merges to main alone and dark)
+> **Related**: skill://draft-spec (upstream spec), skill://implement (downstream execution), skill://fan-out-research (Unknowns research), skill://structure-checks (file-map evidence), skill://goldfish-review (stage B design review), skill://user-check (re-gate fires this for hardening tickets: DoD includes "approved behavior unchanged", tests only for the bug each fixes), skill://tdd (§ What to test, what not to: the test policy every ticket's tests follow), skill://ship-to-trunk (`changes: trunk`: every ticket merges to main alone and dark)
 
 # Write tickets
 
@@ -72,8 +72,9 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
      on the single device-acceptance ticket (item 5). A ticket that adds or
      moves files also carries the DoD line "structure checks green" with the
      `structure:` command as Evidence (`structure-checks`; not configured →
-     say so in the ticket). No DoD → not a ticket: thin or split until one
-     exists.
+     say so in the ticket). Tests a ticket asks for follow `tdd` § What to
+     test, what not to — one behavior at one layer, never one test per
+     surface. No DoD → not a ticket: thin or split until one exists.
    - **flag** (`trunk` runs) — `flag: <Key> | none`; plus
      `live: <what> — <why backward compatible>` for a change no flag can hide
      (migration, persisted format, manifest/permission, dependency bump),

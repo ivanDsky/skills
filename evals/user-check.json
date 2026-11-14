@@ -6,7 +6,8 @@
     "The change is finished, give me the build name and the steps to verify it",
     "I tried it: the list should open on tap, and the header is too big — fix that and send a new build",
     "OK, I like it — now clean up what the quick fixes left behind before review",
-    "Approved — re-gate it, but only real problems become tickets; batch the smaller fixes and just list the nits"
+    "Approved — re-gate it, but only real problems become tickets; batch the smaller fixes and just list the nits",
+    "Approved — re-gate it; Critical findings get regression tests for their bug only, no ticket pinning the whole baseline"
   ],
   "negative": [
     {

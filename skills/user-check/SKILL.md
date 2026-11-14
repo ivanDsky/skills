@@ -102,10 +102,10 @@ rounds skipped it. Write the result to `.scratch/<slug>/regate.md`:
    PROFILE hard rule or the dependency rule; crash or data loss), Important
    (a rule break that will cost later), Minor (naming, style, polish).
 3. **Route by grade** — the grade picks the output, never the finding count:
-   - Critical → hardening tickets via `write-tickets`: one per finding
-     cluster, plus one that pins the baseline. That ticket turns the verify
-     steps and every F-id into persisted tests, each watched failing by
-     temporarily reverting the behavior it guards.
+   - Critical → hardening tickets via `write-tickets`, one per finding
+     cluster. Each carries regression tests for the bug it fixes, nothing
+     more; no ticket re-tests the approved build as a whole. Which tests
+     and which not: `tdd` § What to test, what not to.
    - Important → one fix batch, no tickets: a single `implement` fast-fix
      worker fixes them all in one commit (`trunk`: one slice PR).
    - Minor → a `## Deferred` list in `regate.md`, never ticketed; the next
