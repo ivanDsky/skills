@@ -88,9 +88,10 @@ Commands, conflicts and the no-CI fallback:
 | Flip PR (release) | user approves, after user-check OK and thorough review |
 
 No consent line → every PR waits for the user; say so once in the run plan,
-never infer consent from silence. The orchestrator announces a PR waiting
-for the user through the ask tool (PR link, what changed, why it is theirs;
-approve never preselected — `start` § Waiting on the user). With
+never infer consent from silence. PRs waiting for the user at the same
+time share one ask (PR links, what changed, why each is theirs; approve never
+preselected); agent merges are ledgered, never announced in chat — `start`
+§ Waiting on the user. With
 `pr-check: none`, main's post-merge workflow is the safety net: workers
 never wait on it, and never merge: they push the branch, report ready and
 stop; the orchestrator's merge lane lands ready tickets in batches

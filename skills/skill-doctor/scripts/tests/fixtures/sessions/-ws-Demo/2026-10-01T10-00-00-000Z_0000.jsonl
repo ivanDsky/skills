@@ -1,0 +1,2 @@
+{"type": "session", "version": 3, "id": "old", "timestamp": "2026-10-01T10:00:00.000Z"}
+{"type": "message", "timestamp": "2026-10-01T10:01:00.000Z", "message": {"role": "assistant", "provider": "anthropic", "model": "claude-opus-5-5", "content": [{"type": "text", "text": "x"}], "stopReason": "stop", "usage": {"input": 2, "output": 10, "cacheRead": 1000, "cacheWrite": 500, "totalTokens": 1512, "cost": {"input": 0.0, "output": 4.5, "cacheRead": 2.25, "cacheWrite": 2.25, "total": 9.0}}}}

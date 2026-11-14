@@ -145,6 +145,7 @@ Send the batch and stop. Never a second batch.
 ## Consent ledger            # what the agent may do without asking
 - pre-approved: merge to main after green review; lint fixes; dependency bumps; secret-free fixture redaction; commit+push to the project repo
 # - pre-approved: merge dark slices on green   # written on a `trunk` answer (not `trunk-ask`): agent merges dark/non-behavioral slice PRs on green check + clean fast review; flip PRs and live changes still ask. `trunk-local`: "on green LOCAL suite + clean fast review"
+# - pre-approved: versionCode allocation; merge order; re-record goldens in the ticket's own module; delete build dirs and the worktree's own outputs   # candidates, written when the user delegates them (start § Waiting on the user); never ~/.gradle or ~/Library caches
 - always ask: public pushes; publish/delete; runs longer than ~30 min of dispatch; anything touching user data
 
 ## Environment facts         # stated once, never re-derived

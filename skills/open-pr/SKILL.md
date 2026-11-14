@@ -97,11 +97,15 @@ green AND, if checks exist, `gh pr checks` is green (no CI → say "no CI";
 it is not a pass). Exception: PROFILE `pr-check: none` → the local suite on
 the branch rebased onto fresh `origin/main` is the pass, and the summary
 says so ("local suite green on <sha>; no PR CI by design"). Then
-`gh pr merge --squash --delete-branch`; the squash
+`gh pr merge <n> --squash --match-head-commit <sha>`, then `git push origin
+--delete <branch>` — never `--delete-branch`, which checks out main locally
+and fails in a worktree after a good merge (non-zero merge exit → `gh pr
+view <n> --json state` decides); the squash
 body is the Summary. Stack: mark layers ready (`gh stack submit --open`),
 then `gh stack merge --yes --merge` (atomic) and `gh stack sync --prune`.
 Pending/red checks → leave open and report. After merge:
-`git switch main && git pull`, then any post-merge step in PROFILE
+`git fetch origin` (the main checkout: `git switch main && git pull`; a
+worktree never switches to main), then any post-merge step in PROFILE
 `Environment facts` (skills repo: re-install with `npx skills add`).
 
 ## Trunk runs
@@ -131,8 +135,8 @@ Pending/red checks → leave open and report. After merge:
    over the feature's merged range) and step 1's gate (`user-check: ok`,
    thorough review green).
 3. **Merge** per the `ship-to-trunk` authority table, never step 5's
-   blanket consent: `gh pr merge <n> --squash --delete-branch
-   --match-head-commit <sha>`. Squash title = conventional-commit PR title.
+   blanket consent: `gh pr merge <n> --squash --match-head-commit <sha>`,
+   then `git push origin --delete <branch>`. Squash title = conventional-commit PR title.
    Ledger: `slice: <NN> PR #<n> merged @ <sha>`.
 4. Stacks only as `ship-to-trunk`'s exception; layers merge as soon as
    green, never `gh stack merge` atomically.

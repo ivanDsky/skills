@@ -60,7 +60,9 @@ round, an independent architect decides fix-forward vs teardown.
 mattpocock/skills · `tdd` (fakes-over-mocks payload) from obra/superpowers ·
 `scope-creep-detector` from awesome-llm-apps · `goldfish-review` from
 google/elephant-goldfish-model (Apache-2.0) · `prototype` from
-mattpocock/skills (MIT)
+mattpocock/skills (MIT) · `skill-doctor` (session audit: omp transcript
+metrics, graded scores, verified skill-line findings, ranked change proposals
+it never applies) from warpdotdev/common-skills skill-doctor (MIT)
 
 **Installed as-is (vendored, attributed — see skills/ATTRIBUTION.md):**
 `design-taste-frontend` · `archify` · `ponytail-review` / `-audit` / `-debt` ·

@@ -60,7 +60,8 @@ passed; this stage adds no code.
      allocate → gradlew → cp sequence is never shipped; the harness refuses
      raw `tailscale file cp` and `adb install` of a non-canonical name.
      The allocator takes a unique versionCode from the ledger shared by all
-     worktrees, never lower than what is on the device; versionName is
+     worktrees, never lower than what is on the device; its code stands and
+     is never a question to the user, device reachable or not; versionName is
      `<semver>-<branch-slug>.<n>` (`1.3.0-reminders.2`, `n` = that branch's
      install count, `main.<n>` on main; `--slug S` overrides the slug), so
      no two installs ever share a name. Gradle wiring missing (the script

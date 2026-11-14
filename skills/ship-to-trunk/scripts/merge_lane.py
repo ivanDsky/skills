@@ -2,8 +2,10 @@
 """Merge lane for trunk runs with `pr-check: none`: land ready tickets in batches.
 
 Run by the orchestrator as one background bash job whenever the queue is
-non-empty and no lane job runs. Workers never run it: they push the branch
-and report ready; the orchestrator enqueues the ticket.
+non-empty. One `land` per queue: it holds `<queue>.lane/` (owner pid) for its
+whole run, and a second `land` exits 4 without touching anything. Workers
+never run it: they push the branch and report ready; the orchestrator
+enqueues the ticket.
 
   merge_lane.py enqueue --queue <file> --nn <NN> --worktree <path>
                         --title "<conventional title>" --body-file <f>
@@ -15,11 +17,12 @@ edited only under a mkdir lock (`<queue>.lock`). `enqueue` fills the rest
 from the worktree and replaces an entry with the same nn (a ticket that
 re-enters after a fix):
   {"nn","worktree","branch","head","base","title","body_file",
-   "no_merge":false,"red_fix":null}
+   "no_merge":false,"red_fix":null,"lane_head"?}
 `base` is the ticket's merge-base with origin/main; `base..head` is its own
 commits, restacked from scratch on every lane run. `no_merge: true` marks a
 PR only the user may merge (unflaggable live change, flip PR). `red_fix`
-(culprit sha|#PR) marks the fix PR of a red main.
+(culprit sha|#PR) marks the fix PR of a red main. `lane_head` is the
+worktree HEAD the lane left after rebasing a requeued ticket.
 
 `land` output: one JSON line per ticket touched, {"nn","result",...}, plus
 plain ledger lines (`merge: ...`, `slice: ...`; lines not starting with `{`).
@@ -29,11 +32,13 @@ result is one of
   red           (+ log): the ticket turned the suite red
   waiting_user  (+ url): `no_merge` ticket, PR open, suite green
   claim_refused (+ reason): `red_fix` claim refused, nothing merged
-  invalid       (+ reason): worktree missing
+  invalid       (+ reason): worktree missing, holding uncommitted changes, or
+                its HEAD is neither `head` nor `lane_head` (moved since enqueue)
   requeued      (+ reason): stays at the head of the queue, in order
 Finished tickets (everything but requeued) leave the queue.
 Exit 0 when every ticket of the batch merged, 1 otherwise, 3 when main was
-red at the start and the queue holds no `red_fix` ticket (nothing touched).
+red at the start and the queue holds no `red_fix` ticket (nothing touched),
+4 when another `land` holds the lane (nothing touched).
 
 Sequence:
  1. `main_health.py status`. Red -> `main red; lane paused`, exit 3: the
@@ -66,9 +71,11 @@ Sequence:
     ("main moved: related"). 7.4 push `--force-with-lease`; reuse the OPEN PR
     of the branch (`gh pr view`), else `gh pr create` (body check line:
     `local suite green on batch top <sha7> (tickets <NN,NN>); no PR CI by
-    design`). 7.5 `gh pr merge <n> --squash --delete-branch
-    --match-head-commit <sha>` (always with the PR number; refused ->
-    requeued). 7.6 `git worktree remove`.
+    design`). 7.5 `gh pr merge <n> --squash --match-head-commit <sha>`
+    (always with the PR number, never `--delete-branch`: gh would check out
+    main locally); non-zero exit -> `gh pr view <n>` decides: MERGED counts
+    as merged, anything else is refused -> requeued. 7.6 delete the remote
+    branch, `git worktree remove`, delete the local branch.
  8. Ledger lines: `merge: batch <NN,NN> suite green @ <sha7> (<s> suites)`,
     each rerun decision `merge: <NN..> main moved <k> commits - rerun|push
     (<modules>)`, one `slice: <NN> PR #<n> merged @ <sha7>` per merge.
@@ -86,6 +93,7 @@ The suite tests only the batch top. The intermediate main states (after the
 """
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -286,15 +294,86 @@ def cmd_enqueue(a):
     return 0
 
 
+class LaneLock:
+    """One `land` per queue: `<queue>.lane/pid` names the owner; a dead pid is stale."""
+
+    def __init__(self, queue):
+        self.path = Path(str(queue) + ".lane")
+
+    def __enter__(self):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        while True:
+            try:
+                self.path.mkdir()
+                (self.path / "pid").write_text(str(os.getpid()))
+                return self
+            except FileExistsError:
+                try:
+                    pid = int((self.path / "pid").read_text())
+                except (FileNotFoundError, ValueError):
+                    try:
+                        young = time.time() - self.path.stat().st_mtime < 5
+                    except FileNotFoundError:
+                        continue
+                    if young:  # owner between mkdir and pid write
+                        time.sleep(0.2)
+                        continue
+                    pid = None
+                if pid and pid_alive(pid):
+                    fail(f"lane busy: land pid {pid} holds {self.path}", 4)
+                shutil.rmtree(self.path, ignore_errors=True)
+
+    def __exit__(self, *exc):
+        shutil.rmtree(self.path, ignore_errors=True)
+
+
+def pid_alive(pid):
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def worktree_problem(r):
+    """Why the lane must not touch this entry's worktree, or None."""
+    wt = r["worktree"]
+    if not Path(wt).is_dir():
+        return f"no worktree at {wt}"
+    if out("git", "status", "--porcelain", "--untracked-files=no", cwd=wt):
+        return "uncommitted changes in the worktree (worker still running?); re-enqueue when ready"
+    if out("git", "rev-parse", "HEAD", cwd=wt) not in (r["head"], r.get("lane_head")):
+        return "worktree HEAD moved since enqueue; re-enqueue"
+    return None
+
+
+def pr_merged(wt, pr):
+    v = run("gh", "pr", "view", pr, "--json", "state", "-q", ".state", cwd=wt, check=False)
+    return v.returncode == 0 and v.stdout.strip() == "MERGED"
+
+
 def land(a):
+    with LaneLock(a.queue):
+        return land_batch(a)
+
+
+def land_batch(a):
     q = Queue(a.queue)
     out_ = {"results": {}, "slices": []}
+    worktrees = {r["nn"]: r["worktree"] for r in q.read()}
 
     def emit(nn, result, **kw):
         print(json.dumps({"nn": nn, "result": result, **kw}), flush=True)
         out_["results"][nn] = result
         if result != "requeued":
             q.update(lambda recs: [r for r in recs if r["nn"] != nn])
+            return
+        wt = worktrees.get(nn)
+        if wt and Path(wt).is_dir():  # the lane rebased it: its HEAD is still ours
+            h = out("git", "rev-parse", "HEAD", cwd=wt)
+            q.update(lambda recs: [dict(r, lane_head=h) if r["nn"] == nn else r for r in recs])
 
     def requeue(entries, reason):
         for e in entries:
@@ -302,10 +381,11 @@ def land(a):
 
     recs = []
     for r in q.read():
-        if Path(r["worktree"]).is_dir():
-            recs.append(r)
+        problem = worktree_problem(r)
+        if problem:
+            emit(r["nn"], "invalid", reason=problem)
         else:
-            emit(r["nn"], "invalid", reason=f"no worktree at {r['worktree']}")
+            recs.append(r)
     if not recs:
         return 0 if not out_["results"] else 1
 
@@ -464,12 +544,15 @@ def land(a):
                 emit(e["nn"], "claim_refused", pr=int(pr), reason=(claim.stderr or claim.stdout).strip())
                 break
             print(claim.stdout.strip())
-        m = run("gh", "pr", "merge", pr, "--squash", "--delete-branch", "--match-head-commit", head,
-                cwd=wt, check=False)
-        if m.returncode:
+        # No --delete-branch: gh then checks out main locally, which fails with
+        # "'main' is already checked out" in a worktree even after a good merge.
+        m = run("gh", "pr", "merge", pr, "--squash", "--match-head-commit", head, cwd=wt, check=False)
+        if m.returncode and not pr_merged(wt, pr):
             requeue(rest, f"merge refused for PR #{pr}: {m.stderr.strip()}")
             break
+        run("git", "push", "origin", "--delete", e["branch"], cwd=wt, check=False)
         run("git", "worktree", "remove", wt, cwd=str(common.parent), check=False)
+        run("git", "branch", "-D", e["branch"], cwd=str(common.parent), check=False)
         emit(e["nn"], "merged", pr=int(pr), sha=head[:7])
         out_["slices"].append(f"slice: {e['nn']} PR #{pr} merged @ {head[:7]}")
         prev_t, merged = e["head_t"], merged + 1
