@@ -73,8 +73,9 @@ recollection.
    interfaces and file-scope facts come from one `scout` dispatch, not from
    the controller reading files — unless the ledger or earlier reports
    already hold them. The dispatch
-   prompt holds only the brief path, one line of context, and the report
-   contract. Never paste session history into a dispatch.
+   prompt holds only the brief path, one line of context, the report
+   contract, and the hard-rules block (references/hard-rules.md, verbatim).
+   Never paste session history into a dispatch.
 3. Report contract: the worker writes a report file and replies in at most
    15 lines — status DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT,
    commits, one-line test summary, `device:` and `structure:` lines,

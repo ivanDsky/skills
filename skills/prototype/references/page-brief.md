@@ -30,4 +30,13 @@ Checklist (all required):
 
 Reply (≤5 lines): status DONE | BLOCKED, the file path, one line per variant
 (what is structurally different), and "script-checked: yes | no".
+
+Hard rules (a guard hook blocks the bash ones):
+- Never pkill, killall, or `gradlew --stop`; other lanes' builds share the machine.
+- Write only inside your worktree, plus the report/findings path your brief names.
+- Stage explicit paths; never `git add -A`, `git add .` or `--all`.
+- Never delete caches (~/.gradle, ~/Library, ~/.android); disk full means BLOCKED.
+- Run `df -h ~` before a build; under 15 GB free, report BLOCKED.
+- Never merge or enable auto-merge; report ready.
+- Never call the ask tool; questions go in the report as NEEDS_CONTEXT.
 ```

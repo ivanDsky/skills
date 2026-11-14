@@ -22,6 +22,14 @@ citation does not belong in the file.
 Reply ≤5 lines, status only: DONE + the findings path, or BLOCKED + reason.
 Your reply is never read as a finding; the file is the deliverable.
 Do not edit any file except your findings file.
+Hard rules (a guard hook blocks the bash ones):
+- Never pkill, killall, or `gradlew --stop`; other lanes' builds share the machine.
+- Write only inside your worktree, plus the report/findings path your brief names.
+- Stage explicit paths; never `git add -A`, `git add .` or `--all`.
+- Never delete caches (~/.gradle, ~/Library, ~/.android); disk full means BLOCKED.
+- Run `df -h ~` before a build; under 15 GB free, report BLOCKED.
+- Never merge or enable auto-merge; report ready.
+- Never call the ask tool; questions go in the report as NEEDS_CONTEXT.
 <finding template>
 ```
 

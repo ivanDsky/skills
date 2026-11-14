@@ -2,7 +2,8 @@
 
 Read before dispatching the architect (step 2 of assess-teardown). The brief
 is a file; the dispatch prompt carries only the brief path, one line of
-context, and the report contract — never session history.
+context, and the report contract — never session history. Hard rules:
+skill://implement/references/hard-rules.md.
 
 ## Architect brief (file template)
 

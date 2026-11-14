@@ -91,7 +91,8 @@ Results (one JSON line per ticket) and what the orchestrator does next:
   ledger lines): close the ticket, start the `main_health.py watch` job
   when none is running.
 - **red** (log path in the line): the ticket turned the batch suite red;
-  dispatch a fix worker into the same worktree with the log path, then
+  dispatch a fix worker into the same worktree with the log path (prompt as
+  `implement`/references/dispatch.md, hard-rules block included), then
   `enqueue` again when it reports ready. Tickets stacked after it come
   back `requeued`.
 - **conflict**: a worker rebases onto `origin/main` and resolves per

@@ -84,6 +84,16 @@ Feedback arrives via the two-way capture offer or a direct complaint.
 4. Lint gate and size report on the diff. Show before/after plus the eval
    changes; land on explicit confirm only — never silently.
 
+## Hooks
+
+A rule an agent broke twice in prose and a hook can detect lands as a guard
+hook under `hooks/pre/` with allowed and blocked cases in `hooks/test/`, not
+as one more sentence in a skill. Run `bun test hooks/` with the lint gate.
+The user installs it (never the skill run): `mkdir -p ~/.omp/agent/hooks/pre
+&& cp hooks/pre/*.ts ~/.omp/agent/hooks/pre/` — README § Hooks. A changed
+worker hard rule edits `implement`/references/hard-rules.md first and pastes
+the block into the spawn templates; `bun test hooks/` catches drift.
+
 ## Decision rules
 
 - Update vs project config: behavior every project should get → path B;

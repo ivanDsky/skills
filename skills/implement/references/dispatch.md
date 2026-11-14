@@ -43,14 +43,30 @@ skill wall; the worker reads only what a line names. Selection:
 Event triggers (creating a file, editing a shared variant site, introducing
 a pattern) live in `implement` §3 and are not repeated here.
 
-The dispatch prompt carries four things only: one line on where this ticket
+The dispatch prompt carries five things only: one line on where this ticket
 fits, the brief path introduced as "read this first — it is your
-requirements", the report path + contract below, and the voice line from
+requirements", the report path + contract below, the voice line from
 `start` § Voice (short-note thinking, caveman report), which also says
-"never ask the user; questions go in the report as NEEDS_CONTEXT". The
-controller writes briefs and ledger lines in the same voice. `trunk` runs with
-`pr-check: none` add a fifth: "stop after the branch push; report ready;
-never run the full suite, rebase onto main, open the PR or merge".
+"never ask the user; questions go in the report as NEEDS_CONTEXT", and the
+hard-rules block below, pasted verbatim. The controller writes briefs and
+ledger lines in the same voice. `trunk` runs with `pr-check: none` add a
+sixth: "stop after the branch push; report ready; never run the full suite,
+rebase onto main, open the PR or merge".
+
+### Hard-rules block
+
+Canonical copy: [hard-rules.md](hard-rules.md). Paste exactly this:
+
+```
+Hard rules (a guard hook blocks the bash ones):
+- Never pkill, killall, or `gradlew --stop`; other lanes' builds share the machine.
+- Write only inside your worktree, plus the report/findings path your brief names.
+- Stage explicit paths; never `git add -A`, `git add .` or `--all`.
+- Never delete caches (~/.gradle, ~/Library, ~/.android); disk full means BLOCKED.
+- Run `df -h ~` before a build; under 15 GB free, report BLOCKED.
+- Never merge or enable auto-merge; report ready.
+- Never call the ask tool; questions go in the report as NEEDS_CONTEXT.
+```
 
 ## Report file: `.scratch/<slug>/reports/NN-report.md`
 
