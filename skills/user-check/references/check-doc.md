@@ -43,7 +43,8 @@ Reply `ok`, or by id: "T2: should open the list, not the detail - S1: too dense"
 
 - Screens: reuse the JVM screenshot-test captures (Roborazzi / AGP suites)
   that already exist. Never re-shoot on an emulator. None exist → drop the
-  section; the build is the evidence.
+  section; the build is the evidence. A UI change's section is
+  the visual-gate gallery link ([visual-gate.md](visual-gate.md)), not inlined copies.
 - Motion: only when a recording already exists or the wireless-adb device
   is reachable (`adb screenrecord`, pairing per diagnose-bug). Otherwise say
   the user's eyes check it.
