@@ -40,6 +40,15 @@ Reviewer and research dispatch:
 | fan-out-research, web/primary-source questions | ticket `effort: fast` → `agent: task`, `model: anthropic/claude-haiku-5-5:low`, spawn `effort: lo`; standard → `agent: task`, no `model`, omit `effort`; thorough → `agent: task`, no `model`, `hi` |
 | brief context gathering (neighbor interfaces, file-scope facts) | `agent: scout` |
 
+Orchestrator by stage (who runs each stage: lifecycle.md):
+
+| stage | orchestrator | model |
+|---|---|---|
+| triage, intake, spec, UI contract, goldfish gates, ticketing | main session | the session's launch model: `anthropic/claude-opus-5-5` (`anthropic/claude-fable-5-2` when the user launches it for thorough design); the agent never switches it |
+| user-check F-id triage, taste rulings, asks, approvals, flip, milestone digests | main session | same launch model; taste stays off Sonnet |
+| execution milestone after spec freeze: slices, user-check build, one fix round, hardening + review, deliver | captain, one fresh spawn per milestone | `agent: task`, no `model` (Sonnet); spawn `effort` omitted, `hi` at run effort `thorough` |
+| quick task, quick prototype, bug diagnosis | main session, no captain | launch model |
+
 - Never pass `model` to `scout` or `sonic`: the harness pins them to Haiku,
   and a per-call `model` on a pinned agent is a preflight conflict error.
 - Spawn `effort` is `lo`, omitted or `hi`. Never pass `med`: measured
