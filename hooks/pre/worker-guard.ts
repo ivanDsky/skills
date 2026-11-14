@@ -287,12 +287,23 @@ export function findViolations(command: string): Violation[] {
 }
 
 export default function workerGuard(pi: ExtensionAPI): void {
+	let warned = false;
 	pi.on("tool_call", async event => {
 		if (event.toolName !== "bash") return;
 		const input = (event.input ?? {}) as Record<string, unknown>;
 		const command = typeof input.command === "string" ? input.command : undefined;
 		if (!command) return;
-		const violations = findViolations(command);
+		// Fail open: a parser bug must never block every bash call.
+		let violations: Violation[];
+		try {
+			violations = findViolations(command);
+		} catch (error) {
+			if (!warned) {
+				warned = true;
+				console.error("worker-guard: parser error, failing open:", error);
+			}
+			return;
+		}
 		if (violations.length > 0) return { block: true, reason: violations.map(v => v.reason).join(" ") };
 	});
 }

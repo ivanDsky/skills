@@ -145,4 +145,30 @@ describe("hook wiring", () => {
 		expect(await handler()({ toolName: "bash", input: { command: "git add a.kt" } })).toBeUndefined();
 		expect(await handler()({ toolName: "read", input: { command: "git add -A" } })).toBeUndefined();
 	});
+
+	test("pathological input never throws out of the handler", async () => {
+		const nested = `${"$(".repeat(50)}git add -A${")".repeat(50)}`;
+		for (const command of ['echo "unbalanced', "echo 'unbalanced", "git add -A \\", "$(((", "`", nested, "<<", "cat <<EOF\nno end"]) {
+			let result: unknown;
+			await expect((async () => { result = await handler()({ toolName: "bash", input: { command } }); })()).resolves.toBeUndefined();
+			expect(result === undefined || typeof (result as { block?: boolean }).block === "boolean").toBe(true);
+		}
+	});
+
+	test("fails open when the parser throws", async () => {
+		const original = String.prototype.split;
+		const errors: unknown[][] = [];
+		const logged = console.error;
+		console.error = (...args: unknown[]) => { errors.push(args); };
+		String.prototype.split = () => { throw new Error("boom"); };
+		let result: unknown = "unset";
+		try {
+			result = await handler()({ toolName: "bash", input: { command: "git add -A" } });
+		} finally {
+			String.prototype.split = original;
+			console.error = logged;
+		}
+		expect(result).toBeUndefined();
+		expect(errors.length).toBe(1);
+	});
 });
