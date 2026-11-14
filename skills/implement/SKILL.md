@@ -153,6 +153,11 @@ recollection.
 - NEEDS_CONTEXT: answer as a brief addendum file, resume the same worker.
   Only the user can answer → the orchestrator asks through the ask tool
   first (`start` § Waiting on the user); workers never ask the user.
+- Review findings (slice review or `review-change`): message the worker
+  that wrote the code, in its same session; never a fresh fixer.
+  One re-review per finding, comment/doc-only fixes none; a finding still
+  open after it comes back to the orchestrator, never a third round
+  (`review-change`/references/fix-loop.md).
 - BLOCKED: ledger a `Ruling:`, reopen the ticket, take another frontier
   ticket. Four things stop the run and ask the user (ask tool, `start` §
   Waiting on the user): an irreversible or destructive operation, a

@@ -9,7 +9,9 @@
     "Review this fix round — re-review only the fix diff, JVM screenshot-test captures are the evidence",
     "Review the diff: per-axis coverage proof, run the structure check, and triage the findings from the last round",
     "I approved the build and the hardening tickets are closed — run the review gate, suite once",
-    "Review the diff — it adds a public TagGroup composable and its state holder; grade the component API too"
+    "Review the diff — it adds a public TagGroup composable and its state holder; grade the component API too",
+    "The reviewer found two issues in slice 07 — send them back to the worker that wrote it, one re-review only, escalate if it still fails",
+    "Run the review for this mechanical rename slice — one Haiku reviewer is enough, save the thorough review for the feature range before the flip"
   ],
   "negative": [
     {

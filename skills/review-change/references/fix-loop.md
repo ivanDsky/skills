@@ -5,15 +5,25 @@ fires.
 
 ## Fix round
 
-1. Resume the same implementer with the findings file path
-   (`.scratch/<slug>/review.md`). Critical and Important findings only — Minors
-   are never fixed in-round; ledger each as
+1. The worker that wrote the code fixes its own findings, in the same agent
+   session: message it the findings file path (`.scratch/<slug>/review.md`);
+   never spawn a fresh fixer, which re-reads everything the author already
+   holds. A fresh worker (original brief plus findings file) only when the
+   harness can no longer reach that session. Critical and Important findings
+   only — Minors are never fixed in-round; ledger each as
    `Ruling: minor <what> deferred — <why>`.
-2. Re-review only the fix diff (`git diff <pre-fix-sha>...HEAD`): did each
-   finding actually close, and did the fix break anything inside the
-   already-reviewed surface? Never a full re-review.
+2. Re-review only the fix diff (`git diff <pre-fix-sha>...HEAD`), at most
+   once per finding: did each finding actually close, and did the fix break
+   anything inside the already-reviewed surface? Never a full re-review. A
+   fix whose diff touches only comments, KDoc or docs closes without
+   re-review.
 3. A round fails when any Critical/Important finding survives or a new one of
    the same grade appears. Count failed rounds per module in the ledger.
+4. A finding still open after its one re-review is its second failure: the
+   worker stops and reports it to the orchestrator, never a third round. The
+   orchestrator picks one, ledgered as `Ruling:`: re-dispatch one tier up
+   (`start`/references/effort-mapping.md escalation), the teardown gate
+   below, or ESCALATE to the user when the fix needs a spec decision.
 
 ## Triage — what the implementer may do with a finding
 
