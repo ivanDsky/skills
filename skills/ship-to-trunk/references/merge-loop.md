@@ -106,7 +106,8 @@ Results (one JSON line per ticket) and what the orchestrator does next:
 - **exit 3** (`main red; lane paused`): wait for the watcher to record
   green; only a `--red-fix` ticket lands meanwhile.
 
-- `<suite>`: the command in the `pr-check: none` comment; none written →
+- `<suite>`: the first backticked command in the `pr-check: none` comment
+  that starts with a script in the repo (`./gradlew …`); none written →
   assemble debug + unit `runner:` + `structure:` (when set).
 - **Batch guarantee.** The suite tests only the batch top. The intermediate
   main states (after the 1st, 2nd, … merge of a batch) are never tested on
