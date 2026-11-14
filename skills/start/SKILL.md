@@ -64,12 +64,29 @@ worker's BLOCKED or NEEDS_CONTEXT only the user can clear.
   or phone. Never a local file path, never "I'll send it next". Follow
   `prototype` § 3 Serve (served directory, long-lived server, tailnet URL,
   curl check) before the ask.
+- Read PROFILE.md `## Consent ledger` before every ask: what it
+  pre-approves is done, not asked. The user delegates a class of asks ("do
+  it yourself", "deploy it yourself", "you pick") → append it as a
+  `pre-approved:` line the same turn and name it in the next status.
+  Never pre-approvable, however delegated: the flag flip or release, a
+  production deploy, data deletion, anything public.
+- Budget: ≤5 questions per form, recommended option first; approvals for
+  several PRs share one form; a question that blocks nothing waits for the
+  next checkpoint form instead of its own ask.
+- Reversible decision with a recommended default → preselect it. An answer
+  that comes back as the untouched default (the harness submits preselected
+  values on timeout) is taken: ledger `assumed: <decision> — default` and
+  keep going; the next milestone digest lists every assumption so the user
+  overturns them in one place.
 - Approvals and irreversible actions never preselect the approving option:
   an omitted or unchecked answer means not approved, so the run keeps
-  waiting or asks again — it never acts on silence.
+  waiting or asks again once — it never acts on silence — and every lane
+  that does not depend on the answer keeps moving.
 - Reports that need nothing back (merged, delivered, a verdict) stay chat.
 - Harness without an ask tool → one plain message whose last line is the
   question (`run-intake` step 4 fallback).
+- Every chat message that ends a turn closes with one line:
+  `blocked on you: <what>` or `not blocked: <next step>`.
 
 ## Read first
 
