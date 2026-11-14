@@ -32,7 +32,8 @@ keep the steps below unchanged:
   Dark or non-behavioral slices skip step 1's `user-check` precondition;
   fix rounds run the touched module's tests and leave the full suite to the
   PR check. `pr-check: none`: the worker runs this tier before pushing the
-  branch, then the orchestrator's merge lane rebases and runs the local suite. A rebase conflict
+  branch, then the orchestrator's merge lane stacks ready tickets and runs
+  the local suite once on the batch top. A rebase conflict
   resolved by hand → fast tier again over the resolution diff only; a clean
   rebase is never re-reviewed.
 - **Once, before the flip PR**: thorough tier over the feature's merged range
