@@ -56,3 +56,8 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | Not run | A lens that produced no findings file; reported as missing coverage, never as clean. | skipped, passed |
 | Standards block | ≤5 lines in an implementer brief naming the rules this ticket must satisfy, picked by care-axes rank and ticket shape. | rules dump |
 | File map | Per-ticket list of path — one-sentence responsibility; "and" in a line means two files. | file list |
+| Session audit | A `skill-doctor` run: one window of omp session transcripts turned into metrics, graded scores, verified findings and proposals. | retro (= one run's `retrospect`), review |
+| Condensed transcript | The per-session digest `skill-doctor` writes for graders: user turns, asks, spawns, errors, compactions and replies kept, routine tool calls folded into counts, every line addressed by its JSONL line `#n`. | summary, log |
+| Change unit | One delivered change inside a session (a merged ticket or a quick-task fix); the denominator for per-change cost and ask rates. | task, PR |
+| Skills hash | Hash of the skills dir recorded per audit run; two runs with the same hash measure drift, not a skill change. | version |
+| Proposal | A ranked, verified skill change from a session audit with `token_delta` and `success_metric`; lands only through `integrate-skill` path B after the user picks it. | suggestion, fix |

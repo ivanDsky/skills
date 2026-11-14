@@ -235,6 +235,7 @@ closing the current one first (commit, stop, or hand off).
 | prototype | `prototype` | quick prototype: one question per page, one subagent per task; small ports land directly, big ones via `graduate-prototype` |
 | support | `assess-teardown` | teardown gate: 2 failed fix rounds or reviewer discretion |
 | support | `diagnose-bug` | bug report: evidence ladder, user-time-last |
+| support | `skill-doctor` | the user asks for a session or workflow audit, or to re-measure after skill changes; never fired by the chain itself |
 
 `map-codebase`, `fan-out-research`, `graduate-prototype`, `assess-teardown`
 are the chain contract and land separately — when one fires and the skill is

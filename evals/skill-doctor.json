@@ -1,0 +1,23 @@
+{
+  "skill": "skill-doctor",
+  "positive": [
+    "Audit last week's PuzzleBox agent sessions and tell me which skills are costing the most",
+    "Grade my skill pack from the real omp session logs — asks, compactions, subagent spend — and propose skill changes",
+    "We landed the ask-budget change in start five days ago; re-measure the sessions since and tell me if it worked",
+    "Which of my installed skills never fire in real sessions, and which should I trim or delete?"
+  ],
+  "negative": [
+    {
+      "prompt": "Apply proposal P2 from the session audit to the start skill and update its trigger cases",
+      "owner": "integrate-skill"
+    },
+    {
+      "prompt": "Audit this codebase for bloat and tell me what I can delete",
+      "owner": "ponytail-audit"
+    },
+    {
+      "prompt": "Grade the code quality of this branch before we ship it",
+      "owner": "review-change"
+    }
+  ]
+}
