@@ -106,6 +106,8 @@ skills/<name>/          # one directory per skill
 └── scripts/            # optional: helper scripts the instructions call
     └── tests/          # pytest suites + fixtures from real inputs; lint runs them
 evals/<name>.json       # routing trigger cases (>=3 positive, >=2 near-miss)
+hooks/pre/*.ts          # versioned omp guard hooks (install: § Hooks)
+hooks/test/             # bun tests for the hooks
 docs/skill-template/    # copy to skills/<name>/ to start a new skill
 scripts/lint_skills.py  # ported from awesome-llm-apps (Apache-2.0); no argument = every skill
 scripts/test_skills.py  # runs every skills/*/scripts/tests with pytest (lint calls it)
@@ -139,6 +141,24 @@ scripts/test_skills.py  # runs every skills/*/scripts/tests with pytest (lint ca
 ```bash
 npx skills add ivanDsky/skills
 ```
+
+## Hooks
+
+Rules an agent broke twice in prose are enforced by a hook, and the hook is
+versioned here instead of living only in `~/.omp`. `hooks/pre/worker-guard.ts`
+blocks the mechanically detectable worker hard rules in bash commands
+(`skills/implement/references/hard-rules.md`): `pkill`/`killall` of
+Gradle/Java, `gradlew --stop`, `git add -A`/`--all`/`.`, and `rm` of
+`~/.gradle`, `~/Library` or `~/.android`. Install (omp loads every `.ts` in
+that directory) and test:
+
+```bash
+mkdir -p ~/.omp/agent/hooks/pre && cp hooks/pre/*.ts ~/.omp/agent/hooks/pre/
+bun test hooks/
+```
+
+Re-run the `cp` after every change under `hooks/pre/`; the installed copy is
+not a symlink. Limits are listed at the top of each hook.
 
 ## Planning
 

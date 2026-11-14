@@ -6,6 +6,8 @@ file, and the repo. Knowledge skill = the existing skill whose method the
 lens follows (the subagent reads that skill's SKILL.md). Every finding needs
 evidence; "no findings" must list what was checked.
 
+Hard rules: skill://implement/references/hard-rules.md.
+
 Common ask for every lens: *find what is wrong, missing, or expensive from
 your angle; cite evidence; propose one disposition; do not redesign the
 feature.*
