@@ -21,7 +21,7 @@ interaction: afk
    deeper not bigger.
 2. **Who decides this, and when do they see it?** Design parameters are
    picked by the USER on real hardware (A/B matrix, published for remote
-   judgment) **before implementation locks** — the audited cost of
+   judgment as a served, checked URL — `prototype` § 3 Serve) **before implementation locks** — the audited cost of
    skipping this: a full shipped-and-replaced rework.
 3. **Will the next surface inherit this?** Fixes land in the shared layer
    as named tokens and tested policies (size caps, contrast bars as tests,
@@ -45,7 +45,8 @@ interaction: afk
 - **Decide on hardware**: debug-only A/B switcher (user flips, verdict is
   final, losers deleted); walk every state on the device before changing
   any — including states that look wrong but are correct. Before any app
-  code exists, the switcher is a `prototype` page served to the phone.
+  code exists, the switcher is a `prototype` page served to the phone
+  (`prototype` § 3 Serve).
 - **Policies, tested**: "two-pane requires large width AND landscape";
   "content caps at a readable maximum". Layout keys on size AND
   orientation. Error copy tells the truth about the cause. Motion: exit

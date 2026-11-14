@@ -8,8 +8,9 @@ and trying the build is the point.
 ## Location and shape
 
 `.scratch/<slug>/review/REVIEW.md`, assets beside it in `review/assets/`.
-The path is fixed, because `review-site` reads it from there. Total prose
-≤ ~20 lines; every visual and step is numbered.
+The path is fixed, because `review-site` reads it from there. The user sees
+it only through `review-site`'s served URL (`prototype` § 3 Serve), never as
+a file path. Total prose ≤ ~20 lines; every visual and step is numbered.
 
 ```markdown
 # Check: <slug> — <one-line what changed>

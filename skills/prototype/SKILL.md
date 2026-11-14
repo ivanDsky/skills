@@ -86,14 +86,37 @@ Rules for every page — full checklist in the brief:
 1. Compile check only: pipe each page's inline `<script>` to
    `node --check -` (exit 0 = parses; ~0.1 s). No headless browser, no
    screenshots — the user judges the page directly; speed is the point.
-2. Serve: `python3 -m http.server 8766 --bind 0.0.0.0 --directory
-   .scratch/<slug>/prototype` and reply with the LAN URL
-   `http://<lan-ip>:8766/` (tailnet address from PROFILE `Environment facts`
-   when the phone is remote), never localhost.
-3. Ask one ask-tool form per batch (`start` § Waiting on the user): the LAN
-   URL, per page the question, the variants in one line each, and "which
-   one, or which parts of each?" The verdict is the user's (senior-ux HITL
-   gate); never pick for them, never preselect one.
+2. Serve — the rule every skill that shows the user something visual points
+   to. The user looks on a tablet or phone, never at this machine.
+   - Everything they should see lives in the served directory
+     (`.scratch/<slug>/prototype`): HTML pages and any PNG/SVG option
+     drawings, with an `index.html` that links or embeds the images when
+     there is no page.
+   - The server outlives the turn: the harness's long-lived service (omp:
+     bash with `name` + `ready`) or `nohup python3 -m http.server 8766 --bind
+     0.0.0.0 --directory .scratch/<slug>/prototype >/dev/null 2>&1 &` —
+     never a one-shot command that dies with the turn. A server already
+     listening on that port for that directory
+     (`lsof -nP -iTCP:8766 -sTCP:LISTEN`) is reused.
+   - URLs: tailnet first (`tailscale ip -4`, or the PROFILE `Environment
+     facts` address), LAN second (`ipconfig getifaddr en0` on macOS,
+     `hostname -I | awk '{print $1}'` on Linux). Never localhost, never a
+     local file path, never "I'll send it next" — a page still being built
+     waits for the next batch.
+   - Right before the ask, check every page URL in the form with the
+     tailnet/LAN address, not localhost:
+     `for i in 1 2 3 4 5; do curl -fsS -o /dev/null -m 5 <url> && break;
+     sleep 2; done`. Retry, not one shot: a freshly started server can stall
+     non-loopback connects for a few seconds (observed on macOS) while
+     localhost answers at once. Still failing → restart the server and check
+     again; an unchecked link is never sent.
+3. Ask one ask-tool form per batch (`start` § Waiting on the user): the
+   checked URLs, per page the question, the variants in one line each, and
+   "which one, or which parts of each?" The verdict is the user's (senior-ux
+   HITL gate); never pick for them, never preselect one.
+4. The user says they cannot see the page → check the server process is
+   alive, restart it if not, re-run the curl check, and send a new ask with
+   the URLs. Never argue about the old link.
 
 ## 4. After the verdict — port it
 
@@ -122,6 +145,8 @@ This is the port's spec.
 - Browser runs or screenshots before the user sees it — they cost time and
   the user's own look replaces them.
 - Porting by translating the HTML line by line instead of from the handoff.
+- An ask that describes visual options without a served, checked URL.
+- A local file path or "will send next" in place of a link.
 
 Adapted from mattpocock/skills (`prototype` — throwaway-answers-a-question,
 variant switcher, visible state), MIT. Single-file page, senior-ux method,
