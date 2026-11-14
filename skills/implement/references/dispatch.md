@@ -49,8 +49,8 @@ requirements", the report path + contract below, and the voice line from
 `start` § Voice (short-note thinking, caveman report), which also says
 "never ask the user; questions go in the report as NEEDS_CONTEXT". The
 controller writes briefs and ledger lines in the same voice. `trunk` runs with
-`pr-check: none` add a fifth: "after merge, do not watch or poll main CI;
-report and stop (`main_health.py status` red → hold, don't merge)".
+`pr-check: none` add a fifth: "stop after the branch push; report ready;
+never run the full suite, rebase onto main, open the PR or merge".
 
 ## Report file: `.scratch/<slug>/reports/NN-report.md`
 
@@ -59,7 +59,7 @@ The worker writes the full report there and replies in at most 15 lines:
 ```
 status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
 commits: <base7>..<head7>
-pr: <`trunk` runs — #<n> merged @ <sha7> | held, main red | waiting on user (<why>)>
+pr: <`trunk` runs — #<n> merged @ <sha7>; `pr-check: none` — ready @ <sha7> (<branch>, <worktree path>)>
 tests: <one line — runner, passed/failed>
 dod: <met? evidence path>
 skipped: <what>
