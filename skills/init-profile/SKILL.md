@@ -148,6 +148,8 @@ Send the batch and stop. Never a second batch.
 # - pre-approved: versionCode allocation; merge order; re-record goldens in the ticket's own module; delete build dirs and the worktree's own outputs   # candidates, written when the user delegates them (start § Waiting on the user); never ~/.gradle or ~/Library caches
 - always ask: public pushes; publish/delete; runs longer than ~30 min of dispatch; anything touching user data
 
+## Taste rules               # optional: one line per visual rejection, written the same turn (start § Decisions and waiting); pasted into UI briefs and visual reviewers
+
 ## Environment facts         # stated once, never re-derived
 - (device topology, e.g. tablet on LAN via tailscale, has no terminal)
 - (review site must be LAN-exposed, not localhost)

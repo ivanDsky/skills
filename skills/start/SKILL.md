@@ -93,6 +93,29 @@ worker's BLOCKED or NEEDS_CONTEXT only the user can clear.
   question (`run-intake` step 4 fallback).
 - Every chat message that ends a turn closes with one line:
   `blocked on you: <what>` or `not blocked: <next step>`.
+- User rules and corrections → § Decisions and waiting.
+
+## Decisions and waiting (orchestrator)
+
+Compaction drops what the user said (one audited run restated a scope rule
+three times), so user statements persist the same turn, before acting:
+
+- A rule, preference, scope ruling or correction scoped to this run → one
+  append-only ledger line, `Decision: <scope> — <rule>`
+  (`Decision: friends mode — leaderboards rank among friends only; global
+  untouched`). A correction appends a new line ending `(supersedes <old>)`;
+  the latest line per scope wins. `Ruling:` lines stay the agent's calls.
+- Project-wide → PROFILE.md, never the ledger: standing facts to
+  `## Environment facts`, delegated asks to `## Consent ledger`, a visual
+  rejection to one `## Taste rules` line phrased as the rule (`no large
+  empty space below content`). UI briefs and visual reviewers get the whole
+  `## Taste rules` section pasted.
+- After every compaction or resume, `grep '^Decision:'
+  .scratch/<slug>/ledger.md` first; each spawn brief carries the
+  `Decision:` lines whose scope its ticket touches, verbatim.
+- Never poll workers, CI or PRs (`gh run watch`, `sleep` loops, status
+  reads): workers report when done and `merge_lane.py`/`main_health.py`
+  background jobs push their result lines. Idle → harness wait.
 
 ## Read first
 

@@ -8,8 +8,8 @@ here.
 | effort | subagent thinking (spawn `effort`) | reviewer model | research fan-out | intake gear | blind review (`goldfish-review`) | spec checkpoint | ticket confirm | review tier |
 |---|---|---|---|---|---|---|---|---|
 | fast | low | see *Tier → agent and model* | skip (only when a ticket is blocked) | focused | none (not asked) | post-and-proceed | none | lint + screenshots + design-only reviewer |
-| standard | medium | see *Tier → agent and model* | 1 per unknown, cap 3 | focused | asked; recommend up to 3 (stage B only if architecture-heavy) | blocking | none | + code review |
-| thorough | high | see *Tier → agent and model* | full parallel fan-out | deep if high stakes, else focused | asked; recommend all, stages A and B | blocking | blocking (edges + sizing) | + dual-verdict |
+| standard | medium | see *Tier → agent and model* | 1 per unknown, cap 3 | focused | asked; recommend up to 3 (stage B only if architecture-heavy) | blocking | none | one code reviewer (also fills the design rows), not two |
+| thorough | high | see *Tier → agent and model* | full parallel fan-out | deep if high stakes, else focused | asked; recommend all, stages A and B | blocking | blocking (edges + sizing) | + dual-verdict + visual reviewer, once per feature range before the flip (`pr`/`main`: once per change), never per slice |
 
 ## Tier → agent and model
 
@@ -33,9 +33,9 @@ Reviewer and research dispatch:
 
 | use | dispatch |
 |---|---|
-| fast review tier, design-only reviewer | `agent: reviewer`, spawn `effort: lo`; `model: anthropic/claude-haiku-5-5:low` when every reviewed ticket is `mechanical` or `effort: fast`, else no `model` (Sonnet) |
-| standard review tier, code reviewer | `agent: reviewer`, no `model` (Sonnet high, a stronger tier than the Sonnet-medium implementer) |
-| thorough dual-verdict / fresh visual reviewer | `agent: reviewer`, `model: anthropic/claude-fable-5-2:high` |
+| fast review tier, design-only reviewer (every per-slice review, at any run effort: exactly one reviewer per slice) | `agent: reviewer`, spawn `effort: lo`; `model: anthropic/claude-haiku-5-5:low` when every reviewed ticket is `mechanical` or `effort: fast`, else no `model` (Sonnet) |
+| standard review tier, the one code reviewer (design rows + code review) | `agent: reviewer`, no `model` (Sonnet high, a stronger tier than the Sonnet-medium implementer) |
+| thorough dual-verdict / fresh visual reviewer (once per feature range, never per slice; the code reviewer above runs with them) | `agent: reviewer`, `model: anthropic/claude-fable-5-2:high` |
 | fan-out-research, code/repo questions | `agent: scout` (Haiku), no `model` |
 | fan-out-research, web/primary-source questions | ticket `effort: fast` → `agent: task`, `model: anthropic/claude-haiku-5-5:low`, spawn `effort: lo`; standard → `agent: task`, no `model`, omit `effort`; thorough → `agent: task`, no `model`, `hi` |
 | brief context gathering (neighbor interfaces, file-scope facts) | `agent: scout` |

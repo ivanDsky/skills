@@ -28,7 +28,9 @@ and `regate.md`, use caveman voice (`start` § Voice).
 keep the steps below unchanged:
 
 - **Per slice, before merge**: fast tier only (scripted checks, secret scan,
-  design-only reviewer over the slice diff `git diff origin/main...HEAD`).
+  one design-only reviewer over the slice diff `git diff origin/main...HEAD`
+  — Haiku for a mechanical slice, Sonnet otherwise, per the reviewer table
+  in `start`/references/effort-mapping.md; never a second reviewer per slice).
   Dark or non-behavioral slices skip step 1's `user-check` precondition;
   fix rounds run the touched module's tests and leave the full suite to the
   PR check. `pr-check: none`: the worker runs this tier before pushing the
@@ -76,13 +78,18 @@ keep the steps below unchanged:
      one secret scan over the diff and new fixtures (keys, tokens,
      session IDs, connection strings) — audited cost of skipping: a
      JSESSIONID shipped to GitHub and had to be redacted.
-   - **Standard**: plus one code-reviewer subagent, dispatched per
-     `start`/references/effort-mapping.md's reviewer table (stronger than
-     the implementer by default).
+   - **Standard**: the design-only reviewer becomes one code reviewer that
+     also fills the step-5 rows — one reviewer, not two — dispatched per
+     `start`/references/effort-mapping.md's reviewer table (Sonnet, stronger
+     than the implementer by default).
    - **Thorough**: plus one fresh-context dual-verdict subagent, model per
-     the same reviewer table (the fresh visual reviewer too).
+     the same reviewer table (the fresh visual reviewer too). It runs once
+     per feature range before the flip (`trunk`) or once over the whole
+     change (`pr`/`main`), never per slice or per ticket: the range review
+     is the one that caught the real crashes.
 3. Brief reviewers minimally: diff command, commit list, spec excerpt,
-   care-axes with their rules payloads, relevant ledger lines, and the evidence
+   care-axes with their rules payloads, relevant ledger lines (every
+   `Decision:` line whose scope the diff touches), and the evidence
    ladder — reviewers cite JVM screenshot-test captures as proof and never boot
    an emulator to gather evidence. On Android diffs the reviewer runs the
    Android CLI checks itself (`android-cli` skill, mandatory, not delegated to
@@ -145,8 +152,12 @@ keep the steps below unchanged:
    `user-check` for a short re-check of that delta (the user approved the
    old behavior, not this one). Refactor-only and test-only fixes stay here,
    with a `Ruling:` line saying why they are behavior-neutral.
-8. Fix loop: findings go back to the same implementer as a resumed brief;
-   re-review is scoped to the fix diff only; triage and convergence rules in
+8. Fix loop: the worker that wrote the code fixes its own findings in the
+   same agent session — message it with the findings file; never spawn a
+   fresh fixer. Re-review is scoped to the fix diff only, at most once per
+   finding; a finding still open after its re-review escalates to the
+   orchestrator, never a third round. Comment-only and doc-only fixes need
+   no re-review. Triage, convergence and escalation rules in
    [fix-loop.md](references/fix-loop.md). Minors are ledgered as deferred —
    never silently fixed. Count failed fix rounds per module in the ledger.
    Stacked run: each fix commits into the layer that owns the file, never a
@@ -157,7 +168,8 @@ keep the steps below unchanged:
    the run's only full-suite run; `deliver` and `open-pr` reuse it. Red →
    one more fix round, then rerun.
 9. Teardown gate: 2 failed fix rounds on the same module (fire before round 3),
-   or reviewer discretion once with a logged reason → invoke `assess-teardown`.
+   a failed re-review the orchestrator judges structural, or reviewer
+   discretion once with a logged reason → invoke `assess-teardown`.
    The architect decides fix-forward vs clean redesign; a redesign carries
    forward only root cause, interface contracts, and surviving tests.
 10. Report the verdict to the user: verdicts, findings by grade, what was
