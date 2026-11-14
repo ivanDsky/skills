@@ -4,7 +4,8 @@ description: >-
   Put the implemented change in the user's hands before any review, loop on
   their hands-on feedback with fast fixes that ignore code quality, then on
   their OK re-gate the run at design level (spec vs feedback vs code,
-  senior-dev and architecture checks) into hardening tickets. Use when
+  senior-dev and architecture checks): Critical findings become hardening
+  tickets, Important ones one fix batch, Minor ones a deferred list. Use when
   implement finishes, when a quick task's code is written, when the user says
   "let me try it first", "send me the build" or "I want to check it on my
   phone", or gives feedback on a running change.
@@ -12,7 +13,7 @@ interaction: hitl
 requires: []
 ---
 
-> **TL;DR** Hands the finished change to the user to try before review, loops on their feedback with fast fixes, then on OK re-gates the run (spec vs feedback vs code, senior-dev + architecture) into hardening tickets; fires after implement.
+> **TL;DR** Hands the finished change to the user to try before review, loops on their feedback with fast fixes, then on OK re-gates the run (spec vs feedback vs code, senior-dev + architecture): Critical → hardening tickets, Important → one fix batch, Minor → deferred list; fires after implement.
 > **Related**: skill://implement (upstream; runs fast fixes and hardening tickets), skill://review-change (fires after hardening), skill://deliver (owns build identity; reuses this build), skill://deploy-tailscale (device install), skill://web-env (LAN dev server), skill://senior-dev (re-gate questions), skill://micro-architecture (re-gate file split), skill://design-architecture (re-gate dependency rules), skill://write-tickets (hardening tickets), skill://review-site (publishes the check doc), skill://assess-teardown (stuck feedback loop), skill://ship-to-trunk (trunk runs: check from main, flag forced on)
 
 # User check
@@ -25,7 +26,7 @@ epic), not per ticket.
 
 ```
 implement ─> build ─> user tries ─┬─ feedback ─> fast fix ─> build ...
-                                  └─ OK ─> re-gate ─> hardening tickets ─> implement ─> review-change
+                                  └─ OK ─> re-gate ─> Critical tickets + Important batch ─> implement ─> review-change
 ```
 
 **`trunk` runs** (`ship-to-trunk`): the check runs once, after the feature's
@@ -96,15 +97,25 @@ rounds skipped it. Write the result to `.scratch/<slug>/regate.md`:
    `rules-architecture.md`; component API of public composables per
    `micro-architecture`/references/ui-components.md at the ledgered
    `ui-tier`; PROFILE `structure:` on Kotlin diffs; UI per `senior-ux`.
-   Each finding names the file and the rule it breaks.
-3. **Hardening tickets** via `write-tickets`: one per finding cluster, plus
-   one that pins the baseline. That ticket turns the verify steps and every
-   F-id into persisted tests, each watched failing by temporarily reverting
-   the behavior it guards. Every hardening ticket's DoD includes "approved
-   behavior unchanged".
-4. Fire `implement` on the hardening tickets (TDD), then `review-change`.
-   Quick task: no tracker and no hardening run; the findings stay in
-   `regate.md` and `review-change` fixes them with the tests.
+   Each finding names the file and the rule it breaks, graded with
+   `review-change`'s grades: Critical (breaks a spec criterion, an F-id, a
+   PROFILE hard rule or the dependency rule; crash or data loss), Important
+   (a rule break that will cost later), Minor (naming, style, polish).
+3. **Route by grade** — the grade picks the output, never the finding count:
+   - Critical → hardening tickets via `write-tickets`: one per finding
+     cluster, plus one that pins the baseline. That ticket turns the verify
+     steps and every F-id into persisted tests, each watched failing by
+     temporarily reverting the behavior it guards.
+   - Important → one fix batch, no tickets: a single `implement` fast-fix
+     worker fixes them all in one commit (`trunk`: one slice PR).
+   - Minor → a `## Deferred` list in `regate.md`, never ticketed; the next
+     checkpoint form offers it once so the user can promote items.
+   Every hardening ticket and the batch keep "approved behavior unchanged"
+   in their DoD.
+4. Fire `implement` on the hardening tickets and the batch (TDD), then
+   `review-change`. Quick task: no tracker and no hardening run; Critical
+   and Important findings stay in `regate.md` and `review-change` fixes them
+   with the tests.
 
 ## Decision rules
 

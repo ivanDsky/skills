@@ -109,8 +109,10 @@ keep the steps below unchanged:
    direction) → graded at every tier against `design-architecture`'s
    `../design-architecture/references/rules-architecture.md` payload (fast:
    the design-only reviewer; thorough: also the dual verdict); findings are
-   Critical when the dependency rule breaks. `regate.md` findings already
-   ticketed count as checked only when their hardening ticket is closed.
+   Critical when the dependency rule breaks. `regate.md` Critical findings
+   count as checked only when their hardening ticket is closed, Important
+   ones only when the fix-batch commit has landed; its `## Deferred` Minors
+   are not re-raised.
    Coverage proof, every tier that reviews code: the report carries one row
    per axis — spec, architecture, component API, file structure, patterns,
    UI — with what was checked and the count (`structure: 14 new/moved files
