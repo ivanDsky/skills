@@ -40,15 +40,18 @@ recollection.
    `ship-to-trunk`'s exception. `pr-check: none`: a worker ends at "branch
    pushed, ready" (fast review done, no suite, no rebase, no PR, no merge,
    no polling); the orchestrator owns the merge lane
-   (`ship-to-trunk`/references/merge-loop.md: `merge_lane.py land`, one
-   ticket at a time as a background bash job) and calls `main_health.py
-   status` before merging, holding on red. The orchestrator also runs one
-   `main_health.py watch --who <slug>` background bash job, started after
-   the run's first merge and after a later merge when none is running; on
-   red it attributes the culprit and claims and fixes it when the culprit
-   is its own merge; on green after red it lands the PRs `held` lists
-   with `merge_lane.py land` on their kept worktrees (rerun rule applied by
-   the script). Flow: `ship-to-trunk`/references/merge-loop.md § Red main.
+   (`ship-to-trunk`/references/merge-loop.md): on each `ready` report it
+   runs `merge_lane.py enqueue`, and whenever the queue is non-empty and
+   no lane job runs it starts `merge_lane.py land` as one background bash
+   job (batches of up to 4: one suite on the batch top, then PR + merge
+   per ticket). It handles each result line per merge-loop.md (red → fix
+   worker, conflict → rebase worker, waiting_user → ask tool). The
+   orchestrator also runs one `main_health.py watch --who <slug>`
+   background bash job, started after the run's first merge and after a
+   later merge when none is running; on red it attributes the culprit and
+   claims and fixes it when the culprit is its own merge (`enqueue
+   --red-fix`); the lane pauses while main is red and resumes by itself
+   on green. Flow: `ship-to-trunk`/references/merge-loop.md § Red main.
 2. Claim: set `status: claimed` before any work.
 3. A ticket with `Unknowns` gets research subagents first, one per unknown, in
    parallel; link every findings file into the ticket before coding starts.

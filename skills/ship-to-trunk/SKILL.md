@@ -44,7 +44,8 @@ start's `ask`); never switch a project to trunk on your own.
    `origin/main` fetched at dispatch, and rebases onto `origin/main` right
    before the PR and again before merge (`pr-check: none`: one rebase,
    right before the suite, run by the orchestrator's merge lane after the
-   worker's fast review; the PR opens after the suite and merges at once).
+   worker's fast review; the lane stacks ready tickets, runs one suite on
+   the top, and opens and merges each PR in order).
    Never branch off another unmerged ticket by default.
 5. **Dark until flipped**: a ticket whose behavior is not finished lands
    behind a **release flag** that is off in release builds
@@ -65,7 +66,7 @@ flowchart LR
   B --> C[TDD + local gates]
   C --> D[rebase, PR]
   D --> E{PR check + fast review}
-  C -.->|pr-check: none| N[fast review, push branch: worker] -.-> L[merge lane: rebase, suite, PR] -.-> E2{authority}
+  C -.->|pr-check: none| N[fast review, push branch: worker] -.-> L[merge lane: stack batch, one suite, PR + merge each] -.-> E2{authority}
   E2 -.->|dark| F
   E2 -.->|flip or live change| G
   E -->|green, dark| F[agent merges]
@@ -81,7 +82,7 @@ Commands, conflicts and the no-CI fallback:
 
 | PR kind | Who merges |
 |---|---|
-| Slice, dark or non-behavioral, check green (`pr-check: none`: local suite green on the rebased branch) + fast review clean | agent, when the consent ledger has `merge dark slices on green` |
+| Slice, dark or non-behavioral, check green (`pr-check: none`: local suite green on the rebased branch, or on a batch top it is part of) + fast review clean | agent, when the consent ledger has `merge dark slices on green` |
 | Bug fix (live by nature) | agent on green, same as PROFILE's fix rules; patch bump per project policy |
 | Unflaggable live change (invariant 7) | user approves the PR |
 | Flip PR (release) | user approves, after user-check OK and thorough review |
@@ -92,7 +93,7 @@ for the user through the ask tool (PR link, what changed, why it is theirs;
 approve never preselected — `start` § Waiting on the user). With
 `pr-check: none`, main's post-merge workflow is the safety net: workers
 never wait on it, and never merge: they push the branch, report ready and
-stop; the orchestrator's merge lane lands one ticket at a time
+stop; the orchestrator's merge lane lands ready tickets in batches
 (`scripts/merge_lane.py`). The orchestrator's background watcher records
 its verdict in a shared main-health ledger, and a red main stops all
 merges but the fix (Red main below).
@@ -131,8 +132,8 @@ merges but the fix (Red main below).
 - **Red main** (check fails after a merge): the next PR is the revert of
   the culprit, before any other merge. Fix forward only when the fix is
   one line and obvious. `pr-check: none`: `scripts/main_health.py` keeps
-  the verdict, the claim (one owner, 30-min takeover) and held PRs;
-  the lane calls its `status` before merging and holds on red
+  the verdict, the claim (one owner, 30-min takeover) and PRs held outside
+  the lane; the lane pauses on red and queued tickets wait
   ([references/merge-loop.md](references/merge-loop.md) § Red main).
 - **No required PR check → no trunk.** Trunk mode needs CI as the judge:
   a workflow on `pull_request` that main's branch protection requires.
