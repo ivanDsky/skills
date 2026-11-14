@@ -125,12 +125,14 @@ def profile_line(wt, key):
 
 
 def suite_command(wt):
+    """First backticked command in the `pr-check:` comment that starts with a
+    script in the repo (`./gradlew …`); prose like `pr-check` or `gh pr checks`
+    is skipped. None found -> assembled from PROFILE keys."""
     _, comment = profile_line(wt, "pr-check")
-    if comment:
-        ticks = re.findall(r"`([^`]+)`", comment)
-        cmd = next((t for t in ticks if not t.startswith("<")), None)
-        if cmd:
-            return cmd
+    for t in re.findall(r"`([^`]+)`", comment or ""):
+        first = (t.split() or [""])[0]
+        if "/" in first and (Path(wt) / first).is_file():
+            return t
     parts = ["./gradlew assembleDebug"]
     for key in ("runner", "structure"):
         v, _ = profile_line(wt, key)
