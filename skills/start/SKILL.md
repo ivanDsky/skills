@@ -164,11 +164,10 @@ milestone. Brief, file format, models: [Lifecycle](references/lifecycle.md).
      `deploy: main | standalone | none`.
    Close call → quick; its answer decides whether the big one is worth it.
 4. **Feature** — default → full chain: intake → spec → contract (new or
-   redesigned screens or motion: `prototype` § 5; build AFK after freeze)
-   → tickets → implement (TDD at the seams) → `user-check` on the whole
-   epic (feedback rounds are fast fixes) → on OK, re-gate into hardening
-   tickets → implement → `review-change` (suite once) → deliver → land.
-   The user reviews code
+   redesigned screens or motion: `prototype` § 5) → tickets → implement
+   (TDD at the seams) → `user-check` on the whole epic (feedback rounds are
+   fast fixes) → on OK, re-gate into hardening tickets → implement →
+   `review-change` (suite once) → deliver → land. The user reviews code
    last, in the PR. Delivery `trunk` differs: slices merge dark (fast review
    each) as tickets close, `user-check` runs on a debug build from `main`
    with the release flag forced on, and the flip PR waits for user-check OK
@@ -284,7 +283,7 @@ closing the current one first (commit, stop, or hand off).
 | implement/review | `structure-checks` | Kotlin/Android ticket adds or moves files, or the diff touches Kotlin — the PROFILE `structure:` command is Evidence and a fast-tier review check |
 | report | `review-site` | run's publish decision = yes (PROFILE `Review site publish:` or session answer) |
 | support | `graduate-prototype` | prototype promoted to feature work |
-| prototype | `prototype` | quick prototype: one page per question, small ports land directly, big ones via `graduate-prototype`; feature contract stage (§ 5) |
+| prototype | `prototype` | quick prototype (one page per question; big ports via `graduate-prototype`); feature contract stage (§ 5) |
 | support | `assess-teardown` | teardown gate: 2 failed fix rounds or reviewer discretion |
 | support | `diagnose-bug` | bug report: evidence ladder, user-time-last |
 | support | `skill-doctor` | the user asks for a session or workflow audit, or to re-measure after skill changes; never fired by the chain itself |
