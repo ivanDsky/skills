@@ -154,14 +154,10 @@ keep the steps below unchanged:
    `user-check` for a short re-check of that delta (the user approved the
    old behavior, not this one). Refactor-only and test-only fixes stay here,
    with a `Ruling:` line saying why they are behavior-neutral.
-8. Fix loop: the worker that wrote the code fixes its own findings in the
-   same agent session — message it with the findings file; never spawn a
-   fresh fixer. Re-review is scoped to the fix diff only, at most once per
-   finding; a finding still open after its re-review escalates to the
-   orchestrator, never a third round. Comment-only and doc-only fixes need
-   no re-review. Triage, convergence and escalation rules in
-   [fix-loop.md](references/fix-loop.md). Minors are ledgered as deferred —
-   never silently fixed. Count failed fix rounds per module in the ledger.
+8. Fix loop: [fix-loop.md](references/fix-loop.md) § Fix round owns who fixes,
+   re-review scope and escalation; triage and convergence rules there too.
+   Minors are ledgered as deferred — never silently fixed. Count failed fix
+   rounds per module in the ledger.
    Stacked run: each fix commits into the layer that owns the file, never a
    new layer (`open-pr`/references/stacks.md); the suite runs on the top.
    Fix rounds run only the touched module's tests. When the loop converges,

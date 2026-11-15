@@ -14,7 +14,7 @@ Models for fake data: <paths | "none">
 Target surface: phone (~412 px frame) | tablet | desktop | contract: phone + tablet, no frame
 Taste rules and decisions: <PROFILE `## Taste rules` + in-scope `Decision:` lines, pasted | "none">
 
-Read first: the `prototype` skill (sections 2-3), and for design: `senior-ux`,
+Read first: `prototype`/references/page-rules.md, then for design: `senior-ux`,
 then `emil-design-eng`, `apple-design`, `animation-vocabulary`; for contract also
 `prototype`/references/contract.md § Contract pages.
 

@@ -12,6 +12,26 @@ Common ask for every lens: *find what is wrong, missing, or expensive from
 your angle; cite evidence; propose one disposition; do not redesign the
 feature.*
 
+## Findings format
+
+Per finding, in the findings file: id (`<lens>-1`), the claim in one
+sentence, the evidence (repo path, doc URL, quoted brief line — a claim
+without evidence is dropped), what changes if it is true, and one proposed
+disposition: assumption · non-goal · success criterion · question.
+
+## Parent anti-patterns
+
+- Pasting conversation, rationale, or the author's preferred design into a
+  brief — the lens then reviews the argument, not the idea.
+- Showing one lens another's findings (they converge instead of covering).
+- Treating the result as approval. It is input to the spec; the user's
+  checkpoint stays the gate.
+- A lens with nothing new to say still reports "no findings, checked: …" with
+  what it looked at; an empty file is not run.
+- Running stage A before scope is confirmed, or more than 2 lenses unasked:
+  one audited run produced 76 findings across 6 lenses on a scope that then
+  collapsed to an MVP.
+
 ## Stage A — concept (input: hypothesis + hard constraints + out of scope)
 
 Runs only after the user confirmed scope, at most 2 lenses (SKILL.md § 1).

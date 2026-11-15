@@ -45,44 +45,17 @@ contract stage instead → § 5.
 
 ## 2. Build the page
 
-Rules for every page — full checklist in the brief:
+Read [references/page-rules.md](references/page-rules.md) first (full rules,
+anti-patterns); subagents get them via the brief's checklist.
 
-- **One self-contained file**: inline CSS and JS, no build, no CDN or network
-  (opens offline on the phone). A header strip names the question and says
-  `PROTOTYPE — throwaway`.
-- **Look like the app**: copy the project's theme values (Compose
-  `Color.kt` / `Theme.kt` / `Type.kt`, or the web theme) into CSS custom
-  properties named after the app's tokens; none exists → Material 3
-  baseline. Phone-width frame (~412 px) for mobile screens.
-- **Fake data inline**, shaped like the real models (read them), realistic
-  lengths — including the longest label and an empty list.
-- **No tests, no error handling, no abstractions**, no persistence beyond
-  memory. Speed over code quality; the code is deleted.
-
-**Design question** (what should it look like / feel like):
-
-1. Read `senior-ux` first and follow it; then `emil-design-eng`,
-   `apple-design`, `animation-vocabulary` for taste and motion names.
-   Start from senior-ux question 1: name the user need that fails today —
-   that sentence goes in the header strip.
-2. **2-3 variants, structurally different** (layout, hierarchy, primary
-   affordance — not colours). Two that look alike → redo one.
-3. **Switcher**: fixed bottom bar with variant buttons, `?v=a|b|c` in the
-   URL, keys `1`-`3`. A second row toggles states — default, empty,
-   loading, error, longest content, dark (`?s=`) — because senior-ux walks
-   every state before judging. Keep it compact: at most ~2 rows (short
-   labels, horizontal scroll) and collapsible to a single handle, so the
-   phone still shows most of the screen being judged.
-4. Measure, don't eyeball: contrast ≥ 4.5:1, 48 px targets, sizes at the
-   densest state. Motion uses tokenized durations, exit faster than enter,
-   and respects `prefers-reduced-motion`.
-
-**Logic question** (does this state model / flow feel right):
-
-1. Buttons for every event, free-play plus 1-3 guided scenarios for the
-   cases that are hard on paper.
-2. After every action, render the full state (and the transition taken)
-   on the page.
+- One self-contained offline file that looks like the app (its theme
+  tokens), fake data shaped like the real models; no tests, no abstractions
+  — the code is deleted.
+- **Design question** → `senior-ux` method, 2-3 structurally different
+  variants on a compact bottom switcher with a state row; contrast, targets
+  and motion measured, not eyeballed.
+- **Logic question** → a button per event, guided scenarios, the full state
+  rendered after every action.
 
 ## 3. Check, serve, ask
 
@@ -144,33 +117,11 @@ This is the port's spec.
 
 `start` fires it after spec and before tickets when the feature adds or
 redesigns screens or adds motion; fixes batches and small UI fixes skip it.
-Read [references/contract.md](references/contract.md) first; it owns the
-steps.
-
-1. Contract pages for every screen × state at phone and tablet (dark where
-   it changes layout), plus a motion page; motion HTML cannot prove → a
-   `wire-dev-settings` playground screen on the tablet. PROFILE `## Taste
-   rules` hold before the user sees a frame.
-2. One sitting: the user marks every frame OK or annotates it once; one
-   revision round, never a third.
-3. Freeze writes `.scratch/<slug>/contract/`: reference PNGs captured by
-   `scripts/capture_reference.py`, `acceptance.md`, `motion.md`,
-   `contract.md` with the rulings as `Decision:` lines.
-4. After freeze the build is AFK: no taste asks; unknowns take the nearest
-   ruling or the reversible default, ledgered `assumed:`.
-
-## Anti-patterns
-
-- Variants that differ only in colour or spacing.
-- A page that needs `npm install`, a server-side build, or network.
-- Judging on the laptop browser when the target is the phone.
-- Polishing the losing variants, or writing tests for the page.
-- Browser runs or screenshots before the user sees it — they cost time and
-  the user's own look replaces them. Screenshots exist only at the contract
-  freeze, captured from approved pages.
-- Porting by translating the HTML line by line instead of from the handoff.
-- An ask that describes visual options without a served, checked URL.
-- A local file path or "will send next" in place of a link.
+[references/contract.md](references/contract.md) owns the steps — read it
+first: contract pages for every screen × state at phone and tablet plus a
+motion page, one sitting with one revision round, freeze to
+`.scratch/<slug>/contract/` (`scripts/capture_reference.py`), then an AFK
+build with no taste asks.
 
 Adapted from mattpocock/skills (`prototype` — throwaway-answers-a-question,
 variant switcher, visible state), MIT. Single-file page, senior-ux method,

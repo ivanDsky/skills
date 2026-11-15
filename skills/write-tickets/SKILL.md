@@ -6,9 +6,8 @@ description: >-
   (≤ ~12 per milestone, a count gate for unvalidated designs), a mandatory
   checkable DoD + evidence on every ticket, one ticket per fresh subagent
   context, declared Unknowns fanned out to research, parallel-safe only on
-  disjoint file scopes. Use after a spec
-  passes its checkpoint, or when a plan or spec must become dependency-ordered,
-  trackable tickets.
+  disjoint file scopes. Use when a spec has passed its checkpoint, or when a
+  plan or spec must become dependency-ordered, trackable tickets.
 interaction: afk
 requires: []
 ---
@@ -72,8 +71,7 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
      moves files also carries the DoD line "structure checks green" with the
      `structure:` command as Evidence (`structure-checks`; not configured →
      say so in the ticket). Tests a ticket asks for follow `tdd` § What to
-     test, what not to — one behavior at one layer, never one test per
-     surface. No DoD → not a ticket: thin or split until one exists.
+     test, what not to. No DoD → not a ticket: thin or split until one exists.
    - **Contract lines** — tickets under a frozen UI contract only:
      `Contract: .scratch/<slug>/contract/` and one
      `Reference: <golden or test> = reference/<file>.png` line per pair
@@ -120,9 +118,9 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
 8. Confirm: each ticket carries `effort:` (`fast | standard | thorough`) and
    `tier:` frontmatter fields — effort per the per-task rules in `start`'s
    effort mapping (thorough only for architecture/planning/big-view tickets),
-   tier per item 4. List every downgrade below the run default with a reason;
-   if a different level would likely accelerate development, ask the user
-   (ask tool). Post the numbered list (title, effort / tier, blocked-by, what
+   tier per item 4. Downgrades below the run default follow the Downgrade ask
+   (`start`/references/effort-mapping.md § Rules). Post the numbered list
+   (title, effort / tier, blocked-by, what
    it delivers) and proceed at every effort level. Ask about granularity only
    when the ticket count gate fires or the user asked to see the list first
    (references/slicing.md § Ticket count gate, § Ticket confirm).
