@@ -107,6 +107,14 @@ recollection.
      API, `XxxState`, `XxxDefaults`) follows
      `micro-architecture`/references/ui-components.md at the ledgered
      `ui-tier`: no use case, domain model or ViewModel for UI-only state.
+   - UI ticket with `Contract:` and `Reference:` lines: before coding, read
+     the contract's `acceptance.md` and `motion.md` and open every reference
+     PNG; each golden matches its reference, motion values come from
+     `motion.md`. No taste calls: an unknown takes the nearest contract
+     ruling or the reversible default, reported `assumed:`; an unavoidable
+     deviation is a `Ruling:` plus DONE_WITH_CONCERNS. The slice reviewer
+     gets the same pairs and fails visible drift
+     (`prototype`/references/contract.md § After freeze).
    - Feature flags, remote config, dev-facing settings: `wire-dev-settings`
      before touching configuration code.
    - Architecture-heavy tickets (new module, new boundary, dependency

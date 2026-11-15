@@ -31,6 +31,8 @@ keep the steps below unchanged:
   one design-only reviewer over the slice diff `git diff origin/main...HEAD`
   — Haiku for a mechanical slice, Sonnet otherwise, per the reviewer table
   in `start`/references/effort-mapping.md; never a second reviewer per slice).
+  UI ticket with `Reference:` lines → that reviewer also gets each golden
+  and reference PNG and fails visible drift (`prototype`/references/contract.md).
   Dark or non-behavioral slices skip step 1's `user-check` precondition;
   fix rounds run the touched module's tests and leave the full suite to the
   PR check. `pr-check: none`: the worker runs this tier before pushing the

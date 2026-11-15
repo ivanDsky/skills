@@ -4,7 +4,8 @@
     "The tickets are written — start implementing, one subagent per ticket",
     "Work the frontier: execute the ready tickets in tracer-bullet order",
     "Resume implementation after that interruption — the ledger has our progress",
-    "Run implement on ticket 03 and keep the ledger current"
+    "Run implement on ticket 03 and keep the ledger current",
+    "Execute the ready UI tickets — they carry Contract: and Reference: lines, so build each screen to its reference PNGs without asking me about design"
   ],
   "negative": [
     {

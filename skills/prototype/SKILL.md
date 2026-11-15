@@ -4,16 +4,18 @@ description: >-
   Fast throwaway prototype of ONE task as a single self-contained HTML page:
   2-3 switchable design variants judged by senior-ux method, or a clickable
   state/logic demo, opened on the user's own phone over the LAN, then ported
-  into the app. Several tasks → one subagent per task, one page each, plus an
-  index page. Use when the user says prototype, quick sketch, mock it up,
-  "show me options", "would this work?", or wants to see a screen or flow
-  before it is built into the app.
+  into the app; also runs a UI feature's contract sitting, freezing reference
+  screenshots before tickets. Several tasks → one subagent per task, one page
+  each, plus an index page. Use when the user says prototype, quick sketch,
+  mock it up, "show me options", "would this work?", wants to see a screen or
+  flow before it is built into the app, or a feature with new screens or
+  motion reaches the contract stage.
 interaction: mixed
-requires: [python3 (serves the page on the LAN)]
+requires: [python3 (serves the page on the LAN), Chromium-family browser (contract freeze capture only)]
 ---
 
-> **TL;DR** One task → one throwaway HTML file in `.scratch/`, built in minutes: design questions get 2-3 structurally different variants on a switcher (senior-ux decides the method, the user picks on their phone); logic questions get buttons that drive the state with the state always visible. Small picks are ported straight into the app; big ones go through `graduate-prototype`.
-> **Related**: skill://senior-ux (method for every design prototype), skill://emil-design-eng, skill://apple-design, skill://animation-vocabulary (taste and motion names), skill://graduate-prototype (exit for big ports), skill://start (quick vs big triage), skill://preview-compose (the Compose port's previews)
+> **TL;DR** One task → one throwaway HTML file in `.scratch/`, built in minutes: design questions get 2-3 structurally different variants on a switcher (senior-ux decides the method, the user picks on their phone); logic questions get buttons that drive the state with the state always visible. Small picks are ported straight into the app; big ones go through `graduate-prototype`. In the feature chain it also runs the contract sitting (§ 5).
+> **Related**: skill://senior-ux (method for every design prototype), skill://emil-design-eng, skill://apple-design, skill://animation-vocabulary (taste and motion names), skill://graduate-prototype (exit for big ports), skill://start (quick vs big triage, contract stage), skill://preview-compose (the Compose port's previews), skill://wire-dev-settings (motion playground the contract needs when HTML cannot prove it)
 
 # Prototype
 
@@ -27,7 +29,8 @@ This skill is the **quick** prototype: one question, answerable on a page,
 nothing real touched. Use the chain + prototype flag in `start` instead when
 the prototype needs real app code, real persisted data, several modules, or
 is meant to ship. Close call → quick: a page costs minutes, and its answer
-tells you whether the big one is worth running.
+tells you whether the big one is worth running. Fired by `start`'s
+contract stage instead → § 5.
 
 ## 1. One task per page
 
@@ -86,6 +89,7 @@ Rules for every page — full checklist in the brief:
 1. Compile check only: pipe each page's inline `<script>` to
    `node --check -` (exit 0 = parses; ~0.1 s). No headless browser, no
    screenshots — the user judges the page directly; speed is the point.
+   The one exception is the contract freeze (§ 5), after the user's OK.
 2. Serve — the rule every skill that shows the user something visual points
    to. The user looks on a tablet or phone, never at this machine.
    - Everything they should see lives in the served directory
@@ -136,6 +140,25 @@ This is the port's spec.
   which turns them into tickets for the standard chain.
 - Rejected or discarded → one line in the handoff (what was learned), done.
 
+## 5. Contract sitting (UI feature in the chain)
+
+`start` fires it after spec and before tickets when the feature adds or
+redesigns screens or adds motion; fixes batches and small UI fixes skip it.
+Read [references/contract.md](references/contract.md) first; it owns the
+steps.
+
+1. Contract pages for every screen × state at phone and tablet (dark where
+   it changes layout), plus a motion page; motion HTML cannot prove → a
+   `wire-dev-settings` playground screen on the tablet. PROFILE `## Taste
+   rules` hold before the user sees a frame.
+2. One sitting: the user marks every frame OK or annotates it once; one
+   revision round, never a third.
+3. Freeze writes `.scratch/<slug>/contract/`: reference PNGs captured by
+   `scripts/capture_reference.py`, `acceptance.md`, `motion.md`,
+   `contract.md` with the rulings as `Decision:` lines.
+4. After freeze the build is AFK: no taste asks; unknowns take the nearest
+   ruling or the reversible default, ledgered `assumed:`.
+
 ## Anti-patterns
 
 - Variants that differ only in colour or spacing.
@@ -143,7 +166,8 @@ This is the port's spec.
 - Judging on the laptop browser when the target is the phone.
 - Polishing the losing variants, or writing tests for the page.
 - Browser runs or screenshots before the user sees it — they cost time and
-  the user's own look replaces them.
+  the user's own look replaces them. Screenshots exist only at the contract
+  freeze, captured from approved pages.
 - Porting by translating the HTML line by line instead of from the handoff.
 - An ask that describes visual options without a served, checked URL.
 - A local file path or "will send next" in place of a link.

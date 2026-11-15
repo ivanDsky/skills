@@ -14,6 +14,8 @@ SKILL.md stays the contract.
 | "/start continue" with frontier tickets open | Resume offer | List in-flight tickets, offer resume (straight to `implement`); classify nothing new. |
 | "/start quick patch" that adds a public API endpoint | Feature (override rejected) | The quick-task test is a checklist, not a label; a new public interface fails it regardless of what the ask calls itself. |
 | "/start prototype the importer — and we WILL ship it to prod" | Prototype, deploy question | Prototype flag holds, but the intake batch must carry the deploy question (`deploy: main | standalone | none`) so shipping is explicit, not silent. |
+| "/start competitions: new reveal animation and a tablet results screen" | Feature + contract stage | New screen and new motion → after spec, `prototype` § 5 runs the contract sitting (phone and tablet frames, motion page, playground if HTML cannot prove the motion); tickets wait for the freeze; the build asks no taste questions. |
+| "/start fix these five spacing and copy nits on the results screen" | Quick task or fixes path, no contract | Existing screen, no redesign and no new motion → the path it takes today; a contract sitting would cost more than the fixes. |
 
 Near-miss pattern: a user says "quick" but the checklist says feature — the
 checklist wins; say so in one line in the run plan.
