@@ -5,16 +5,17 @@ description: >-
   their hands-on feedback with fast fixes that ignore code quality, then on
   their OK re-gate the run at design level (spec vs feedback vs code,
   senior-dev and architecture checks): Critical findings become hardening
-  tickets, Important ones one fix batch, Minor ones a deferred list. Use when
-  implement finishes, when a quick task's code is written, when the user says
-  "let me try it first", "send me the build" or "I want to check it on my
-  phone", or gives feedback on a running change.
+  tickets, Important ones one fix batch, Minor ones a deferred list; UI
+  changes pass a visual gate (golden gallery, duplicate check) before any APK
+  leaves. Use when implement finishes, when a quick task's code is written,
+  when the user says "let me try it first", "send me the build" or "I want to
+  check it on my phone", or gives feedback on a running change.
 interaction: hitl
 requires: []
 ---
 
 > **TL;DR** Hands the finished change to the user to try before review, loops on their feedback with fast fixes, then on OK re-gates the run (spec vs feedback vs code, senior-dev + architecture): Critical → hardening tickets, Important → one fix batch, Minor → deferred list; fires after implement.
-> **Related**: skill://implement (upstream; runs fast fixes and hardening tickets), skill://review-change (fires after hardening), skill://deliver (owns build identity; reuses this build), skill://deploy-tailscale (device install), skill://web-env (LAN dev server), skill://senior-dev (re-gate questions), skill://micro-architecture (re-gate file split), skill://design-architecture (re-gate dependency rules), skill://write-tickets (hardening tickets), skill://review-site (publishes the check doc), skill://assess-teardown (stuck feedback loop), skill://ship-to-trunk (trunk runs: check from main, flag forced on)
+> **Related**: skill://implement (upstream; runs fast fixes and hardening tickets), skill://review-change (fires after hardening), skill://deliver (owns build identity; reuses this build), skill://deploy-tailscale (device install), skill://web-env (LAN dev server), skill://senior-dev (re-gate questions), skill://micro-architecture (re-gate file split), skill://design-architecture (re-gate dependency rules), skill://write-tickets (hardening tickets), skill://review-site (publishes the check doc and the visual-gate gallery), skill://prototype (prototype-first for layout and motion feedback), skill://wire-dev-settings (motion playground), skill://preview-compose (golden captures), skill://assess-teardown (stuck feedback loop), skill://ship-to-trunk (trunk runs: check from main, flag forced on)
 
 # User check
 
@@ -42,6 +43,11 @@ need none.
 The change compiles, plus the touched module's existing tests. Do not run the
 full suite, a reviewer or `structure:` here; they run after the OK.
 
+**UI change** (any golden PNG changed): also run the visual gate, open its
+gallery yourself and fix every blocking finding before building, per
+[visual-gate.md](references/visual-gate.md). A UI change that fails the gate
+never ships an APK.
+
 ## 2. Put it in their hands
 
 - **Android**: `deliver`'s `ship_apk.py`
@@ -59,7 +65,8 @@ full suite, a reviewer or `structure:` here; they run after the OK.
 One ask-tool call (`start` § Waiting on the user — a chat message sends no
 notification): build name (`versionName`), how to open it, 2–4 numbered
 verify steps with exact entry points (deep link, `adb shell am start`, tap
-path) and the expected result of each, the vetoable spec assumptions, then
+path) and the expected result of each, the vetoable spec assumptions, the
+gallery link for UI changes (one link, with the build), then
 one free-text field "`ok`, or feedback by id", nothing prefilled. Feature
 runs also write `.scratch/<slug>/review/REVIEW.md` per
 [check-doc.md](references/check-doc.md) and publish it via `review-site` when
@@ -68,8 +75,14 @@ the answer; an empty answer is silence — ask again, never continue on it.
 
 ## 4. Feedback → fast fix → step 1
 
-- Number every point (`F1`, `F2`, …) in `.scratch/<slug>/user-check.md` with
-  the build it was given against, quoted in the user's words.
+- The user's reply is the whole round; never wait for more items. Number
+  every point (`F1`, `F2`, …) in `.scratch/<slug>/user-check.md` with the
+  build it was given against, quoted in the user's words. Widen an
+  instance-level point to its class on the same surface (one 43dp target →
+  check every target on that screen) before dispatching.
+- Layout, spacing or motion points are not fast fixes yet: prototype or
+  dev-settings playground round first, values confirmed there, then applied
+  (visual-gate.md § Feedback rounds).
 - One implementer applies them **fast**: smallest change that does what the
   user asked, no tests, no refactor, no structure work. Still never cut
   validation, security, accessibility or data-loss handling. Commits are

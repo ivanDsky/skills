@@ -69,6 +69,8 @@ passed; this stage adds no code.
      first; never add it in a worktree. Trunk worktree branches
      `<slug>/<NN>-<ticket>` keep that shape: the last segment is the
      build-identity slug.
+   - A UI change ships no APK before `user-check`'s visual gate passed
+     (`user-check`/references/visual-gate.md); a failing gate stops here.
    - A failed build stops everything — a deploy never starts on a red
      build. The script prints the log tail and `.scratch/<slug>/build.log`.
    - Deploy targets and evidence lines reference `$APK_NAME`
