@@ -15,7 +15,8 @@
     "/start streaks — spec is frozen, run the tickets on Sonnet and keep Opus for the spec and taste calls",
     "/start leaderboard — last orchestrator ran five days and compacted 48 times; start fresh each milestone from a resume file",
     "Resume leaderboard from .scratch/leaderboard/resume.md",
-    "/start redesign the competitions reveal and results screens for tablet — I sign off the design once up front, then build without asking me"
+    "/start redesign the competitions reveal and results screens for tablet — I sign off the design once up front, then build without asking me",
+    "/start the hardening wave — last run put five test-only pin tickets on Fable at $16 each; tier them so only real design work gets deep"
   ],
   "negative": [
     {
