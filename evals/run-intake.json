@@ -3,9 +3,11 @@
   "positive": [
     "Gather requirements for the new CSV export feature before we write the spec",
     "Ask me what you need to know to build the billing prototype",
-    "We're adding multi-tenant support \u2014 scope it with me, ask your questions in one go",
+    "We're adding multi-tenant support — scope it with me, ask your questions in one go",
     "Run intake on this feature request",
-    "Intake for the new reminders feature — ask me whether it should be extensible and how many blind reviewers I want"
+    "Intake for the new reminders feature — ask me whether it should be extensible",
+    "Scope the board editor with me — check whether I already built something like it in my other projects and how a user would create a board before you ask",
+    "Before the spec for the LinkedIn import, look at what I already have and list the full rule catalog, then ask your questions"
   ],
   "negative": [
     {
@@ -19,6 +21,10 @@
     {
       "prompt": "Write the implementation tickets for this spec",
       "owner": "write-tickets"
+    },
+    {
+      "prompt": "Run two blind lenses on the confirmed spec before we cut tickets",
+      "owner": "goldfish-review"
     }
   ]
 }

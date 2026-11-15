@@ -1,17 +1,18 @@
 ---
 name: draft-spec
 description: >-
-  Write the working spec with an explicit numbered Assumptions section and post the
-  single "correct me or I go" checkpoint before autonomous execution. Use after
-  intake answers exist — when the user says draft the spec, write the spec, turn
-  the answers into a spec, or spec it up, or when an intake batch has been answered
-  and feature or prototype work needs its spec stage.
+  Write the working spec with numbered UX-visible assumptions, internal
+  assumed: lines and a scope matrix for every setting or mode, then post the
+  single "correct me or I go" checkpoint before autonomous execution. Use
+  after intake answers exist — when the user says draft the spec, write the
+  spec, turn the answers into a spec, or spec it up, or when an intake batch
+  has been answered and feature or prototype work needs its spec stage.
 interaction: mixed
 requires: []
 ---
 
 > **TL;DR** Writes the working spec with numbered Assumptions and posts the single correct-me-or-I-go checkpoint; fires after intake answers exist.
-> **Related**: skill://run-intake (intake answers), skill://design-architecture (architecture section), skill://write-tickets (next stage), skill://goldfish-review (stage A concept lenses before drafting)
+> **Related**: skill://run-intake (intake answers, prior-art findings), skill://design-architecture (architecture section), skill://write-tickets (next stage), skill://goldfish-review (stage A lenses after the checkpoint confirms scope)
 
 # Draft the spec
 
@@ -21,20 +22,13 @@ autonomous. The intake batch was the interview — never ask again.
 
 ## 1. Consume intake
 
-1. Read `.scratch/<slug>/intake.md`: answers plus the numbered assumption list
-   (A1, A2, ...). Standalone, no intake file: synthesize from the ask and your
-   repo reading instead, and write down every default you filled in — a default
-   the user never saw is one they could not reject.
+1. Read `.scratch/<slug>/intake.md`: answers, the A-items, the `assumed:`
+   lines, and `prior-art.md` when linked (its catalog and walkthrough feed
+   the Solution). Standalone, no intake file: synthesize from the ask and
+   your repo reading instead, and write down every default you filled in —
+   a default the user never saw is one they could not reject.
 2. Read PROFILE.md for care-axes and the effort level. Never re-ask anything
    intake or the repo already settles.
-3. Blind concept review: when intake recorded a lens choice other than none,
-   run `goldfish-review` stage A now, on the hypothesis + hard constraints
-   from `intake.md`. Triage each finding before drafting — a finding is one
-   of: a numbered assumption, a non-goal in Out of scope, a Success-criteria
-   line, or declined with a one-line reason. Lens tensions (two lenses
-   pulling opposite ways) become an assumption that names both sides and
-   your pick. A lens that did not run is stated in the digest as not run.
-   An irreversible fork goes to `grilling`, not an assumption.
 
 ## 2. Write the spec
 
@@ -42,20 +36,26 @@ Write `.scratch/<slug>/spec.md`, exactly these sections:
 
 1. **Problem** — from the user's side: what hurts, who feels it. Grounded in
    the PROFILE.md Product frame (purpose, users, core loop) when present.
-2. **Solution** — what gets built, stated as behavior.
-3. **Assumptions** — every A-item from intake plus your own fills and triaged
-   lens findings, each one concrete and checkable ("A1: single tenant,
-   Postgres only"). Features include an **Extension points** assumption from
-   intake's extension question: either "variation points X, Y via <pattern>;
-   part N+1 = a new file" or "no seam; a second variant triggers a refactor
-   ticket". This section is what the checkpoint sells; no silent gaps,
-   nothing unnumbered.
-4. **Success criteria** — checkable outcomes; they seed the tickets' DoD. UI
+2. **Solution** — what gets built, stated as behavior. Authoring flows open
+   with the confirmed "how does a user create one" walkthrough; rule
+   catalogs are listed in full, each rule in or out.
+3. **Scope matrix** — features that add or change a setting or mode: every
+   surface × every setting, no empty cell
+   ([how](references/assumptions-and-scope-matrix.md)).
+4. **Assumptions** — two lists, split by § Shown vs assumed in the same
+   reference. **Shown**: the UX-visible A-items from intake plus your own
+   fills, each concrete and checkable ("A1: a draft board autosaves on
+   exit"). **Assumed**: internal `assumed: <decision> — <why>` lines,
+   decided by you. Features include an **Extension points** line from
+   intake's extension question: either "variation points X, Y via
+   <pattern>; part N+1 = a new file" or "no seam; a second variant triggers
+   a refactor ticket". No silent gaps, nothing unnumbered.
+5. **Success criteria** — checkable outcomes; they seed the tickets' DoD. UI
    features also record the visual direction here: the references the user
    named (apps/screens), theme constraints, and feel words — or the explicit
    assumption "no direction given: house style + design-skill judgment".
-5. **Out of scope** — explicit non-goals, so review can reject creep.
-6. **Deploy** — prototype runs only: the intake `deploy:` answer
+6. **Out of scope** — explicit non-goals, so review can reject creep.
+7. **Deploy** — prototype runs only: the intake `deploy:` answer
    (`main | standalone | none`).
 
 Decision rules:
@@ -81,13 +81,14 @@ Decision rules:
 ## 3. Post the checkpoint
 
 The flow's only standing blocking gate besides intake. ONE message:
-0. Before posting, diff the draft against `intake.md` and the lens findings:
-   every intake answer and non-declined finding is reflected, none
-   contradicted, no Out-of-scope item re-added by the Solution.
+0. Before posting, diff the draft against `intake.md`: every intake answer
+   is reflected, none contradicted, no Out-of-scope item re-added by the
+   Solution, the scope matrix has no empty cell, and every A-item passes
+   the shown test while every `assumed:` line fails it.
 
 1. Digest ≤30 lines: problem, solution in a sentence, success criteria, then
-   the FULL assumption list A1..An — the assumptions are the point, show all
-   of them, not a sample.
+   the FULL A-item list A1..An — show all of them, not a sample — and one
+   line `N internal decisions assumed (spec.md § Assumptions)`.
 2. End with exactly: "Correct me or I go." No second question, no menu, no
    approve/reject choice.
 3. Blocking by effort (prototype never blocks, any effort):
@@ -112,8 +113,10 @@ The flow's only standing blocking gate besides intake. ONE message:
 
 ## 5. Hand off
 
-Checkpoint passed → hand the spec to `write-tickets` (chain) or report it
-ready (standalone). The numbered assumptions survive into the tickets and
-later count as decisions: reviewers grade the build against them.
+Checkpoint passed = scope confirmed. Then `goldfish-review` stage A (the
+orchestrator picks 0–2 lenses by risk; its output edits the spec), then hand
+the spec to `write-tickets` (chain) or report it ready (standalone). Both
+assumption lists survive into the tickets and count as decisions:
+reviewers grade the build against them.
 
 Adapted from Matt Pocock's to-spec and Jesse Vincent's superpowers brainstorming (both MIT).

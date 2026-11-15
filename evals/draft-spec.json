@@ -4,7 +4,9 @@
     "Draft the spec for the CSV export feature from yesterday's intake notes",
     "We finished intake — write the spec and show me what you're assuming before you build",
     "Turn my answers into a working spec, then give me one chance to correct you before you go",
-    "Spec out the billing prototype and post your correct-me-or-I-go summary"
+    "Spec out the billing prototype and post your correct-me-or-I-go summary",
+    "Write the spec for friends mode — table every screen the setting touches before you show me",
+    "Draft the spec but only show me the assumptions I'd actually see; decide the technical ones yourself"
   ],
   "negative": [
     {
@@ -22,6 +24,10 @@
     {
       "prompt": "Implement the first ticket from the spec",
       "owner": "implement"
+    },
+    {
+      "prompt": "Search my other repos for prior work on this integration before we scope it",
+      "owner": "run-intake"
     }
   ]
 }

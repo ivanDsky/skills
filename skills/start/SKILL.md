@@ -264,7 +264,7 @@ closing the current one first (commit, stop, or hand off).
 | intake | `run-intake` | feature, prototype |
 | orientation | `map-codebase` | unmapped codebase + chain work |
 | spec | `draft-spec` | feature, prototype |
-| spec/tickets | `goldfish-review` | the user chose lenses (none / up to 3 / all): stage A after intake and before the spec is drafted; stage B at the write-tickets confirm gate |
+| spec/tickets | `goldfish-review` | stage A after the spec checkpoint confirms scope (orchestrator picks 0–2 lenses by risk); stage B at the write-tickets confirm gate (user picks none / up to 3 / all) |
 | tickets | `write-tickets` | feature, prototype (ticket sets are parallel-first: minimal file overlap; device checks get one aggregate ticket, or none) |
 | research | `fan-out-research` | ticket/spec declares an Unknown |
 | implement | `implement` | ready frontier ticket; `user-check` fast fixes; re-gate hardening tickets |

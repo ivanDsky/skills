@@ -5,7 +5,7 @@
     "Play devil's advocate on the plan — someone who hasn't seen our conversation",
     "Run a blind review of the design before we cut tickets",
     "Have a few independent reviewers poke holes in the concept: reuse, failure modes, data migration",
-    "I want up to 3 lenses on this feature before drafting"
+    "Scope is confirmed — pick the two riskiest lenses and challenge the concept before tickets"
   ],
   "negative": [
     {
@@ -23,6 +23,10 @@
     {
       "prompt": "Grill me on whether we should change the database engine",
       "owner": "grilling"
+    },
+    {
+      "prompt": "Show me only the UX-visible assumptions in the spec and post the checkpoint",
+      "owner": "draft-spec"
     }
   ]
 }
