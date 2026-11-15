@@ -31,6 +31,8 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | Teardown gate | 2 failed fix rounds or reviewer discretion → independent architect decides fix-forward vs redesign; carries only root cause, contracts, surviving tests. | rewrite, pivot |
 | Dual-verdict review | Reviewer returns two separate verdicts: spec compliance + code quality; never merged. | sign-off |
 | Ledger | Append-only run log (`.scratch/<slug>/ledger.md`): rulings, ticket closes; beats memory after compaction. | progress file |
+| Captain | One fresh Sonnet subagent per execution milestone after spec freeze: dispatches tickets, runs the merge lane and fix loop from the resume file, returns one digest; never talks to the user (`start`/references/lifecycle.md). | sub-orchestrator, manager agent |
+| Resume file | `.scratch/<slug>/resume.md`, overwritten at each milestone boundary: ledger pointer, live `Decision:` lines, open tickets, next step, how to resume. Feeds each captain and a fresh session. | checkpoint file (Checkpoint is the spec message), handoff (omp `/handoff` compacts in place) |
 | Ruling | Autonomous decision recorded as `Ruling: what — why — cost if wrong`. | decision log |
 | HITL / AFK | Human-in-the-loop vs autonomous stage marking; declared in `interaction` frontmatter. | interactive / automatic |
 | Prototype flag | Big-prototype triage outcome; same flow, reduced gates, DoD = question answered/demoable, carries `deploy: main/standalone/none`. | spike |

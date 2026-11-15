@@ -11,9 +11,16 @@
     "/start the streak feature — stop asking me things I already approved, take the safe defaults and tell me if you are blocked on me",
     "/start leaderboard — don't post after every merge, just give me one short update per milestone",
     "/start leaderboard — remember: friends mode ranks only among friends, global stays untouched; don't make me repeat it after compaction",
-    "/start ranks — that layout is wrong, too much empty space under the list; keep that as a rule for this project"
+    "/start ranks — that layout is wrong, too much empty space under the list; keep that as a rule for this project",
+    "/start streaks — spec is frozen, run the tickets on Sonnet and keep Opus for the spec and taste calls",
+    "/start leaderboard — last orchestrator ran five days and compacted 48 times; start fresh each milestone from a resume file",
+    "Resume leaderboard from .scratch/leaderboard/resume.md"
   ],
   "negative": [
+    {
+      "prompt": "Audit last week's sessions: compactions and Opus spend per orchestrator",
+      "owner": "skill-doctor"
+    },
     {
       "prompt": "Ask me the load-bearing questions about this feature in one batch",
       "owner": "run-intake"

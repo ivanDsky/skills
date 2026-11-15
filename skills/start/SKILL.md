@@ -117,6 +117,14 @@ three times), so user statements persist the same turn, before acting:
   reads): workers report when done and `merge_lane.py`/`main_health.py`
   background jobs push their result lines. Idle → harness wait.
 
+## Orchestrator lifecycle
+
+This session keeps intake, spec, contract, taste and every ask. Once spec
+and contract freeze, each execution milestone runs in one fresh Sonnet
+captain subagent fed `.scratch/<slug>/resume.md`; this session waits for its
+digest. Third compaction → one `blocked on you:` rollover at the next
+milestone. Brief, file format, models: [Lifecycle](references/lifecycle.md).
+
 ## Read first
 
 1. `PROFILE.md` (care-axes, effort level, deploy targets, testing style,
@@ -175,10 +183,6 @@ normally either way.
   architecture, planning, and other big-view work; `standard` for ordinary
   features; `fast` for contained fixes. Full rules:
   [Effort mapping](references/effort-mapping.md).
-- Downgrade ask: picking a lower level than the run default is stated in one
-  line ("downgraded to fast: <reason>"); when the agent believes a different
-  level would accelerate development, it asks the user rather than deciding
-  silently.
 - Precedence: session override (`/start fast|standard|thorough`) >
   `docs/agents/AGENTS.md` > PROFILE.md; default `standard`.
 - Map the level to subagent knobs, gates, and stage behavior with
