@@ -7,9 +7,14 @@ here.
 
 | effort | subagent thinking (spawn `effort`) | reviewer model | research fan-out | intake gear | blind review (`goldfish-review`) | spec checkpoint | ticket confirm | review tier |
 |---|---|---|---|---|---|---|---|---|
-| fast | low | see *Tier → agent and model* | skip (only when a ticket is blocked) | focused | none (not asked) | post-and-proceed | none | lint + screenshots + design-only reviewer |
-| standard | medium | see *Tier → agent and model* | 1 per unknown, cap 3 | focused | stage A: 0–2 lenses by risk after the checkpoint, not asked; stage B asked, recommend up to 3, only if architecture-heavy | blocking | none | one code reviewer (also fills the design rows), not two |
-| thorough | high | see *Tier → agent and model* | full parallel fan-out | deep if high stakes, else focused | stage A: 0–2 lenses by risk after the checkpoint, not asked; stage B asked, recommend all | blocking | blocking (edges + sizing) | + dual-verdict + visual reviewer, once per feature range before the flip (`pr`/`main`: once per change), never per slice |
+| fast | low | see *Tier → agent and model* | skip (only when a ticket is blocked) | focused | none (not asked) | post-and-proceed | post-and-proceed | lint + screenshots + design-only reviewer |
+| standard | medium | see *Tier → agent and model* | 1 per unknown, cap 3 | focused | stage A: 0–2 lenses by risk after the checkpoint, not asked; stage B asked, recommend up to 3, only if architecture-heavy | blocking | post-and-proceed | one code reviewer (also fills the design rows), not two |
+| thorough | high | see *Tier → agent and model* | full parallel fan-out | deep if high stakes, else focused | stage A: 0–2 lenses by risk after the checkpoint, not asked; stage B asked, recommend all | blocking | post-and-proceed | + dual-verdict + visual reviewer, once per feature range before the flip (`pr`/`main`: once per change), never per slice |
+
+Ticket confirm blocks at no effort: the list is posted and the run proceeds;
+`write-tickets` asks about granularity only when its ticket count gate fires
+or the user asked to see the list first (`write-tickets`/references/slicing.md
+§ Ticket confirm).
 
 ## Tier → agent and model
 
@@ -54,6 +59,9 @@ Orchestrator by stage (who runs each stage: lifecycle.md):
 - Spawn `effort` is `lo`, omitted or `hi`. Never pass `med`: measured
   2026-11-07, `med` ran at high thinking, same as `hi`; omitting it keeps
   the agent's default (medium for `task`). Never request above `hi`.
+- Spawn `effort` is the real thinking budget. The dispatch voice line's
+  "think in short notes" half (start § Voice) is best effort: the model may
+  not follow it, and the displayed thinking may be a harness summary.
 - Escalation (cheap first, pay only on failure): a `mechanical` worker or a
   Haiku `effort: fast` worker that returns BLOCKED or NEEDS_CONTEXT twice,
   or fails its DoD after one fix round, is re-dispatched one tier up

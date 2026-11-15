@@ -37,9 +37,8 @@ inherit the session's mode and only the orchestrator talks to the user.
 Plain full sentences instead: questions to the user (ask tool), security or
 irreversible-action warnings, and anything persisted for humans — code,
 comments, commits, PR bodies, specs, tickets, check docs, `REPORT.md`.
-The thinking half of the line is best effort: the model may not follow it,
-and the displayed thinking may be a harness summary. The real thinking
-budget is the spawn `effort` (references/effort-mapping.md).
+The thinking half is best effort; the real thinking budget is the spawn
+`effort` (references/effort-mapping.md).
 
 ## Waiting on the user (every chain skill)
 
@@ -60,10 +59,8 @@ worker's BLOCKED or NEEDS_CONTEXT only the user can clear.
 - The context goes inside the form (digest, verify steps, PR link, options);
   the chat reply holds no second copy.
 - Visual context (a prototype, design options, drawings, screenshots, a
-  review page) reaches the user only as a served URL — they are on a tablet
-  or phone. Never a local file path, never "I'll send it next". Follow
-  `prototype` § 3 Serve (served directory, long-lived server, tailnet URL,
-  curl check) before the ask.
+  review page) reaches the user only as a served, checked URL — they are on
+  a tablet or phone (`prototype` § 3 Serve, before the ask).
 - Read PROFILE.md `## Consent ledger` before every ask: what it
   pre-approves is done, not asked. The user delegates a class of asks ("do
   it yourself", "deploy it yourself", "you pick") → append it as a
@@ -179,84 +176,55 @@ normally either way.
 
 ## Effort level
 
-- Per task, not per run: triage classifies the *run default*, but each task or
-  ticket gets its own effort chosen from its shape — `thorough` only for
-  architecture, planning, and other big-view work; `standard` for ordinary
-  features; `fast` for contained fixes. Full rules:
-  [Effort mapping](references/effort-mapping.md).
-- Precedence: session override (`/start fast|standard|thorough`) >
-  `docs/agents/AGENTS.md` > PROFILE.md; default `standard`.
-- Map the level to subagent knobs, gates, and stage behavior with
-  [Effort mapping](references/effort-mapping.md). A prototype caps gates at
-  the fast tier at any effort.
+Per task, not per run: triage sets the *run default*; each task or ticket
+gets its own level from its shape — `thorough` only for architecture,
+planning and other big-view work, `standard` for ordinary features, `fast`
+for contained fixes. Precedence: session override (`/start
+fast|standard|thorough`) > `docs/agents/AGENTS.md` > PROFILE.md; default
+`standard`. A prototype caps gates at the fast tier at any effort. Knobs,
+gates, stage behavior and per-ticket rules: [Effort
+mapping](references/effort-mapping.md).
 
 ## Run plan, then fire
 
 Print one line per stage: fires/skips · HITL or AFK (read each skill's
 `interaction` frontmatter, effort overrides applied) · gate · artifact path.
 Ask at most one question, only if triage is genuinely ambiguous — then fire.
-Every question to the user, here and in every chain skill, goes through the
-harness's ask tool (§ Waiting on the user), never as plain text ending a turn.
-Exceptions (each bundles into the plan, never a separate round trip):
-- Review-site publish. PROFILE.md `Review site publish:` decides — `always`
-  → the plan lists `review-site` firing after deliver; `off` → skip
-  silently; `ask` (the default) → one yes/no ("publish the review dashboard
-  when this run ships?") that routes deliver's report step for this run only.
-- Delivery. PROFILE.md `## Delivery` `changes:` decides — `pr` → the plan
-  lists `open-pr` after deliver and the run branch is cut before the first
-  commit (several tickets or > ~20 files → a `gh stack`, one layer per
-  ticket); `trunk` → the plan lists `ship-to-trunk`: no run branch, one
-  worktree + slice PR per ticket off fresh `origin/main`, ticket 01 adds the
-  release flag, the flip PR is the release (stacks only by its exception);
-  `main` → commits land on the default branch; `ask` (typed by the user at
-  setup, or an old PROFILE without the answer) → one question ("trunk
-  (small PRs into main), one PR, or straight to main?") answered for this
-  run only. The style is the user's per-project decision from
-  `init-profile` question 9; start never switches it on its own. Asked
-  before `implement` starts, because the branch must exist before the first
-  commit. Trunk needs a required PR check (a workflow on
-  `pull_request` that main's protection requires): missing → the plan's
-  first ticket is the check setup and slices wait for it plus the user's
-  branch protection (`ship-to-trunk`); local gates substitute only when
-  PROFILE says `pr-check: none` (CI on main only; merge gate = local suite
-  on the rebased branch). No
-  `merge dark slices on green` consent line → say once that every PR waits
-  for the user.
-- UI tier. The ask builds or changes a reusable composable → infer the tier
-  per module (`micro-architecture`/references/ui-components.md, "Tier
-  first"): design-system, shared or published module → `library`;
-  feature-local → `app`. Record it as a ledger line
-  `Ruling: ui-tier <module> = library|app — <why>`. When it is ambiguous
-  (single module, shared `ui/components` package), ask one question
-  ("library rules (MUST) or app rules (SHOULD) for <module>?").
+Three decisions bundle into the plan, never a separate round trip (rules
+and question wording: [Run plan](references/run-plan.md)):
+- Review-site publish (PROFILE `Review site publish:`): `always` → plan
+  lists `review-site` after deliver; `off` → skip; `ask` (default) → one
+  yes/no for this run.
+- Delivery (PROFILE `## Delivery` `changes:`): `pr` → `open-pr` after
+  deliver, run branch cut before the first commit; `trunk` →
+  `ship-to-trunk`, which needs a required PR check or `pr-check: none`;
+  `main` → default branch; `ask` → one question for this run, before
+  `implement`. Start never switches the style on its own.
+- UI tier: the ask builds or changes a reusable composable → ledger
+  `Ruling: ui-tier <module> = library|app — <why>`; ambiguous → one
+  question.
 
 ## Debug run log
 
-PROFILE.md `debug: on`, or "debug on" said this session → create
-`.scratch/run-log.md`; every chain skill appends one bounded entry (≤4 lines):
-
-`<skill> | fired by <trigger> | contributed: <what changed> | depth: ok | skipped: <none | what + why>`
-
-`depth != ok` when a size estimate is exceeded, >2 fix rounds run, research
-fan-out tops 3 subagents, or a gate re-ran — always with the cause. Off = no
-log. The per-run ledger (`.scratch/<slug>/ledger.md`) is a different file.
+PROFILE.md `debug: on`, or "debug on" said this session → every chain skill
+appends one ≤4-line entry to `.scratch/run-log.md`; format and `depth`
+rules: [Run plan](references/run-plan.md) § Debug run log. Off = no log.
 
 ## Hats — pick one per session, per subagent
 
 Before dispatching anything, name the hat: **implementer** (writes to the
-ticket, optimistic), **reviewer** (grades a diff it didn't write, never its
-own), **designer** (decides what the thing should be, before code),
+ticket, optimistic), **reviewer** (grades a diff it didn't write),
+**designer** (decides what the thing should be, before code),
 **diagnostician** (finds cause, fixes nothing yet), **challenger** (a
 `goldfish-review` lens: fresh context, one angle, finds what is wrong with a
-concept or design, fixes and decides nothing). The dispatch table
-below is hat-routed: `implement` dispatches implementers by ticket `tier:`,
-`review-change` dispatches reviewers (agent and model for both:
-references/effort-mapping.md, *Tier → agent and model*), `goldfish-review` dispatches
-challengers, `diagnose-bug` stays
-diagnostician until the fix is a ticket. Never let one agent wear two hats
-on the same work product — the implementer "reviewing" its own diff is the
-audited source of "all done" → full-rework incidents. Switching hats means
-closing the current one first (commit, stop, or hand off).
+concept or design, fixes and decides nothing). `implement` dispatches
+implementers by ticket `tier:`, `review-change` reviewers (agent and model:
+references/effort-mapping.md, *Tier → agent and model*), `goldfish-review`
+challengers; `diagnose-bug` stays diagnostician until the fix is a ticket.
+One agent never wears two hats on the same work product — the implementer
+"reviewing" its own diff is the audited source of "all done" → full-rework
+incidents. Switching hats closes the current one first (commit, stop, or
+hand off).
 
 ## Stage → skill dispatch
 
@@ -265,11 +233,11 @@ closing the current one first (commit, stop, or hand off).
 | intake | `run-intake` | feature, prototype |
 | orientation | `map-codebase` | unmapped codebase + chain work |
 | spec | `draft-spec` | feature, prototype |
-| spec/tickets | `goldfish-review` | stage A after the spec checkpoint confirms scope (orchestrator picks 0–2 lenses by risk); stage B at the write-tickets confirm gate (user picks none / up to 3 / all) |
+| spec/tickets | `goldfish-review` | stage A after the spec checkpoint confirms scope (orchestrator picks 0–2 lenses by risk); stage B at `write-tickets`' design-review question (user picks none / up to 3 / all) |
 | tickets | `write-tickets` | feature, prototype (ticket sets are parallel-first: minimal file overlap; device checks get one aggregate ticket, or none) |
 | research | `fan-out-research` | ticket/spec declares an Unknown |
 | implement | `implement` | ready frontier ticket; `user-check` fast fixes; re-gate hardening tickets |
-| user check | `user-check` | implement done (feature tickets) or quick-task code written — the user tries the whole change before any review (pr/main) or after the last slice merged dark, from `main` with the flag forced on and before the flip PR (trunk); on OK it re-gates the run into hardening tickets |
+| user check | `user-check` | implement done (feature tickets) or quick-task code written — the user tries the whole change before any review (trunk: after the last slice merged dark, before the flip PR); on OK it re-gates the run into hardening tickets |
 | review | `review-change` | hardening tickets closed after `user-check` OK (quick task: right after OK) |
 | deliver | `deliver` | review passes and `suite: green @ HEAD` is ledgered |
 | land | `open-pr` | run's delivery decision = pr (PROFILE `## Delivery` `changes:` or session answer), fired by `deliver`; = trunk → once per slice PR and for the flip PR (`ship-to-trunk`) |
@@ -292,26 +260,16 @@ closing the current one first (commit, stop, or hand off).
 are the chain contract and land separately — when one fires and the skill is
 absent, say so and stop that branch instead of improvising.
 
-Direct paths for knowledge skills the chain mandates mid-run (do not wait to
-be asked): "let me try it first" / hands-on check → `user-check`; Compose UI → `preview-compose`; flags/dev settings →
-`wire-dev-settings`; animations → `animation-vocabulary` + `apple-design`;
-principles → `emil-design-eng`, `ui-ux-pro-max`; diagrams → `archify`;
-architecture → `design-architecture`; screenshots/tests → `tdd`
-(`tdd`/references/android-testing.md); web testing ladder (React-first, browser
-as the emulator of web) → `tdd` (`tdd`/references/web-testing.md); web/Node
-environment bootstrap → `web-env`; Android tooling (renders, analysis, docs,
-emulators, deploys, signals) → `android-cli`; environment bootstrap (PATH,
-local.properties, worktree git, device connect, Gradle triage, Studio
-modals) → `android-env`; capability adoption checklist → `adopt-tool`;
-feature file-split design (parallel-safe, open/closed, one responsibility
-per file) → `micro-architecture`; judgment defaults → `senior-dev`; UX
-method (framework-judged pixels, A/B on hardware, tokens with floors) →
-`senior-ux`; blind concept/design lenses → `goldfish-review`; mechanical
-file-structure and layering checks (Konsist) → `structure-checks`; PR
-description and landing → `open-pr`; stacked PRs per ticket (`gh stack`,
-fixes into the owning layer) → `open-pr`/references/stacks.md; trunk based
-/ small PRs / merge dark / keep main releasable → `ship-to-trunk`;
-throwaway one-page prototypes → `prototype`.
+Direct paths the chain mandates mid-run beyond the table (do not wait to be
+asked): "let me try it first" / hands-on check → `user-check`; Compose UI →
+`preview-compose`; flags/dev settings → `wire-dev-settings`; animations →
+`animation-vocabulary` + `apple-design`; principles → `emil-design-eng`,
+`ui-ux-pro-max`; diagrams → `archify`; architecture → `design-architecture`;
+screenshots/tests → `tdd` (`tdd`/references/android-testing.md; web testing
+ladder, React-first, browser as the emulator of web:
+`tdd`/references/web-testing.md); Android tooling (renders, analysis, docs,
+emulators, deploys, signals) → `android-cli`; stacked PRs per ticket (`gh
+stack`, fixes into the owning layer) → `open-pr`/references/stacks.md.
 
 Close calls (quick vs feature vs prototype): read
 [Triage cases](references/triage-cases.md).

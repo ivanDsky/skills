@@ -14,7 +14,7 @@ requires: []
 ---
 
 > **TL;DR** Fresh subagents that only know the hypothesis and hard constraints each attack one angle of a feature before code exists; the parent merges their findings into numbered assumptions and shows the user where lenses disagree. No fresh subagent, no review — never a same-context stand-in.
-> **Related**: skill://draft-spec (stage A follows its checkpoint), skill://run-intake (prior-art step), skill://write-tickets (stage B at its confirm gate), skill://review-change (stage C — the diff — and shared triage rules), skill://fan-out-research (same one-file-per-subagent contract), skill://grilling (irreversible forks), skill://micro-architecture, skill://design-architecture, skill://structure-checks, skill://ship-to-trunk (file-structure lens: `trunk` tickets merge alone and dark)
+> **Related**: skill://draft-spec (stage A follows its checkpoint), skill://run-intake (prior-art step), skill://write-tickets (stage B at its design-review step), skill://review-change (stage C — the diff — and shared triage rules), skill://fan-out-research (same one-file-per-subagent contract), skill://grilling (irreversible forks), skill://micro-architecture, skill://design-architecture, skill://structure-checks, skill://ship-to-trunk (file-structure lens: `trunk` tickets merge alone and dark)
 
 # Goldfish review
 
@@ -30,7 +30,7 @@ multiplied.
 | Stage | When | Input | Lenses (catalog: [references/lenses.md](references/lenses.md)) |
 |---|---|---|---|
 | **A — concept** | after the spec checkpoint confirms scope, before `write-tickets` | hypothesis + hard constraints + Out of scope | reuse, persona flows, data & migration, failure & resources, best version, verifiability |
-| **B — design** | `write-tickets` confirm gate | spec + module map + file maps | architecture, patterns, file structure |
+| **B — design** | `write-tickets` design-review step (item 9) | spec + module map + file maps | architecture, patterns, file structure |
 | **C — diff** | `review-change` | the diff | owned by `review-change` (axes + visual reviewer); not a mode here |
 
 **Stage A — the orchestrator picks; the user is not asked.** Never before
@@ -50,10 +50,10 @@ Ledger `Ruling: stage A lenses <a>, <b> — <risk>`.
 
 Best version only when the user asks: it adds scope a confirmed spec cut.
 
-**Stage B — the user picks** none / up to 3 / all in the `write-tickets`
-confirm message. Recommended: fast → none, standard → up to 3, thorough →
-all. A "none", or silence on a fast run, means no goldfish; never add one
-unasked.
+**Stage B — the user picks** none / up to 3 / all at `write-tickets` item 9,
+which owns when the question is asked and what it recommends (blind review
+column: `start`/references/effort-mapping.md). A "none", or no question
+asked, means no goldfish; never add one unasked.
 
 ## 2. Run a stage
 
@@ -71,12 +71,10 @@ unasked.
    lens file section to follow, the ABSOLUTE findings path
    `.scratch/<slug>/goldfish/<stage>-<lens>.md`, and the reply contract
    (≤5 lines, status only), and the voice line from `start` § Voice.
-   Subagent thinking follows effort (low / medium /
-   high for fast / standard / thorough).
-3. **Findings format** (in the file): per finding — id (`<lens>-1`), the claim
-   in one sentence, the evidence (repo path, doc URL, quoted brief line — a
-   claim without evidence is dropped), what changes if it is true, and one
-   proposed disposition: assumption · non-goal · success criterion · question.
+   Spawn `effort` per `start`/references/effort-mapping.md (subagent
+   thinking column).
+3. **Findings format** (in the file): [lenses.md](references/lenses.md)
+   § Findings format — a claim without evidence is dropped.
 4. **Not run ≠ clean.** A lens that could not be dispatched (no fresh
    subagent available), returned no file, or failed twice is **not run**. Say
    so in the digest, name the missing coverage, and never count it as zero
@@ -103,16 +101,9 @@ unasked.
 
 ## 3. Anti-patterns
 
-- Pasting conversation, rationale, or the author's preferred design into a
-  brief — the lens then reviews the argument, not the idea.
-- Showing one lens another's findings (they converge instead of covering).
-- Treating the result as approval. It is input to the spec; the user's
-  checkpoint stays the gate.
-- A lens with nothing new to say still reports "no findings, checked: …" with
-  what it looked at; an empty file is not run.
-- Running stage A before scope is confirmed, or more than 2 lenses unasked:
-  one audited run produced 76 findings across 6 lenses on a scope that then
-  collapsed to an MVP.
+Read [lenses.md](references/lenses.md) § Parent anti-patterns before writing
+a brief or merging. The result is input to the spec, never approval: the
+user's checkpoint stays the gate.
 
 Adapted from the Elephant-Goldfish Model, github.com/google/elephant-goldfish-model
 (Apache-2.0): the fresh-context-reviewer idea, concept-stage lenses, the

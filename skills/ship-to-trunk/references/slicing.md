@@ -8,9 +8,9 @@ one PR, or when a change cannot hide behind a flag.
 | Ticket | Lands | Flag |
 |---|---|---|
 | 01 flag | release flag, off in release, debug toggle | adds `<Key>` |
-| 02..N slices | domain, data, UI pieces behind the flag; each builds and passes alone | gated |
+| 02..N slices | one capability each, end to end, behind the flag; each builds and passes alone | gated |
 | shared-file edits | registry / DI module / nav graph / `when` entry, alone and first | gated or inert |
-| hardening (after user-check) | tests pinning approved behavior, fixes | gated |
+| hardening (after user-check) | fixes plus regression tests for the bug each fixes (`tdd` § What to test, what not to) | gated |
 | flip | release default on, version bump, changelog | flips `<Key>` |
 | cleanup | remove flag, dead branch, override | removes `<Key>` |
 
@@ -49,7 +49,10 @@ version moves.
 
 ## Too big for one PR
 
-Split by layer seam (domain → data → UI), by variant (one file per variant,
-`micro-architecture`), or by scaffold then fill (inert route first, content
-next). A ticket whose diff is mostly one new file of > ~400 lines is a
-structure problem, not a slicing problem (`structure-checks` S2).
+Split by capability, never by layer: `write-tickets`/references/slicing.md
+owns how (a thinner capability — one state, one variant, one entry point;
+~600-line ceiling, this skill's ~400-line cap for `trunk`). Trunk-specific
+aids: one file per variant (`micro-architecture`), or scaffold then fill
+(inert route first, content next). A ticket whose diff is mostly one new
+file of > ~400 lines is a structure problem, not a slicing problem
+(`structure-checks` S2).
