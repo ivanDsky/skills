@@ -1,14 +1,18 @@
 {
   "skill": "write-tickets",
   "positive": [
-    "The spec passed review \u2014 break it into tickets in the tracker",
+    "The spec passed review — break it into tickets in the tracker",
     "Turn this plan into dependency-ordered tickets, each with a checkable done condition and evidence",
     "We're building the export feature next; write the tickets so each one fits a single fresh subagent run",
     "Split the approved spec into tracer-bullet tickets, walking skeleton first",
     "Cut tickets with a file map per ticket and a re-runnable evidence command; ask me how many blind design lenses to run",
     "Split this spec into tickets that can each merge to main behind a flag",
-    "Split this ticket: most of it is DI and nav registration, but the retry state machine needs real design \u2014 tag each piece with its tier",
-    "Break the spec into tickets; each DoD asks only for the tests the test policy admits, never one per surface"
+    "Split this ticket: most of it is DI and nav registration, but the retry state machine needs real design — tag each piece with its tier",
+    "Break the spec into tickets; each DoD asks only for the tests the test policy admits, never one per surface",
+    "Cut the sync spec into tickets — keep them big: one capability per ticket end to end, DI and nav registration folded into the slice, about a dozen per milestone",
+    "The plan is coming out at 40 tickets and the user hasn't signed off on the design yet — split it so a prototype milestone comes first",
+    "Write tickets for the new settings screen; the contract is frozen, so every UI ticket needs its Contract and Reference lines to the prototype screenshots",
+    "Turn the spec into tickets and just post the list — don't make me confirm granularity unless the plan is huge"
   ],
   "negative": [
     {
@@ -26,6 +30,10 @@
     {
       "prompt": "Classify this ask and print the run plan for the session",
       "owner": "start"
+    },
+    {
+      "prompt": "Freeze the UI contract: capture reference screenshots from the approved prototype and write the acceptance list",
+      "owner": "prototype"
     }
   ]
 }

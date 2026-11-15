@@ -2,16 +2,18 @@
 name: write-tickets
 description: >-
   Break an approved spec into tracer-bullet tickets in the local tracker —
-  walking-skeleton ticket 01 first, a mandatory checkable DoD + evidence on
-  every ticket, one ticket per fresh subagent context, declared Unknowns fanned
-  out to research, parallel-safe only on disjoint file scopes. Use after a spec
+  walking-skeleton ticket 01 first, one end-to-end capability per ticket
+  (≤ ~12 per milestone, a count gate for unvalidated designs), a mandatory
+  checkable DoD + evidence on every ticket, one ticket per fresh subagent
+  context, declared Unknowns fanned out to research, parallel-safe only on
+  disjoint file scopes. Use after a spec
   passes its checkpoint, or when a plan or spec must become dependency-ordered,
   trackable tickets.
 interaction: afk
 requires: []
 ---
 
-> **TL;DR** Breaks an approved spec into dependency-ordered tracer-bullet tickets with DoD and evidence in the local tracker; fires after a spec passes checkpoint.
+> **TL;DR** Breaks an approved spec into few, bigger dependency-ordered tracer-bullet tickets with DoD and evidence in the local tracker; fires after a spec passes checkpoint.
 > **Related**: skill://draft-spec (upstream spec), skill://implement (downstream execution), skill://fan-out-research (Unknowns research), skill://structure-checks (file-map evidence), skill://goldfish-review (stage B design review), skill://user-check (re-gate fires this for hardening tickets: DoD includes "approved behavior unchanged", tests only for the bug each fixes), skill://tdd (§ What to test, what not to: the test policy every ticket's tests follow), skill://ship-to-trunk (`changes: trunk`: every ticket merges to main alone and dark)
 
 # Write tickets
@@ -35,21 +37,18 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
    shared-file edit (registry, DI module, nav graph, `when` entry) is its
    own ticket merged first; the flip ticket and the cleanup ticket are
    written up front, last. Rules: `ship-to-trunk`/references/slicing.md.
-3. Size: one ticket = one fresh subagent context, one sitting. The budget is
-   a single context window: ticket + spec backlink + neighbor interfaces in,
-   code + evidence out. Checkable proxy: ≤5 files touched and exactly one
-   demoable or verifiable outcome. Over budget → split vertically (a thinner
-   slice), never by layer. One mechanical change with a wide blast radius →
-   expand–contract batches: add the new form beside the old, migrate call
-   sites in batches (each batch ticket `tier: mechanical`), delete the old
-   form last. `trunk` runs add a hard cap:
-   ≤ ~400 changed lines, one concern — split before publishing, never after.
-   Mixed ticket — mostly mechanical with a judgment core → split into one
-   `mechanical` ticket (wiring, registration, resources, call-site batches)
-   and one `standard`/`deep` ticket for the core, ordered by the real
-   dependency. Still vertical, never by layer, each with its own checkable
-   DoD; a mechanical DoD may be "compiles + touched-module tests green".
-   Never split below that: a piece with no DoD of its own stays merged.
+3. Size: one ticket = one fresh subagent context, one sitting, and by default
+   one user-visible capability end to end (data → domain → ViewModel → UI),
+   never one layer. Merge mechanical pieces (DI/nav registration, strings,
+   the slice's own call-site migration) into the slice that needs them;
+   target ≤ ~12 tickets per milestone, ceiling ~600 changed production lines
+   per ticket, split above it into a thinner capability, never by layer.
+   `trunk` runs keep the hard cap ≤ ~400 changed lines, one concern, split
+   before publishing, never after. A repo-wide migration over the ceiling →
+   expand–contract batches, each `tier: mechanical`, old form deleted last.
+   A plan over ~25 tickets for a design the user has not validated is split:
+   prototype/contract milestone first, tickets after freeze. Rules, exceptions
+   and the gate: references/slicing.md — read it before sizing.
 4. Every ticket carries ALL mandatory fields:
    - **What to build** — end-to-end behavior from the user's perspective, not
      a layer list. No file paths or line numbers; they go stale. Exception: a
@@ -75,6 +74,10 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
      say so in the ticket). Tests a ticket asks for follow `tdd` § What to
      test, what not to — one behavior at one layer, never one test per
      surface. No DoD → not a ticket: thin or split until one exists.
+   - **Contract lines** — tickets under a frozen UI contract only:
+     `Contract: .scratch/<slug>/contract/` and one
+     `Reference: <golden or test> = reference/<file>.png` line per pair
+     (references/slicing.md § UI contract lines). Absent otherwise.
    - **flag** (`trunk` runs) — `flag: <Key> | none`; plus
      `live: <what> — <why backward compatible>` for a change no flag can hide
      (migration, persisted format, manifest/permission, dependency bump),
@@ -114,22 +117,21 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
    publish there natively and use its real blocking links.
 7. Prototype sets: DoD = the question answered or the thing demoable; the
    last ticket carries the `deploy:` flag (`main | standalone | none`).
-8. Confirm by effort: each ticket carries `effort:` (`fast | standard |
-   thorough`) and `tier:` frontmatter fields — effort per the per-task rules
-   in `start`'s effort mapping (thorough only for architecture/planning/
-   big-view tickets), tier per item 4. List every downgrade below the run
-   default with a reason; if a different level would likely accelerate
-   development, ask the user (ask tool). fast/standard — publish and report the
-   numbered list (title, effort / tier, blocked-by, what it delivers).
-   Thorough — show the list and wait: confirm granularity, blocking edges, and
-   split/merge before publishing, through the ask tool (`start` § Waiting on
-   the user; the list goes inside the form).
+8. Confirm: each ticket carries `effort:` (`fast | standard | thorough`) and
+   `tier:` frontmatter fields — effort per the per-task rules in `start`'s
+   effort mapping (thorough only for architecture/planning/big-view tickets),
+   tier per item 4. List every downgrade below the run default with a reason;
+   if a different level would likely accelerate development, ask the user
+   (ask tool). Post the numbered list (title, effort / tier, blocked-by, what
+   it delivers) and proceed at every effort level. Ask about granularity only
+   when the ticket count gate fires or the user asked to see the list first
+   (references/slicing.md § Ticket count gate, § Ticket confirm).
 9. Design review (stage B, `goldfish-review`): before publishing, when the
-   set adds a module or boundary or the run is thorough, ask the user in the
-   same confirm form whether they want a blind design review — none / up
-   to 3 / all lenses (recommended: all at thorough, up to 3 otherwise). fast,
-   or nothing architectural → skip silently. Findings land as ticket edits
-   or file-map changes, never a second interview.
+   set adds a module or boundary or the run is thorough, ask the user whether
+   they want a blind design review — none / up to 3 / all lenses (recommended:
+   all at thorough, up to 3 otherwise), one question, in the gate's form when
+   it fires. fast, or nothing architectural → skip silently. Findings land as
+   ticket edits or file-map changes, never a second interview.
 
 Adapted from mattpocock/skills (`to-tickets`) and obra/superpowers
 (`writing-plans`), MIT.
