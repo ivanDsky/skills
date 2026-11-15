@@ -35,7 +35,18 @@ CLI is installed (`android-cli`), prefer it — it knows the SDK location via
 
 ## 2. local.properties
 
-Missing → write it once, at the repo root:
+Every new git worktree starts without it (it is gitignored), so a per-ticket
+worktree run hits "SDK location not found" once per ticket. Fix it once per
+machine: `export ANDROID_HOME=$HOME/Library/Android/sdk` in `~/.zshenv`
+(non-interactive shells read it; Gradle uses it when `sdk.dir` is absent).
+Not possible → the step that creates a worktree copies the main checkout's
+file:
+
+```sh
+cp "$(git rev-parse --path-format=absolute --git-common-dir)/../local.properties" .
+```
+
+No file anywhere → write one at the repo root:
 
 ```sh
 echo "sdk.dir=$HOME/Library/Android/sdk" > local.properties

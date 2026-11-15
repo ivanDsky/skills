@@ -27,12 +27,17 @@ fast fix can need judgment: never derive one from the other.
 |---|---|---|---|
 | `mechanical` | fully specified edits: renames, DI/nav registration, strings/resources, gradle deps, fixtures, moving code with no behavior change, call-site migration batches | `agent: sonic`, no `model` | `lo` |
 | `standard` | ordinary feature/fix work with local decisions | ticket `effort: fast` → `agent: task`, `model: anthropic/claude-haiku-5-5:high` (cheap, so high thinking: a weak implementer costs more in fix loops than in tokens); `effort: standard`/`thorough` → `agent: task`, no `model` (Sonnet medium) | fast → omit (the `:high` model suffix sets thinking); standard → omit, thorough → `hi` |
-| `deep` | new module/boundary, concurrency/state-machine logic, cross-cutting refactor design, anything where a wrong call is expensive to unwind | `agent: task`, `model: anthropic/claude-fable-5-2:high` | `hi` |
+| `deep` | the ticket names an open design for a new module or boundary, concurrency, or a state machine | `agent: task`, `model: anthropic/claude-fable-5-2:high` | `hi` |
 
 Defaults when write-tickets did not set `tier:`: `effort: fast` → `standard`;
 `standard` → `standard`; `thorough` → `deep` only if the ticket is
 architecture-heavy (`implement` §3: new module, new boundary, dependency
 direction in play), else `standard`.
+
+Never `deep`: test-only tickets (pins, characterization, coverage),
+behaviour-preserving refactors whose target shape is given, and work against
+an API the ticket already specifies. "Expensive if wrong" is not a tier: a
+`standard` worker that fails escalates (below).
 
 Reviewer and research dispatch:
 

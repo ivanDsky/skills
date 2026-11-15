@@ -7,7 +7,8 @@
     "adb doesn't see my tablet",
     "git is acting weird inside this worktree",
     "Android Studio seems stuck, maybe a dialog is open",
-    "what gradle task do I run to build the debug APK"
+    "what gradle task do I run to build the debug APK",
+    "every new ticket worktree fails with SDK location not found until I copy local.properties in"
   ],
   "negative": [
     {
