@@ -53,9 +53,13 @@ ticket's state by hand to claim it.
 ## 3. Land each ticket
 
 Run `implement` on the pack with ledger `.scratch/backlog-$ME/ledger.md`.
-Delivery is always one ticket = one PR off fresh `origin/main`, merged dark
-per `ship-to-trunk`, whatever the run default. A project without a required
-PR check or `pr-check: none` gets PRs opened for the user to merge.
+Delivery is always one ticket = one PR off fresh `origin/main`, whatever the
+run default: merged dark behind its flag, or live when it is a pure bug fix.
+Who merges is `ship-to-trunk` § Merge authority, never a rule of this skill:
+with the consent line, the agent merges on a green gate plus a clean fast
+review. The gate is the required PR check, or under `pr-check: none` the
+local suite on the branch rebased onto fresh `origin/main`. Only a missing
+consent line, a live change (invariant 7) or a flip PR waits for the user.
 
 Per ticket, before dispatch, write the brief from the ticket
 ([pack-loop.md](references/pack-loop.md) § Brief):
@@ -79,7 +83,7 @@ No ticket stays `claimed` once its outcome is known.
 |---|---|
 | merged, logic proven by evidence | `set ID --state done --note "PR #N merged @ <sha>; <evidence>"` |
 | merged, `hands-on` | `set ID --state needs-check --note "PR #N merged @ <sha>; flag: <Key\|none>; verify: <one line>"` |
-| PR opened, the user merges | `set ID --state needs-check --note "PR #N awaits your merge"` |
+| PR waits for the user (no consent line, or a live change) | `set ID --state needs-check --note "PR #N awaits your merge: <why>"` |
 | worker NEEDS_CONTEXT that only the user can answer | `set ID --state needs-info --note "<the question, with a recommended answer>"` |
 | needs credentials, a device or a product decision | `set ID --state ready-for-human --note "<what and why>"` |
 | BLOCKED, failed twice, or out of time | `unclaim ID --note "<what was tried, where it stopped>"` |
