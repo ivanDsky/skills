@@ -16,9 +16,15 @@
     "/start leaderboard — last orchestrator ran five days and compacted 48 times; start fresh each milestone from a resume file",
     "Resume leaderboard from .scratch/leaderboard/resume.md",
     "/start redesign the competitions reveal and results screens for tablet — I sign off the design once up front, then build without asking me",
-    "/start the hardening wave — last run put five test-only pin tickets on Fable at $16 each; tier them so only real design work gets deep"
+    "/start the hardening wave — last run put five test-only pin tickets on Fable at $16 each; tier them so only real design work gets deep",
+    "/start the reveal text overflows on small phones — fix it here",
+    "/start — this session is for my feedback today, and the other worktrees will work what we file"
   ],
   "negative": [
+    {
+      "prompt": "Log these for later: the timer skips on resume and the share sheet is missing the puzzle number",
+      "owner": "file-tickets"
+    },
     {
       "prompt": "Audit last week's sessions: compactions and Opus spend per orchestrator",
       "owner": "skill-doctor"

@@ -12,9 +12,14 @@
     "Cut the sync spec into tickets — keep them big: one capability per ticket end to end, DI and nav registration folded into the slice, about a dozen per milestone",
     "The plan is coming out at 40 tickets and the user hasn't signed off on the design yet — split it so a prototype milestone comes first",
     "Write tickets for the new settings screen; the contract is frozen, so every UI ticket needs its Contract and Reference lines to the prototype screenshots",
-    "Turn the spec into tickets and just post the list — don't make me confirm granularity unless the plan is huge"
+    "Turn the spec into tickets and just post the list — don't make me confirm granularity unless the plan is huge",
+    "The leaderboard spec passed checkpoint — publish its slices to the backlog under the leaderboard epic"
   ],
   "negative": [
+    {
+      "prompt": "File the three bugs I just described as backlog tickets",
+      "owner": "file-tickets"
+    },
     {
       "prompt": "Draft the spec with a numbered assumptions section from yesterday's intake answers",
       "owner": "draft-spec"

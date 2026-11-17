@@ -1,0 +1,68 @@
+[
+ {
+  "body": "<!--\nFor security vulnerabilities, first report through GitHub's bug bounty program:\nhttps://hackerone.com/github\nFor other security-related concerns or questions, report privately through GitHub\nSecu",
+  "closedAt": null,
+  "createdAt": "2026-11-16T15:29:42Z",
+  "labels": [
+   {
+    "id": "MDU6TGFiZWwxNTkzNDg0NjIw",
+    "name": "bug",
+    "description": "Something isn't working",
+    "color": "d73a4a"
+   },
+   {
+    "id": "MDU6TGFiZWwxODI1MDc2ODcz",
+    "name": "priority-3",
+    "description": "Affects a small number of users or is largely cosmetic",
+    "color": "eded04"
+   },
+   {
+    "id": "LA_kwDODKw3uc8AAAABZ6m4jw",
+    "name": "gh-label",
+    "description": "relating to the gh label command",
+    "color": "E6691F"
+   }
+  ],
+  "number": 15066,
+  "state": "OPEN",
+  "title": "`gh label list --json` prints nothing instead of `[]` when the repository has no labels"
+ },
+ {
+  "body": "x",
+  "closedAt": "2026-11-16T11:41:00Z",
+  "createdAt": "2026-11-16T11:34:32Z",
+  "labels": [
+   {
+    "id": "LA_kwDODKw3uc8AAAACFc3YjA",
+    "name": "suspected-spam",
+    "description": "Issue is likely a spam",
+    "color": "c62946"
+   }
+  ],
+  "number": 15063,
+  "state": "CLOSED",
+  "title": "x"
+ },
+ {
+  "body": "### What happened\n\n**Issue Triage (skills-driven)** reported incomplete result.\n\n[View run \\#43609023537](https://github.com/cli/cli/actions/runs/43609023537) \u00b7 [Workflow source](https://github.com/cl",
+  "closedAt": null,
+  "createdAt": "2026-11-14T15:21:10Z",
+  "labels": [
+   {
+    "id": "LA_kwDODKw3uc7QD3p7",
+    "name": "needs-triage",
+    "description": "needs to be reviewed",
+    "color": "D6393F"
+   },
+   {
+    "id": "LA_kwDODKw3uc8AAAACq9yTBg",
+    "name": "agentic-workflows",
+    "description": "",
+    "color": "ededed"
+   }
+  ],
+  "number": 15061,
+  "state": "OPEN",
+  "title": "[aw] Issue Triage (skills-driven): reported incomplete result"
+ }
+]

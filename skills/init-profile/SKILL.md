@@ -65,8 +65,11 @@ answer.
 2. Effort level: `fast | standard | thorough` — recommend `standard`.
 3. Deploy targets, in order — recommend build-only (`- local: <run command>`).
 4. Testing style: `tdd-fakes | tdd-real | smoke-only`, runner, seams.
-5. Tracker location — default `.scratch/<slug>/tickets/`; lands in PROFILE.md
-   only when the project points elsewhere.
+5. Tracker backend for the shared backlog (`work-tickets`/references/backlog.md):
+   `github | local`. `github` = GitHub Issues, visible from the web and
+   phone; `local` = files in the clone's git dir, shared by every worktree
+   on this machine, never committed. Recommend `github` when `origin` is
+   on GitHub and `gh auth status` passes; otherwise `local`.
 6. Platform override — only when the project differs from the user default.
 7. Product frame — the agent proposes from the ask, the user confirms or
    edits: purpose in one line (what the app is for, what it says), who it is
@@ -142,6 +145,10 @@ Send the batch and stop. Never a second batch.
 # - pr-check: none   # written only on a `trunk-local` answer: merge gate is local: `<suite>` green on the PR branch rebased onto fresh origin/main; CI on main only. Absent (default) → trunk waits on main's required PR check
 # - main-check: <workflow file>   # optional, `pr-check: none` only: main's post-merge workflow watched by ship-to-trunk's main_health.py; absent → the `release:` workflow
 
+## Tracker                   # shared backlog: file-tickets files, work-tickets claims
+- backend: github            # from question 5: github (GitHub Issues) | local (<git-common-dir>/backlog/)
+# - repo: owner/name         # github only; absent → the origin remote
+
 ## Consent ledger            # what the agent may do without asking
 - pre-approved: merge to main after green review; lint fixes; dependency bumps; secret-free fixture redaction; commit+push to the project repo
 # - pre-approved: merge dark slices on green   # written on a `trunk` answer (not `trunk-ask`): agent merges dark/non-behavioral slice PRs on green check + clean fast review; flip PRs and live changes still ask. `trunk-local`: "on green LOCAL suite + clean fast review"
@@ -201,8 +208,10 @@ Then, in order:
    android-cli skill) once, and note the CLI in PROFILE.md; skip on
    non-Android platforms.
 
-1. `.scratch/` seed: create the directory if absent; `tickets/` under the
-   tracker location from the batch.
+1. `.scratch/` seed: create the directory if absent (run specs, ledgers,
+   briefs; never tickets). Then the backlog:
+   `python3 ~/.agents/skills/work-tickets/scripts/backlog.py init` (labels
+   on GitHub, or the backlog directory).
 2. The entry line: append exactly one line to the harness config from step 1 —
    `Work in this repo starts with /start.` No heading, no section, no hooks,
    no injection budget; ~0 tokens until `/start` runs.

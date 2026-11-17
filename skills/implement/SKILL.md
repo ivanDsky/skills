@@ -21,9 +21,10 @@ recollection.
 
 ## 1. Step zero — unknowns
 
-1. Read the frontier (tickets open, unblocked, unclaimed), each ticket's spec
-   backlink, and PROFILE.md (effort level, debug). Resuming? Trust the ledger
-   and git log over your own memory.
+1. Read the frontier (`backlog.py list --frontier --epic <slug>`;
+   `work-tickets`/references/backlog.md), each ticket's spec backlink, and
+   PROFILE.md (effort level, debug). Resuming? Trust the ledger, git log
+   and `list --state claimed` over your own memory.
    Delivery `pr` (PROFILE `## Delivery` or start's answer) → make sure the
    run branch `<slug>` is checked out before the first dispatch; workers
    commit on it. Never commit a `pr` run to the default branch. More than
@@ -52,7 +53,9 @@ recollection.
    claims and fixes it when the culprit is its own merge (`enqueue
    --red-fix`); the lane pauses while main is red and resumes by itself
    on green. Flow: `ship-to-trunk`/references/merge-loop.md § Red main.
-2. Claim: set `status: claimed` before any work.
+2. Claim through the script before any work: `backlog.py claim --as <slug>
+   --epic <slug> --ids <id>` (atomic across sessions; exit 3 = someone else
+   holds it, take the next). A pack from `work-tickets` arrives claimed.
 3. A ticket with `Unknowns` gets research subagents first, one per unknown, in
    parallel; link every findings file into the ticket before coding starts.
    Fan-out per ticket effort level (ticket `effort:` field, run default as
@@ -166,7 +169,7 @@ recollection.
 - Review findings (slice review or `review-change`): the worker that wrote
   the code fixes them in its same session, per
   `review-change`/references/fix-loop.md § Fix round.
-- BLOCKED: ledger a `Ruling:`, reopen the ticket, take another frontier
+- BLOCKED: ledger a `Ruling:`, `backlog.py unclaim <id> --note …`, take another frontier
   ticket. Four things stop the run and ask the user (ask tool, `start` §
   Waiting on the user): an irreversible or destructive operation, a
   security-sensitive action, a side effect outside the worktree norms say
@@ -174,13 +177,13 @@ recollection.
 
 ## 5. Close and loop
 
-1. DoD evidence must exist or the ticket stays open. On close: append the
-   ledger line, take the next frontier ticket — no chat to the user per
-   ticket (`start` § Waiting on the user: milestone digests only).
-   `trunk`: close = PR merged,
-   ledgered `slice: <NN> PR #<n> merged @ <sha>`. `pr-check: none`: the
-   ticket stays `claimed` from `ready` until the lane merges it; the
-   frontier counts only merged parents (no change in meaning).
+1. DoD evidence must exist or the ticket stays claimed. On close: `backlog.py
+   set <id> --state done --note "<evidence>"` (a `hands-on` ticket outside
+   an epic: `--state needs-check`), append the ledger line, take the next
+   frontier ticket — no chat to the user per ticket (`start` § Waiting on
+   the user: milestone digests only). `trunk`: close = PR merged, ledgered
+   `slice: <NN> PR #<n> merged @ <sha>`. `pr-check: none`: the ticket stays
+   `claimed` from `ready` until the lane merges it.
 2. Every deviation from ticket or spec lands as
    `Ruling: what — why — cost if wrong`.
 3. Frontier empty → hand off by ticket kind. Feature tickets → `user-check`
@@ -189,6 +192,8 @@ recollection.
    last feature slice merged — the user checks a debug build from `main`
    with the flag forced on; the flip and cleanup tickets wait for
    user-check OK and thorough review (`ship-to-trunk` lifecycle).
+   Backlog packs (`work-tickets`): no epic, so no user-check hand-off;
+   control returns to `work-tickets` for the next pack.
 4. Fast-fix briefs from `user-check` (`mode: fast-fix`, F-ids listed): the
    quality bar is off on purpose. No tests, no refactor, no `structure:`;
    only the smallest change the user asked for, committed `fast(F<n>): …`.

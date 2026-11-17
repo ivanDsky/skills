@@ -38,6 +38,13 @@ run branch; the re-gate diffs the feature's merged range. The ledger
 `user-check: ok <versionName> @ <sha>` is what the flip PR requires; slices
 need none.
 
+**Backlog tickets** (filed by `file-tickets`, landed by `work-tickets`) have
+no epic and never come here one at a time. A hands-on ticket merges and
+waits in `needs-check`, and the feedback session builds one batch for all of
+them (`file-tickets` § 3, reusing § 2 below). Each reply sets `done` or sends
+the ticket back. No re-gate: each ticket was reviewed at the fast tier when
+it merged.
+
 ## 1. Gate in (cheap)
 
 The change compiles, plus the touched module's existing tests. Do not run the

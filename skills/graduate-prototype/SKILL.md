@@ -63,10 +63,9 @@ Graduation is never autonomous: no picks, no tickets.
 
 ## 4. Cherry-pick into real tickets
 
-One ticket per picked module, tracker format
-(docs/agents/issue-tracker.md frontmatter), published to
-`.scratch/<slug>/tickets/NN-<slug>.md`, all mandatory write-tickets fields
-present:
+One ticket per picked module, published to the shared backlog the way
+`write-tickets` § 6 does it (`--epic <slug>`), with all mandatory
+write-tickets fields present:
 
 - **What to build** (behavior, not a diff dump) / **Blocked by** in
   dependency order / **File scope** / **Unknowns** / **DoD** — one checkable

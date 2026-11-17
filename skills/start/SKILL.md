@@ -130,12 +130,16 @@ milestone. Brief, file format, models: [Lifecycle](references/lifecycle.md).
    the original ask.
 2. `docs/agents/AGENTS.md` when present — project-local overrides. A missing
    file is normal; defaults hold.
-3. Tracker frontier: tickets `open`, `assignee: none`, no unclosed
-   `blocked-by` (layout and ops: `docs/agents/issue-tracker.md`).
+3. Backlog: PROFILE `## Tracker`, then `backlog.py list --frontier` and the
+   tickets claimed by this worktree (`work-tickets`/references/backlog.md).
 4. A missing PROFILE.md section → ask once, write the answer back, move on.
 
 ## Triage — first match wins, in this order
 
+0. **Backlog session** — the ask is feedback, bugs or ideas to file for
+   later, or a request to check what merged → `file-tickets`. The ask is
+   to pick up backlog work ("pick up tickets in leaderboard", "take #42")
+   → `work-tickets`. Nothing else fires.
 1. **Quick task** — ALL true: ≤3 files touched, no new public interface, no
    irreversible op, no deploy → code only (ponytail; no tests, no checks) →
    `user-check` (build or demo, one message, wait) → on OK, its re-gate
@@ -143,10 +147,13 @@ milestone. Brief, file format, models: [Lifecycle](references/lifecycle.md).
    once, design check) → land.
    No spec, no tickets; the reply ends with `skipped:` and `residual risk:`
    lines.
-1b. **Bug report** — the ask reports broken behavior (crash, glitch, wrong
-   result) rather than requesting new behavior → `diagnose-bug` owns the
-   intake and evidence gathering; its output ticket re-enters the normal
-   chain for the fix.
+1b. **Bug report or one-shot fix** — broken behavior (crash, glitch, wrong
+   result), or one contained change with no design question → one backlog
+   ticket landed by a worker, never the feature chain. Bug: `diagnose-bug`
+   gathers evidence first, and its diagnosis becomes the ticket's brief
+   (filed as in `file-tickets` § 2). Then `work-tickets --ids <id>` lands
+   it here as one PR. "File it" or "later" → stop after filing; any
+   worktree's `work-tickets` picks it up.
 2. **Unmapped codebase** — chain work ahead + no orientation artifacts →
    run `map-codebase`, fill PROFILE.md care-axes from the map, re-triage.
 3. **Prototype** — user flag ("prototype", "quick sketch", "just a demo",
@@ -170,9 +177,9 @@ milestone. Brief, file format, models: [Lifecycle](references/lifecycle.md).
    with the release flag forced on, and the flip PR waits for user-check OK
    plus thorough review (`ship-to-trunk`).
 
-Frontier non-empty → the run plan lists in-flight tickets and offers resume
-(resume = jump straight to `implement`); the new ask is still classified
-normally either way.
+Tickets still claimed by this worktree → the run plan lists them and offers
+resume (feature epic → `implement`, otherwise `work-tickets`); the new ask is
+still classified normally either way.
 
 ## Effort level
 
@@ -234,7 +241,9 @@ hand off).
 | orientation | `map-codebase` | unmapped codebase + chain work |
 | spec | `draft-spec` | feature, prototype |
 | spec/tickets | `goldfish-review` | stage A after the spec checkpoint confirms scope (orchestrator picks 0–2 lenses by risk); stage B at `write-tickets`' design-review question (user picks none / up to 3 / all) |
-| tickets | `write-tickets` | feature, prototype (ticket sets are parallel-first: minimal file overlap; device checks get one aggregate ticket, or none) |
+| tickets | `write-tickets` | feature, prototype (ticket sets are parallel-first: minimal file overlap; device checks get one aggregate ticket, or none); publishes to the shared backlog with `--epic` |
+| backlog | `file-tickets` | triage 0: feedback, bugs or ideas to file; the batched hands-on check of `needs-check` tickets; triage 1b filing |
+| backlog | `work-tickets` | triage 0: pick up backlog tickets by area, type, epic or ids; triage 1b: land the one filed ticket |
 | research | `fan-out-research` | ticket/spec declares an Unknown |
 | implement | `implement` | ready frontier ticket; `user-check` fast fixes; re-gate hardening tickets |
 | user check | `user-check` | implement done (feature tickets) or quick-task code written — the user tries the whole change before any review (trunk: after the last slice merged dark, before the flip PR); on OK it re-gates the run into hardening tickets |
@@ -253,7 +262,7 @@ hand off).
 | support | `graduate-prototype` | prototype promoted to feature work |
 | prototype | `prototype` | quick prototype (one page per question; big ports via `graduate-prototype`); feature contract stage (§ 5) |
 | support | `assess-teardown` | teardown gate: 2 failed fix rounds or reviewer discretion |
-| support | `diagnose-bug` | bug report: evidence ladder, user-time-last |
+| support | `diagnose-bug` | bug report (triage 1b) or a `bug` ticket in `work-tickets`: evidence ladder, user-time-last |
 | support | `skill-doctor` | the user asks for a session or workflow audit, or to re-measure after skill changes; never fired by the chain itself |
 
 `map-codebase`, `fan-out-research`, `graduate-prototype`, `assess-teardown`

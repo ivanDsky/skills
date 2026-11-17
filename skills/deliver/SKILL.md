@@ -102,9 +102,16 @@ passed; this stage adds no code.
 5. DoD-final check, before any summary: every ticket's DoD is checkable
    against evidence in hand (command output, screenshot path, deploy
    output), and each spec success criterion has a green answer. Close each
-   final ticket only now: set `status: closed`, append the evidence to its
-   Resolution, add the ledger line. A ticket without evidence stays open,
-   and the summary names it.
+   final ticket only now: `backlog.py set <id> --state done --note
+   "<evidence>"` (`work-tickets`/references/backlog.md), add the ledger
+   line. A ticket without evidence stays open, and the summary names it.
+
+   **Release cut** (a semver bump, step 3): cut from `main` as it stands.
+   Never wait for open tickets or another session's run; anything not
+   `done` rolls to the next release. Release notes = `backlog.py list
+   --state done --closed-since` the previous release's tag date, one
+   behavior line per ticket. `needs-check` tickets merged dark stay out of
+   the notes until the user's check marks them done.
 
 6. Write the user-facing report — `.scratch/<slug>/report/REPORT.md`, small
    (≈1 screen), so the user never reverse-engineers what happened:

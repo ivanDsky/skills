@@ -1,7 +1,7 @@
 ---
 name: write-tickets
 description: >-
-  Break an approved spec into tracer-bullet tickets in the local tracker —
+  Break an approved spec into tracer-bullet tickets in the shared backlog —
   walking-skeleton ticket 01 first, one end-to-end capability per ticket
   (≤ ~12 per milestone, a count gate for unvalidated designs), a mandatory
   checkable DoD + evidence on every ticket, one ticket per fresh subagent
@@ -12,17 +12,17 @@ interaction: afk
 requires: []
 ---
 
-> **TL;DR** Breaks an approved spec into few, bigger dependency-ordered tracer-bullet tickets with DoD and evidence in the local tracker; fires after a spec passes checkpoint.
+> **TL;DR** Breaks an approved spec into few, bigger dependency-ordered tracer-bullet tickets with DoD and evidence in the shared backlog; fires after a spec passes checkpoint.
 > **Related**: skill://draft-spec (upstream spec), skill://implement (downstream execution), skill://fan-out-research (Unknowns research), skill://structure-checks (file-map evidence), skill://goldfish-review (stage B design review), skill://user-check (re-gate fires this for hardening tickets: DoD includes "approved behavior unchanged", tests only for the bug each fixes), skill://tdd (§ What to test, what not to: the test policy every ticket's tests follow), skill://ship-to-trunk (`changes: trunk`: every ticket merges to main alone and dark)
 
 # Write tickets
 
-Turn the spec into tracer-bullet tickets in the wayfinder tracker, each
+Turn the spec into tracer-bullet tickets in the shared backlog, each
 closable only by evidence. The spec has passed its checkpoint — do not re-open
 its decisions; fold new corrections in as ticket edits, never a re-interview.
 
 1. Read first: `.scratch/<slug>/spec.md` (Solution, numbered Assumptions,
-   Success criteria, Out of scope), PROFILE.md, the tracker frontier, and the
+   Success criteria, Out of scope), PROFILE.md, the epic's open backlog tickets, and the
    code around the change. Assumption numbers are decisions — reference them
    (A1, A2) in the tickets that rely on them; never drop one silently.
 2. Order tracer bullets: ticket 01 is the thinnest end-to-end walking
@@ -106,17 +106,21 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
    across tickets — each one serializes its ticket behind a device and
    multiplies emulator boots. (b) is the fallback; (a) is the goal, and a
    set with no device-dependent ticket at all is the win.
-6. Publish: one file per ticket, `.scratch/<slug>/tickets/NN-<slug>.md`, with
-   the tracker frontmatter from docs/agents/issue-tracker.md (`id`, `title`,
-   `labels`, `status`, `assignee`, `blocked-by`). Claim = set `assignee:`
-   before any work; the frontier = `status: open`, `assignee: none`, every
-   `blocked-by` id done (`trunk`: its PR merged); close = `status: done` +
-   Evidence under `## Resolution`. PROFILE.md may point at another tracker —
-   publish there natively and use its real blocking links.
+6. Publish to the shared backlog (`work-tickets`/references/backlog.md).
+   Draft each body at `.scratch/<slug>/drafts/NN-<slug>.md` with every
+   item-4 field plus `effort:` and `tier:` lines. Then publish in `NN`
+   order, so `--blocked-by` can name ids that already exist:
+   `backlog.py new --title "NN — <title>" --type enhancement --area <area>
+   --epic <slug> [--blocked-by <ids>] --body-file <draft>`. Hardening
+   tickets for a bug use `--type bug`; the device-acceptance ticket gets
+   `--hands-on`. Ledger `ticket: NN → <id>`. From here the backlog is the
+   source of truth and drafts are never edited again. Claims, the frontier
+   and closing belong to `implement`; `trunk` blockers count as done once
+   their PR merged.
 7. Prototype sets: DoD = the question answered or the thing demoable; the
    last ticket carries the `deploy:` flag (`main | standalone | none`).
 8. Confirm: each ticket carries `effort:` (`fast | standard | thorough`) and
-   `tier:` frontmatter fields — effort per the per-task rules in `start`'s
+   `tier:` lines — effort per the per-task rules in `start`'s
    effort mapping (thorough only for architecture/planning/big-view tickets),
    tier per item 4. Downgrades below the run default follow the Downgrade ask
    (`start`/references/effort-mapping.md § Rules). Post the numbered list

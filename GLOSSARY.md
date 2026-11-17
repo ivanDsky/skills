@@ -15,7 +15,16 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | Gear | Intake batch size: focused (5–8) or deep (20–30). | mode |
 | Care-axes | Ranked quality priorities in PROFILE.md; drive review order + rules-payload selection. | preferences |
 | Run plan | start's output: stages × fires/skips × HITL/AFK × gates for one run. | agenda |
-| Frontier | Tracker tickets that are open, unblocked, unclaimed. | backlog |
+| Frontier | Backlog tickets in `ready-for-agent` whose `blocked-by` tickets are all `done` (`backlog.py list --frontier`); claims take only from it. | queue, todo list |
+| Backlog | The one shared ticket store per repo, GitHub Issues or `<git-common-dir>/backlog/` (PROFILE `## Tracker`), read and written only through `work-tickets`' `backlog.py`; every worktree and session sees the same tickets. | tracker folder, `.scratch` tickets, issue list |
+| Feedback session | A `file-tickets` session: the user talks, the agent files deduplicated tickets and runs the check batch; it never implements. | triage session, inbox |
+| Worker session | A `work-tickets` session in a worktree: claims packs matching a filter and lands each ticket as its own PR; never asks the user. | ralph loop, AFK agent |
+| Claim | Atomic move of a frontier ticket to `claimed` with `claimed-by`, made only by `backlog.py claim` under the backlog lock; released by `unclaim` or a state change. | assign, grab, take |
+| Pack | Up to 5 tickets one `claim` call returns for a worker's filter; the next pack is claimed only when every ticket of the current one has an outcome. | batch (batch = the check batch), sprint |
+| Agent brief | The body of a ticket filed by `file-tickets`: the user's words, expected behavior, acceptance, out of scope; behavior and contracts only, never file paths (epic tickets from `write-tickets` keep their file scope and map). | description, spec |
+| needs-check | Backlog state of a merged hands-on ticket that waits for the user's check batch; ends in `done` or back to `ready-for-agent`. | in review, QA, awaiting verification |
+| Check batch | One build from `main` covering every `needs-check` ticket, handed over in one message by the feedback session (`file-tickets` § 3). | UAT round, test build |
+| Area | A ticket's kebab-case product surface label (`area:<name>`) that workers filter on. | component, module, epic |
 | Tracer bullet | Ticket cutting a narrow but complete path through every layer; demoable alone; 01 = thinnest walking path. | spike (spike = throwaway, different thing) |
 | DoD | Per-ticket checkable completion condition; no DoD, no ticket. | acceptance criteria |
 | Evidence | Artifact proving a DoD: command output, screenshot path, deploy output. | proof |

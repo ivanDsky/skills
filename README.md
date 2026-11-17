@@ -29,6 +29,20 @@ subagent thinking, review depth, and which gates block. Prototypes are a flag
 on the same flow, not a second process. When a module fails its second fix
 round, an independent architect decides fix-forward vs teardown.
 
+**Shared backlog.** Features take the chain above. Bugs and one-shot fixes go
+through a shared backlog instead: GitHub Issues, or files in the clone's git
+dir, chosen per project at `init-profile`. A feedback session
+(`file-tickets`) turns whatever you say into deduplicated tickets and never
+implements. Worker sessions (`work-tickets`) in any worktree claim packs of up
+to 5 matching tickets atomically and land each as its own small PR, merged
+dark. Tickets that need your eyes wait in `needs-check` until one batched
+build. A release cuts `main` as it stands, and unfinished tickets roll over.
+
+```
+feedback session ──file──> backlog ──claim pack──> worker (any worktree) ──PR merged──> done | needs-check
+     └────────── check batch: one build, your replies ──────────────────────────────────────┘
+```
+
 ## Skills
 
 **Flow (fresh, authored):**
@@ -36,6 +50,8 @@ round, an independent architect decides fix-forward vs teardown.
 `user-check` · `review-change` · `deliver` · `map-codebase` · `fan-out-research` ·
 `graduate-prototype` · `assess-teardown` · `init-profile` · `integrate-skill` ·
 `diagnose-bug` (bug reports: evidence ladder, user-time-last) ·
+`file-tickets` (feedback session: deduplicated backlog tickets, batched hands-on checks; never implements) ·
+`work-tickets` (worker session: atomic pack claims, one dark PR per ticket; GitHub Issues or local backend) ·
 `design-architecture` (SOLID payload, wired into spec/implement/review) ·
 `preview-compose` (previews + animation preview verification) ·
 `deploy-firebase` (test users + APK distribution) ·

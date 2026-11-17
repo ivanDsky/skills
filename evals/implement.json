@@ -9,6 +9,10 @@
   ],
   "negative": [
     {
+      "prompt": "Pick up the ready backlog tickets in area sync and land each as its own PR",
+      "owner": "work-tickets"
+    },
+    {
       "prompt": "Review the change we just implemented against the spec before we ship",
       "owner": "review-change"
     },

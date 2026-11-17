@@ -7,6 +7,10 @@
   ],
   "negative": [
     {
+      "prompt": "Just log this bug for a worker to pick up later: the settings toggle doesn't persist",
+      "owner": "file-tickets"
+    },
+    {
       "prompt": "Build and ship this to my testers",
       "owner": "deliver"
     },
