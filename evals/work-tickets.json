@@ -1,0 +1,29 @@
+{
+  "skill": "work-tickets",
+  "positive": [
+    "Pick up tickets in area leaderboard",
+    "Work the ready bugs in the backlog until there are none left",
+    "Take #42 and land it",
+    "Grab whatever is ready in sync and ship each one as its own PR",
+    "This worktree is for draining the backlog — claim a pack and go",
+    "Fix the rotation bug that's in the backlog"
+  ],
+  "negative": [
+    {
+      "prompt": "Here's my feedback from today's build, file it",
+      "owner": "file-tickets"
+    },
+    {
+      "prompt": "Execute the next ticket of the export epic we just spec'd, with research fan-out first",
+      "owner": "implement"
+    },
+    {
+      "prompt": "Merge this slice PR to main behind its flag and watch the merge lane",
+      "owner": "ship-to-trunk"
+    },
+    {
+      "prompt": "Build me a new streaks feature from scratch",
+      "owner": "start"
+    }
+  ]
+}

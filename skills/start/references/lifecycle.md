@@ -88,7 +88,7 @@ history stays in the ledger. Format:
 ```
 # Resume — <slug> — after <milestone> — <date>
 Ledger: .scratch/<slug>/ledger.md (ledger wins over the copies below)
-Spec: <path>. Contract: .scratch/<slug>/contract/ | none. Tickets: <tracker path>
+Spec: <path>. Contract: .scratch/<slug>/contract/ | none. Tickets: backlog epic <slug>
 ## Decisions
 <every live Decision: line, verbatim, latest per scope>
 ## Open tickets

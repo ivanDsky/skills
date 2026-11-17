@@ -8,7 +8,8 @@
     "Which branch's build is on my phone right now?",
     "Two agents in parallel worktrees keep installing APKs over each other — the versionCode goes down and installs fail",
     "Cut a release from main: bump the version once for everything that landed and build the release APK",
-    "Stop asking me for the versionCode every build — the phone isn't connected, just pick one"
+    "Stop asking me for the versionCode every build — the phone isn't connected, just pick one",
+    "Cut 1.4.0 from main as it is and write the release notes from the tickets done since 1.3.0"
   ],
   "negative": [
     {

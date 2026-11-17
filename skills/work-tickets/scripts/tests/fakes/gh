@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Offline `gh` stand-in for the backlog script tests: issues and labels only.
+
+State lives in $GH_FAKE_DIR/state.json:
+  issues   {"<number>": {number,title,body,labels:[{name,...}],state,createdAt,closedAt,comments:[]}}
+  labels   [names]
+  next     next issue number
+Output shapes mirror real `gh issue list/view --json` (fixtures/gh_issue_list.json).
+Every call is appended to $GH_FAKE_DIR/calls.log as one JSON argv line.
+"""
+import fcntl
+import json
+import os
+import sys
+import time
+
+d = os.environ["GH_FAKE_DIR"]
+lock = open(os.path.join(d, "gh.lock"), "w")
+fcntl.flock(lock, fcntl.LOCK_EX)
+state_path = os.path.join(d, "state.json")
+state = json.load(open(state_path))
+args = sys.argv[1:]
+with open(os.path.join(d, "calls.log"), "a") as f:
+    f.write(json.dumps(args) + "\n")
+if "-R" in args:
+    i = args.index("-R")
+    args = args[:i] + args[i + 2:]
+
+
+def save():
+    json.dump(state, open(state_path, "w"))
+
+
+def opt(name, default=None):
+    return args[args.index(name) + 1] if name in args else default
+
+
+def opts(name):
+    return [args[i + 1] for i, a in enumerate(args) if a == name]
+
+
+def body_in():
+    f = opt("--body-file")
+    return sys.stdin.read() if f == "-" else open(f).read()
+
+
+def stamp():
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def view(i, fields):
+    return {k: i[k] for k in fields.split(",")}
+
+
+cmd = args[:2]
+if cmd == ["label", "create"]:
+    if args[2] not in state["labels"]:
+        state["labels"].append(args[2])
+elif cmd == ["issue", "create"]:
+    for l in opts("--label"):
+        if l not in state["labels"]:
+            sys.exit(f"could not add label: '{l}' not found")
+    n = state["next"]
+    state["next"] += 1
+    state["issues"][str(n)] = {"number": n, "title": opt("--title"), "body": body_in(),
+                               "labels": [{"name": l, "color": "ededed"} for l in opts("--label")],
+                               "state": "OPEN", "createdAt": stamp(), "closedAt": None, "comments": []}
+    print(f"https://github.com/o/r/issues/{n}")
+elif cmd == ["issue", "list"]:
+    rows = [i for i in state["issues"].values()
+            if opt("--state", "open") == "all" or i["state"] == opt("--state", "open").upper()]
+    print(json.dumps([view(i, opt("--json")) for i in sorted(rows, key=lambda i: -i["number"])]))
+elif cmd == ["issue", "view"]:
+    i = state["issues"].get(args[2])
+    if not i:
+        sys.exit(f"GraphQL: Could not resolve to an issue with the number of {args[2]}.")
+    print(json.dumps(view(i, opt("--json"))))
+elif cmd == ["issue", "edit"]:
+    i = state["issues"][args[2]]
+    for l in opts("--add-label"):
+        if l not in state["labels"]:
+            sys.exit(f"'{l}' not found")
+        i["labels"].append({"name": l, "color": "ededed"})
+    gone = set(opts("--remove-label"))
+    i["labels"] = [l for l in i["labels"] if l["name"] not in gone]
+    if "--body-file" in args:
+        i["body"] = body_in()
+elif cmd == ["issue", "close"]:
+    i = state["issues"][args[2]]
+    i.update(state="CLOSED", closedAt=stamp(), reason=opt("--reason", "completed"))
+elif cmd == ["issue", "reopen"]:
+    state["issues"][args[2]].update(state="OPEN", closedAt=None)
+elif cmd == ["issue", "comment"]:
+    state["issues"][args[2]]["comments"].append(body_in())
+else:
+    sys.exit(f"fake gh: unsupported {args}")
+save()

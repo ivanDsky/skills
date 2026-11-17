@@ -1,0 +1,30 @@
+{
+  "skill": "file-tickets",
+  "positive": [
+    "I have a bunch of feedback from playing the build — file it all as tickets, don't fix anything",
+    "Log these: the timer skips a second on resume, the leaderboard header overlaps on tablet, and I want a dark mode for the editor",
+    "Here's a screenshot of the glitch on the results screen; put it in the backlog so a worker picks it up",
+    "Note this for later: share should include the puzzle number",
+    "What's waiting for me to check? Send one build with everything that merged",
+    "This session is just for feedback — triage what I send into the backlog with areas and priorities",
+    "Is the rotation bug already filed? If not, file it"
+  ],
+  "negative": [
+    {
+      "prompt": "Pick up the leaderboard bugs from the backlog and fix them",
+      "owner": "work-tickets"
+    },
+    {
+      "prompt": "The app crashes when I open settings — find out why before anyone touches code",
+      "owner": "diagnose-bug"
+    },
+    {
+      "prompt": "Break the approved sync spec into tracer-bullet tickets",
+      "owner": "write-tickets"
+    },
+    {
+      "prompt": "Install the build I just made and let me try the new onboarding flow",
+      "owner": "user-check"
+    }
+  ]
+}

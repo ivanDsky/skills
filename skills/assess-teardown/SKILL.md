@@ -73,7 +73,7 @@ the process that broke it.
 3. Archive the old branch: rename it with an `archive/` prefix and record
    the sha in the ledger. It is kept for reference and never merged; its fix
    diffs are not reused.
-4. Rebuild: open a fresh ticket (docs/agents/issue-tracker.md format)
+4. Rebuild: file a fresh backlog ticket (`work-tickets`/references/backlog.md)
    referencing the memo path, then dispatch a fresh-context implementer
    whose brief is only the memo + spec excerpt. New work starts from the
    base branch and re-enters the normal gates — implement, then

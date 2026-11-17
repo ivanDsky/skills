@@ -13,6 +13,10 @@
   ],
   "negative": [
     {
+      "prompt": "Send me one build with every merged ticket that's waiting for my check",
+      "owner": "file-tickets"
+    },
+    {
       "prompt": "Review the diff against the spec and run the fix loop",
       "owner": "review-change"
     },
