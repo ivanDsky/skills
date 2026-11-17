@@ -11,7 +11,7 @@ never a guess.
 ```markdown
 # Brief: NN — <ticket title>
 
-Tier: <mechanical | standard | deep> → <agent>[, model] (`start`/references/effort-mapping.md)
+Tier: <mechanical | standard | deep | open> → <agent>[, model] (`start`/references/effort-mapping.md)
 Ticket: <path — source of requirements>
 Spec: <backlink path — binding authority; its assumptions count as decisions>
 File scope: <paths this ticket may touch; disjoint for parallel-safe tickets>
