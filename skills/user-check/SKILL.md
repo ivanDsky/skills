@@ -104,7 +104,9 @@ the answer; an empty answer is silence — ask again, never continue on it.
 
 Ledger `user-check: ok <versionName> @ <sha>`. That build's behavior is now
 the acceptance baseline. Then go back to design level, because the fast
-rounds skipped it. Write the result to `.scratch/<slug>/regate.md`:
+rounds skipped it. A fresh-context run dispatches per
+`start`/references/effort-mapping.md (*Work outside tickets*: Opus xhigh,
+not Fable). Write the result to `.scratch/<slug>/regate.md`:
 
 1. **Reconcile** — one row per F-id: what the user asked, what the code does
    now, which spec assumption or criterion it changes. Amend `spec.md` (new

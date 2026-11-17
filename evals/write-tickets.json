@@ -13,7 +13,8 @@
     "The plan is coming out at 40 tickets and the user hasn't signed off on the design yet — split it so a prototype milestone comes first",
     "Write tickets for the new settings screen; the contract is frozen, so every UI ticket needs its Contract and Reference lines to the prototype screenshots",
     "Turn the spec into tickets and just post the list — don't make me confirm granularity unless the plan is huge",
-    "The leaderboard spec passed checkpoint — publish its slices to the backlog under the leaderboard epic"
+    "The leaderboard spec passed checkpoint — publish its slices to the backlog under the leaderboard epic",
+    "Ticket the sync spec, and tier it so only the unresolved conflict-merge design question goes to Fable; the new repository module is deep, not open"
   ],
   "negative": [
     {

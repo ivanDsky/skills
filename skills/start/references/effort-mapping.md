@@ -27,17 +27,32 @@ fast fix can need judgment: never derive one from the other.
 |---|---|---|---|
 | `mechanical` | fully specified edits: renames, DI/nav registration, strings/resources, gradle deps, fixtures, moving code with no behavior change, call-site migration batches | `agent: sonic`, no `model` | `lo` |
 | `standard` | ordinary feature/fix work with local decisions | ticket `effort: fast` → `agent: task`, `model: anthropic/claude-haiku-5-5:high` (cheap, so high thinking: a weak implementer costs more in fix loops than in tokens); `effort: standard`/`thorough` → `agent: task`, no `model` (Sonnet medium) | fast → omit (the `:high` model suffix sets thinking); standard → omit, thorough → `hi` |
-| `deep` | the ticket names an open design for a new module or boundary, concurrency, or a state machine | `agent: task`, `model: anthropic/claude-fable-5-2:high` | `hi` |
+| `deep` | the ticket names an open design for a new module or boundary, concurrency, or a state machine | `agent: task`, `model: anthropic/claude-opus-5-5:xhigh` | `hi` |
+| `open` | a big open question the spec left open on purpose: the design itself is unresolved (competing architectures, no prior art in the repo, the choice reshapes several modules), or a `deep` worker failed twice | `agent: task`, `model: anthropic/claude-fable-5-2:high` | `hi` |
 
 Defaults when write-tickets did not set `tier:`: `effort: fast` → `standard`;
 `standard` → `standard`; `thorough` → `deep` only if the ticket is
 architecture-heavy (`implement` §3: new module, new boundary, dependency
 direction in play), else `standard`.
 
-Never `deep`: test-only tickets (pins, characterization, coverage),
-behaviour-preserving refactors whose target shape is given, and work against
-an API the ticket already specifies. "Expensive if wrong" is not a tier: a
-`standard` worker that fails escalates (below).
+`open` is rare: a run plan holding more than one `open` ticket names each
+one's open question in a line, or downgrades it to `deep`. A new module,
+boundary, state machine or concurrency is `deep`, not `open`, when the spec
+or contract already decides its shape.
+
+Never `deep` or `open`: test-only tickets (pins, characterization,
+coverage), behaviour-preserving refactors whose target shape is given, and
+work against an API the ticket already specifies. "Expensive if wrong" is
+not a tier: a `standard` worker that fails escalates (below).
+
+Work outside tickets:
+
+| work | dispatch |
+|---|---|
+| `user-check` fast fixes (`mode: fast-fix`) | `standard` tier at most: `agent: task`, no `model`; spawn `effort` omitted |
+| hardening tickets from the re-gate | their own `tier:` per the table above; never `open` |
+| `user-check` re-gate (designer hat, fresh context) | `agent: task`, `model: anthropic/claude-opus-5-5:xhigh`, `hi` |
+| `assess-teardown` architect | `agent: task`, `model: anthropic/claude-fable-5-2:high`, `hi`: fix-forward vs redesign is an open question by definition |
 
 Reviewer and research dispatch:
 
@@ -45,7 +60,7 @@ Reviewer and research dispatch:
 |---|---|
 | fast review tier, design-only reviewer (every per-slice review, at any run effort: exactly one reviewer per slice) | `agent: reviewer`, spawn `effort: lo`; `model: anthropic/claude-haiku-5-5:low` when every reviewed ticket is `mechanical` or `effort: fast`, else no `model` (Sonnet) |
 | standard review tier, the one code reviewer (design rows + code review) | `agent: reviewer`, no `model` (Sonnet high, a stronger tier than the Sonnet-medium implementer) |
-| thorough dual-verdict / fresh visual reviewer (once per feature range, never per slice; the code reviewer above runs with them) | `agent: reviewer`, `model: anthropic/claude-fable-5-2:high` |
+| thorough dual-verdict / fresh visual reviewer (once per feature range, never per slice; the code reviewer above runs with them) | `agent: reviewer`, `model: anthropic/claude-opus-5-5:xhigh` |
 | fan-out-research, code/repo questions | `agent: scout` (Haiku), no `model` |
 | fan-out-research, web/primary-source questions | ticket `effort: fast` → `agent: task`, `model: anthropic/claude-haiku-5-5:low`, spawn `effort: lo`; standard → `agent: task`, no `model`, omit `effort`; thorough → `agent: task`, no `model`, `hi` |
 | brief context gathering (neighbor interfaces, file-scope facts) | `agent: scout` |
@@ -59,6 +74,10 @@ Orchestrator by stage (who runs each stage: lifecycle.md):
 | execution milestone after spec freeze: slices, user-check build, one fix round, hardening + review, deliver | captain, one fresh spawn per milestone | `agent: task`, no `model` (Sonnet); spawn `effort` omitted, `hi` at run effort `thorough` |
 | quick task, quick prototype, bug diagnosis | main session, no captain | launch model |
 
+- Fable (`anthropic/claude-fable-5-2`) runs only where these tables name it:
+  the `open` tier, the `assess-teardown` architect, and a main session the
+  user launched on it. Any other Fable spawn, per-slice reviewers and
+  fast fixes included, is a defect: dispatch per the table instead, or ask.
 - Never pass `model` to `scout` or `sonic`: the harness pins them to Haiku,
   and a per-call `model` on a pinned agent is a preflight conflict error.
 - Spawn `effort` is `lo`, omitted or `hi`. Never pass `med`: measured
@@ -71,9 +90,13 @@ Orchestrator by stage (who runs each stage: lifecycle.md):
   Haiku `effort: fast` worker that returns BLOCKED or NEEDS_CONTEXT twice,
   or fails its DoD after one fix round, is re-dispatched one tier up
   (`mechanical` → `standard`; Haiku fast → Sonnet: `agent: task`, no
-  `model`; then `deep`). Ledger: `Ruling: NN escalated <from>→<to> — <why>
-  — <cost if wrong>` (Haiku step: `escalated haiku→standard`). Never
-  escalate pre-emptively.
+  `model`; then `deep`; a `deep` worker that fails twice → `open`). Ledger:
+  `Ruling: NN escalated <from>→<to> — <why> — <cost if wrong>` (Haiku step:
+  `escalated haiku→standard`). Never escalate pre-emptively.
+- `:xhigh` needs omp `task.maxEffort: xhigh` and the model approved through
+  a `modelRoles` entry (`deep: anthropic/claude-opus-5-5:xhigh`). A spawn
+  rejected for the model → re-dispatch with `anthropic/claude-opus-5-5:high`
+  and say so once in the run plan.
 
 ## Rules
 

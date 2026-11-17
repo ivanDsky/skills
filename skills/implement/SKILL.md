@@ -197,6 +197,8 @@ recollection.
 4. Fast-fix briefs from `user-check` (`mode: fast-fix`, F-ids listed): the
    quality bar is off on purpose. No tests, no refactor, no `structure:`;
    only the smallest change the user asked for, committed `fast(F<n>): …`.
+   Workers dispatch at `standard` tier at most, never Fable
+   (`start`/references/effort-mapping.md, *Work outside tickets*).
    The section-3 never-cuts (validation, security, accessibility, data
    loss) still hold. The re-gate pays the rest down. `trunk`: each fast fix
    and each hardening ticket is a new slice — own worktree, own PR, same

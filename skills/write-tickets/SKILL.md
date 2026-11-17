@@ -80,12 +80,13 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
      `live: <what> — <why backward compatible>` for a change no flag can hide
      (migration, persisted format, manifest/permission, dependency bump),
      which becomes its own user-approved ticket.
-   - **tier** — `tier: mechanical | standard | deep`: how much judgment the
-     work needs; it picks agent, model and spawn effort
+   - **tier** — `tier: mechanical | standard | deep | open`: how much
+     judgment the work needs; it picks agent, model and spawn effort
      (`start`/references/effort-mapping.md, *Tier → agent and model*).
      `mechanical` only when *What to build* plus the brief leave zero design
      decisions (exact names, signatures and target files known). In doubt →
-     `standard`.
+     `standard`. `open` only when the ticket's design question is still
+     unresolved after the spec; name that question in the ticket.
 5. Parallel-safe, and make it the DEFAULT: tickets are designed to run in
    parallel with minimal overlap — serialization is the exception that needs
    a reason, not the norm. Mark a ticket parallel-safe only when its file

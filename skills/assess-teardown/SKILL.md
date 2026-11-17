@@ -38,7 +38,8 @@ the process that broke it.
 ## 2. Dispatch the architect
 
 1. One architect subagent: fresh context, effort forced high — the PROFILE.md
-   effort level does not inherit. The architect decides; it never implements.
+   effort level does not inherit. Model: `start`/references/effort-mapping.md
+   (*Work outside tickets*). The architect decides; it never implements.
 2. The brief is a FILE, absolute paths: module path (plus its section of
    `docs/agents/project-map.md` when a map exists), spec excerpt, fix-round
    history summary from the ledger, open review findings. Never the session
