@@ -262,8 +262,9 @@ PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
   (async, costs no turns), started after the run's first merge and again
   after any later merge, the fix PR included, when none is running. It
   exits once no main run is pending: 0 green, 3 red, printing `main red at
-  <sha> (run <id>), range <last green>..<red sha>`. `status` reads only the
-  ledger, so it stays red until a watcher records the next green run.
+  <sha> (run <id>), range <last green>..<red sha>; cause <hint>: <first
+  failing tests>`. `status` reads only the ledger, so it stays red until a
+  watcher records the next green run.
 - **Red → every merge stops except the fix.** `merge_lane.py land` sees
   `status` exit 3 and exits 3 (`main red; lane paused`): ready tickets wait
   in the queue with no PR open, so no `hold` is needed, and the lane stays
@@ -271,11 +272,26 @@ PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
   main at all. `main_health.py hold`/`held` stay for PRs that wait outside
   the lane: a `waiting_user` PR whose approval arrives while main is red is
   held (`hold --pr <n> --who <id>`) instead of merged.
-- **Culprit**: `gh run view <id> --log-failed` → failing Gradle task →
+- **Cause**: each red run's ledger record carries `failed_tests`
+  (`Class.method`, else the failed Gradle task paths; at most 50) and
+  `cause_hint`, both read from `gh run view <id> --log-failed`: `test`,
+  `compile`, `download` (Robolectric android-all or a Gradle artifact
+  fetch), `infra` (no job started, runner lost) or `unknown` (no log; read
+  it yourself). `download` and `infra` name no commit: rerun the failed
+  jobs (`gh run rerun <id> --failed`) and start a watcher.
+- **Culprit** (`test`, `compile`, `unknown`): failing test or task →
   module; each commit in the range → `git diff --name-only <sha>^ <sha>`
   → modules. One match is the culprit. Several (cancelled runs make one red
   run cover many merges) → the most likely first, the next if main stays
   red. Never bisect on CI.
+- **Flaky test → quarantine in the same incident.** A test that fails on
+  main and passes on rerun with no code change is flaky, not a culprit.
+  Measure it first with `tdd`'s `flake_rate.py` (`tdd` § Flakes). The fix
+  PR marks it `@Ignore("quarantine #<ticket> until <YYYY-MM-DD>")`, at
+  most 48 h out, with a filed ticket and a named owner who fixes or deletes
+  the test. `status` and `watch` print `quarantine expired: <Class> #<N>
+  since <date>` for each past date in `src/test` or `src/androidTest`
+  Kotlin; exit codes stay unchanged.
 - **Owner**: the orchestrator whose merge is the culprit prepares the fix
   in its own worktree: `git revert` of the culprit squash commit (the
   ticket reopens), or a fix forward when it is one obvious line, then the

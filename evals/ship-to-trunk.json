@@ -10,7 +10,8 @@
     "Main CI went red after the agents merged three slices \u2014 who reverts, and should the other agents keep merging meanwhile?",
     "The merge lane says requeued but the PR is already merged, and I keep running cleanup-merged.sh by hand \u2014 two lanes also raced on one queue",
     "My green batches keep getting requeued with 'main keeps moving' because other sessions merge to main \u2014 unrelated merges shouldn't block each other",
-    "How often does the merge lane rerun the suite because main moved, and which module's tests eat the most suite time?"
+    "How often does the merge lane rerun the suite because main moved, and which module's tests eat the most suite time?",
+    "Main went red again \u2014 which tests failed in each red run, was it a Robolectric download, and has anyone's quarantine on main run out?"
   ],
   "negative": [
     {

@@ -1,0 +1,36 @@
+test (core)	UNKNOWN STEP	2026-11-14T20:15:05.7634286Z 
+test (core)	UNKNOWN STEP	2026-11-14T20:15:05.7635248Z > Task :core:game-ui:testDebugUnitTest
+test (core)	UNKNOWN STEP	2026-11-14T20:15:05.7658414Z 
+test (core)	UNKNOWN STEP	2026-11-14T20:15:05.7688986Z HintSearchTest > invalidate after compute finished but before deliver ran delivers nothing FAILED
+test (core)	UNKNOWN STEP	2026-11-14T20:15:05.7689612Z     java.lang.AssertionError at HintSearchTest.kt:114
+test (core)	UNKNOWN STEP	2026-11-14T20:15:06.0681591Z 
+test (core)	UNKNOWN STEP	2026-11-14T20:15:06.0682696Z > Task :games:sudoku-ui:test
+test (core)	UNKNOWN STEP	2026-11-14T20:15:06.0710931Z > Task :games:zip-ui:bundleLibRuntimeToJarDebug
+test (core)	UNKNOWN STEP	2026-11-14T20:15:08.5689099Z > Task :games:strands-ui:test
+test (core)	UNKNOWN STEP	2026-11-14T20:15:10.8634134Z > Task :games:zip-ui:compileDebugUnitTestKotlin
+test (core)	UNKNOWN STEP	2026-11-14T20:15:10.8649100Z > Task :games:zip-ui:compileDebugUnitTestJavaWithJavac NO-SOURCE
+test (core)	UNKNOWN STEP	2026-11-14T20:15:10.8649812Z > Task :games:zip-ui:compressDebugUnitTestJavaRes FROM-CACHE
+test (core)	UNKNOWN STEP	2026-11-14T20:15:10.8679044Z > Task :games:zip-ui:generateDebugUnitTestConfig
+test (core)	UNKNOWN STEP	2026-11-14T20:15:10.8698638Z > Task :games:zip-ui:extractDebugUnitTestJavaRes
+test (core)	UNKNOWN STEP	2026-11-14T20:15:12.0679233Z > Task :games:tango-ui:testDebugUnitTest
+test (core)	UNKNOWN STEP	2026-11-14T20:15:13.8658540Z 
+test (core)	UNKNOWN STEP	2026-11-14T20:15:13.8658555Z 
+test (core)	UNKNOWN STEP	2026-11-14T20:15:13.8688874Z 729 tests completed, 1 failed
+test (core)	UNKNOWN STEP	2026-11-14T20:15:13.8689327Z > Task :core:game-ui:testDebugUnitTest FAILED
+test (core)	UNKNOWN STEP	2026-11-14T20:15:19.4633472Z 
+test (core)	UNKNOWN STEP	2026-11-14T20:15:19.4661675Z > Task :games:tango-ui:test
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1638448Z 
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1639144Z > Task :games:zip-ui:testDebugUnitTest
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1648266Z FAILURE: Build failed with an exception.
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1648616Z > Task :games:zip-ui:test
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1658394Z 
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1658606Z * What went wrong:
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1658976Z Execution failed for task ':core:game-ui:testDebugUnitTest'.
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1659721Z > There were failing tests. See the report at: file:///home/runner/work/PuzzleBox/PuzzleBox/core/game-ui/build/reports/tests/testDebugUnitTest/index.html
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1660235Z 
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1660328Z * Try:
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1660669Z > Run with --scan to get full insights from a Build Scan (powered by Develocity).
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1660974Z 
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1661083Z BUILD FAILED in 3m 27s
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1679047Z gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1794687126512.json
+test (core)	UNKNOWN STEP	2026-11-14T20:15:27.1704713Z 

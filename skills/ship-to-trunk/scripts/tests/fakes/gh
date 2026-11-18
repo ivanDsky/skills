@@ -11,6 +11,9 @@ State lives in $GH_FAKE_DIR/state.json (written by the test):
   land   true: a merge also pushes the --match-head-commit sha to origin's main
          (the squash of a linear branch), then runs the executable
          $GH_FAKE_DIR/after_merge when the test wrote one (main moves under the lane)
+  logs   {"<run id>": `gh run view --log-failed` text}; a run absent here
+         fails like an expired log
+  jobs   {"<run id>": `gh run view --json jobs` list}; absent → gh error
 Every call is appended to $GH_FAKE_DIR/calls.log as one JSON argv line.
 """
 import json
@@ -55,6 +58,13 @@ if args[:2] == ["run", "list"]:
     print(json.dumps([project(r, opt("--json")) for r in runs[: int(opt("-L", "20"))]]))
 elif args[:2] == ["run", "watch"]:
     sys.exit(0)
+elif args[:2] == ["run", "view"]:
+    key = "logs" if "--log-failed" in args else "jobs"
+    found = state.get(key, {}).get(args[2])
+    if found is None:
+        print(f"gh fake: no {key} for run {args[2]}", file=sys.stderr)
+        sys.exit(1)
+    sys.stdout.write(found if key == "logs" else json.dumps({"jobs": found}))
 elif args[:2] == ["pr", "view"]:
     pr = find_pr(args[2])
     if pr is None:

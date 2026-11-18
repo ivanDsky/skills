@@ -1,0 +1,167 @@
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0616533Z FlatPressTintTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0617070Z     java.lang.AssertionError at MavenArtifactFetcher.java:130
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0617630Z         Caused by: java.util.concurrent.ExecutionException at AbstractFuture.java:168
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0618216Z             Caused by: java.io.IOException at HttpURLConnection.java:1726
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0618630Z HomeDoorsTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0619058Z     java.lang.AssertionError at MavenArtifactFetcher.java:130
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0619546Z         Caused by: java.util.concurrent.ExecutionException at AbstractFuture.java:168
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0619955Z             Caused by: java.io.IOException at HttpURLConnection.java:1726
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0620294Z HomeRecentEmptyTabletTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0620626Z     java.lang.AssertionError at MavenArtifactFetcher.java:130
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0621172Z         Caused by: java.util.concurrent.ExecutionException at AbstractFuture.java:168
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0621568Z             Caused by: java.io.IOException at HttpURLConnection.java:1726
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0621900Z HomeRecentPhoneFramesTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0622220Z     java.lang.AssertionError at MavenArtifactFetcher.java:130
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0622618Z         Caused by: java.util.concurrent.ExecutionException at AbstractFuture.java:168
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0623011Z             Caused by: java.io.IOException at HttpURLConnection.java:1726
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0623313Z HomeRouteTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0624700Z HomeScreenRecentTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0626258Z HomeScreenTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0627659Z HomeStatTilesTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0629054Z HomeStreakPaneFreezeTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0630856Z HomeUnloadedPhoneTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.0632464Z HomeUnloadedTabletTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.5614939Z TodayBadgeNamePhoneTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.5616718Z TodayBadgeNameTabletTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.6615163Z TodayBadgeRingFlatTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:35.6626863Z TodayBadgeRingTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:36.0641673Z 53 tests completed, 15 failed
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:36.0642133Z > Task :feature:home:impl:testDebugUnitTest FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:37.6640067Z > Task :app:testReleaseUnitTest FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:37.6671389Z 4 tests completed, 4 failed
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:37.6672422Z ReleaseFlagsBindingTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:37.6675037Z ReleaseGameModulesTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:37.6677735Z ReleaseShareLinksTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:37.6680241Z ReleaseUpdateChecksTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.0731701Z BackupRulesTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.0901569Z CloudSyncKindsRulesTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.0905181Z DebugGameModulesTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.0908270Z DebugReleaseFlagsBindingTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.0911360Z DiGraphTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.1671334Z EveryGameHasTutorialTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.1697624Z FirestoreRulesAllowListTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.2622687Z NativeGraphicsWarmUpTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.2625587Z NavKeySavedStateTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.3614773Z NavRoutesTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.3617573Z RestoreMessageTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.3620196Z SplashMarkTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.4629770Z VibrationGateTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.4632983Z ImportTextGateTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.5614675Z NewPuzzleSheetQueensTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.5617390Z NewPuzzleSheetStrandsGateTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.6614416Z NewPuzzleSheetSudokuGateTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.6616006Z NewPuzzleSheetTangoGateTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.7661623Z NewPuzzleSheetZipGateTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.7692726Z StrandsStudioPhoneBoardTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.8638567Z DebugSettingsSectionsTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.8731844Z DebugPlayTuningSourceTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:38.8734580Z PlayTuningPanelTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.1625009Z CloudSyncAccountSwitchE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.1627699Z CloudSyncDraftEditsE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.1629960Z CloudSyncEraseE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.2615419Z CloudSyncPublishedRestoreE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.2618364Z CloudSyncReplayBudgetE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.3652103Z CloudSyncSentinelE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.3664471Z CloudSyncTwoDevicesE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.3679838Z CloudSyncUnfinishedGameE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.4667682Z CommunityTabsE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.4715038Z CustomImportTextE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.5614950Z CustomProcessDeathE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.5617113Z DuelFlowE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.5618976Z DuelLinkE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.6661381Z DuelQuickE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.6663460Z DuelUserCheckE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.7614414Z DuelsShellE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.7616233Z FriendHiddenBoardE2ETest > [Queens] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.7617721Z FriendHiddenBoardE2ETest > [Zip] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.8614658Z FriendHiddenBoardE2ETest > [Tango] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.8616198Z FriendHiddenBoardE2ETest > [MiniSudoku] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.9622079Z FriendHiddenBoardE2ETest > [Strands] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.9623848Z FriendLinkE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:39.9625294Z FriendOpenLoopE2ETest > [Zip] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.0614105Z FriendOpenLoopE2ETest > [Tango] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.0615718Z FriendOpenLoopE2ETest > [MiniSudoku] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.1614393Z FriendOpenLoopE2ETest > [Strands] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.1616053Z FriendResumeE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.1617562Z FriendWinIsolationE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.2614396Z FullReplayE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.2617303Z GamesCustomSkeletonE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.2619443Z KeyboardModeE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.3615693Z LinkedInArchiveE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.3617308Z LinkedInDisconnectE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.3618927Z LinkedInGhostFriendsE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.4621945Z LinkedInGhostIsolationE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.4624209Z LinkedInImportE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.5632006Z LinkedInPostRowE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.5634739Z LinkedInSafetyE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.5637666Z LinkedInSentinelE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.6614684Z OfficialLegE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.6616446Z PlayBackE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.6618366Z PlayFlowE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.7614437Z PlayLeaveE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.7616289Z ProcessDeathE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.8614544Z PublishOpenLoopE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.8616867Z RanksPlayAgainE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.8619002Z ReachabilityInventoryE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.9614157Z ResultIsolationE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:40.9615681Z ResumeSolveE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.0614478Z SelfDuelE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.0616932Z SelfDuelFlagOffE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.0618673Z SelfDuelIsolationTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.1614563Z ShareTargetE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.1618175Z ShellSummariesE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.1619795Z ShellTabsE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.2614820Z SolveRestE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.2617953Z StrandsArchiveE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.3641841Z StrandsFriendHintE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.3649782Z StrandsPlayE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.3653487Z StrandsPublishOpenLoopE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.4614470Z StreakFreezeBaselineE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.4616269Z StreakFreezeMissedDayE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.4617737Z StudioDoorsE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.5621622Z SudokuPublishOpenLoopE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.5624004Z TabNavigationE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.5626263Z TabReselectE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.6614430Z TabSetRestoreE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.6615991Z TangoPublishOpenLoopE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.7614222Z TestSolveImmersiveE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.7615994Z TestSolveLeaveE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.7617532Z TestSolveRegularPlayE2ETest > [Queens] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.8614469Z TestSolveRegularPlayE2ETest > [Zip] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.8617033Z TestSolveRegularPlayE2ETest > [Tango] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.9614477Z TestSolveRegularPlayE2ETest > [MiniSudoku] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.9616154Z TestSolveRegularPlayE2ETest > [Strands] > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:41.9617645Z TestSolveScreenE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.0614891Z VibrationSwitchE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.0616695Z ZipPublishOpenLoopE2ETest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.0618155Z CustomBoardSubmitterTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.1615042Z LeaderboardSubmitWatcherTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.1616837Z ChromeExitShellTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.2615920Z CommunityTabTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.2619176Z CustomSlotYoursTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.2621975Z FirstScreenReadyShellTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.3619690Z HintCooldownProviderTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.3621664Z ImmersivePlayShellTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.3623095Z LinkedInNavTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.4614712Z NavTransitionsTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.4616566Z OpenRanksTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.5614852Z PerTabShellTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.7614472Z ProfileLayerShellTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.7616205Z RanksLinkLoadingTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.7617641Z RanksTabTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.7619068Z SettingsHubSectionsTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.8616204Z ShellChromeTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.8618300Z ShellSessionLifecycleTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.9615790Z TabSetWidthChangeTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.9636045Z TopLevelNavBarTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:42.9638121Z ControlLayoutParityTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:43.0614468Z PlayBoardPositionTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:43.0616604Z RealGamesBoardFirstTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:43.0618145Z RealGamesBoardSwapTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:43.1615670Z RealGamesPlayRouteTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:43.1641033Z RealGamesResultRouteTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:43.2614985Z QueensPlayWiringTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:43.3691536Z 220 tests completed, 129 failed
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:43.3755522Z QueensRotationRestoreTest > classMethod FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:43.5638796Z > Task :app:testDebugUnitTest FAILED
+test (ui)	UNKNOWN STEP	2026-11-18T00:59:43.5647984Z BUILD FAILED in 56s
