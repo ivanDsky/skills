@@ -166,14 +166,42 @@ def test_green_runs_fetch_no_logs(repo, gh, real_runs):
     assert not [c for c in gh.calls() if c[:2] == ["run", "view"]]
 
 
+def test_green_rerun_of_the_red_run_turns_main_green(repo, gh, real_runs):
+    """`gh run rerun <id> --failed` keeps the databaseId and bumps the attempt."""
+    gh.set(runs=real_runs[4:], logs={RED_RUN: fixture_text("gh_run_log_failed_flaky_test.txt")})
+    assert mh(repo, "status")[0] == 3
+    rerun = [dict(r, conclusion="success", attempt=2) if str(r["databaseId"]) == RED_RUN else r
+             for r in real_runs[4:]]
+    gh.set(runs=rerun)
+    rc, out, _ = mh(repo, "watch", "--who", "t")
+    sha = next(r["headSha"] for r in rerun if str(r["databaseId"]) == RED_RUN)
+    assert rc == 0 and out.splitlines() == [f"main green at {sha[:9]} (run {RED_RUN})", "main green; nothing pending"]
+    assert mh(repo, "status")[:2] == (0, f"green at {sha[:9]} (run {RED_RUN})")
+
+
+def test_ledger_skips_a_run_attempt_older_than_the_newest_recorded(repo):
+    """Closes the bootstrap race: a `status` on an empty ledger and a watcher
+    may each append; only strictly newer (run, attempt) keys land."""
+    led = main_health.Ledger(str(repo))
+    rec = lambda run, attempt: {"type": "run", "run": run, "attempt": attempt, "conclusion": "failure"}
+    assert led.append(rec(10, 1), unique_run=True)
+    assert not led.append(rec(9, 1), unique_run=True)
+    assert not led.append(rec(10, 1), unique_run=True)
+    assert led.append(rec(10, 2), unique_run=True)
+    assert [main_health.run_key(r) for r in led.read()] == [(10, 1), (10, 2)]
+
+
 @pytest.mark.parametrize("log, want", [
     # Real line from run 44212142333: the fetch error itself names android-all.
     ("test (ui)\tUNKNOWN STEP\t2026-11-18T00:59:35.6617086Z java.io.IOException: Server returned HTTP "
      "response code: 429 for URL: https://gcp.mirrors.maven.org/maven2/org/robolectric/android-all-instrumented/"
      "14-robolectric-10818077-i7/android-all-instrumented-14-robolectric-10818077-i7.jar",
      ([], "download")),
-    ("> Task :feature:play:impl:compileDebugKotlin FAILED\nBUILD FAILED in 1m",
-     ([":feature:play:impl:compileDebugKotlin"], "compile")),
+    ("> Task :feature:play:impl:compileDebugKotlin FAILED\nFooTest > bar FAILED\nBUILD FAILED in 1m",
+     ([":feature:play:impl:compileDebugKotlin", "FooTest.bar"], "compile")),
+    # A real test failure next to a download error: the download wins.
+    ("FooTest > bar FAILED\n    java.lang.AssertionError at MavenArtifactFetcher.java:130",
+     (["FooTest.bar"], "download")),
     ("##[error]The runner has received a shutdown signal.", ([], "infra")),
     ("> Task :konsist:test FAILED\n", ([":konsist:test"], "unknown")),
     ("", ([], "unknown")),
@@ -181,6 +209,13 @@ def test_green_runs_fetch_no_logs(repo, gh, real_runs):
 def test_parse_failure_hints(log, want):
     got = main_health.parse_failure(log)
     assert (got["failed_tests"], got["cause_hint"]) == want
+
+
+def test_a_run_with_no_jobs_is_unknown_not_infra():
+    """A broken workflow file yields zero jobs: a defect with a culprit, not a rerun."""
+    assert main_health.parse_failure("", [])["cause_hint"] == "unknown"
+    jobs = json.loads(fixture_text("gh_run_view_jobs_never_started.json"))["jobs"]
+    assert main_health.parse_failure("", jobs)["cause_hint"] == "infra"
 
 
 # Quarantine expiry: the fixture tree has one expired quarantine (a method in

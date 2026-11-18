@@ -5,8 +5,9 @@ The ledger lives in the git common dir (shared by every worktree, never
 committed): <git-common-dir>/agent-builds/main-health.jsonl, append-only.
 
   watch   background job: waits for main's CI (newest queued/running run of
-          the main workflow) until nothing is pending, records each run that
-          ended success or failure (cancelled runs are skipped), prints one
+          the main workflow) until nothing is pending, records each run
+          attempt that ended success or failure (cancelled runs are skipped;
+          a `gh run rerun` is a newer attempt of the same run), prints one
           line per state change. Exit 0 green or unknown, 3 red.
   status  green|red|unknown before `gh pr merge`; red adds sha, range, cause,
           first failing tests, claim and held PRs. Exit 0 green or unknown,
@@ -41,7 +42,7 @@ LOCK_WAIT_S = 30
 LOCK_STALE_S = 120
 CLAIM_TTL_S = 30 * 60
 WATCH_INTERVAL_S = 30
-RUN_FIELDS = "databaseId,headSha,status,conclusion,createdAt"
+RUN_FIELDS = "databaseId,attempt,headSha,status,conclusion,createdAt"
 GREEN, RED = "success", "failure"
 FAILED_CAP = 50
 SHOWN_TESTS = 3
@@ -111,8 +112,9 @@ class Ledger:
         return [json.loads(line) for line in self.path.read_text().splitlines() if line.strip()]
 
     def append(self, rec, unique_run=False):
-        """Append under a mkdir lock; unique_run skips a run already recorded
-        (several watchers may see the same run)."""
+        """Append under a mkdir lock; unique_run skips a run attempt that is
+        not newer than the newest one recorded (several watchers may see the
+        same run, and a bootstrap may race a watcher)."""
         deadline = time.time() + LOCK_WAIT_S
         while True:
             try:
@@ -129,7 +131,8 @@ class Ledger:
                     sys.exit(f"main_health: ledger locked > {LOCK_WAIT_S}s: {self.lock}")
                 time.sleep(0.1)
         try:
-            if unique_run and any(r.get("type") == "run" and r["run"] == rec["run"] for r in self.read()):
+            keys = [run_key(r) for r in self.read() if r.get("type") == "run"] if unique_run else []
+            if keys and run_key(rec) <= max(keys):
                 return False
             with self.path.open("a") as f:
                 f.write(json.dumps(rec) + "\n")
@@ -184,7 +187,7 @@ def parse_failure(log, jobs=None):
             tasks[m[1]] = None
         download = download or bool(DOWNLOAD.search(line))
         runner_lost = runner_lost or bool(RUNNER_LOST.search(line))
-    never_started = not log.strip() and jobs is not None and not any(j.get("steps") for j in jobs)
+    never_started = not log.strip() and bool(jobs) and not any(j.get("steps") for j in jobs)
     if runner_lost or never_started:
         hint = "infra"
     elif download:
@@ -195,13 +198,17 @@ def parse_failure(log, jobs=None):
         hint = "test"
     else:
         hint = "unknown"
-    return {"failed_tests": list(tests or tasks)[:FAILED_CAP], "cause_hint": hint}
+    if hint == "compile":
+        names = [t for t in tasks if COMPILE_TASK.search(t)] + list(tests)
+    else:
+        names = list(tests or tasks)
+    return {"failed_tests": names[:FAILED_CAP], "cause_hint": hint}
 
 
-def red_details(root, run_id):
-    """Failure fields for a red run. gh errors (log expired, offline) leave
-    the log empty: no names, hint from the jobs when they load, else unknown."""
-    view = ["gh", "run", "view", str(run_id)]
+def red_details(root, run_id, attempt):
+    """Failure fields for a red run attempt. gh errors (log expired, offline)
+    leave the log empty: no names, hint from the jobs when they load, else unknown."""
+    view = ["gh", "run", "view", str(run_id), "--attempt", str(attempt)]
     r = subprocess.run([*view, "--log-failed"], cwd=root, capture_output=True, text=True)
     log = r.stdout if r.returncode == 0 else ""
     jobs = None
@@ -214,11 +221,17 @@ def red_details(root, run_id):
     return parse_failure(log, jobs)
 
 
+def run_key(rec):
+    """(run id, attempt): `gh run rerun` keeps the id and bumps the attempt.
+    Ledger lines from before attempts were recorded count as attempt 1."""
+    return rec["run"], rec.get("attempt") or 1
+
+
 def run_record(run, who, root):
-    rec = {"type": "run", "run": run["databaseId"], "sha": run["headSha"],
+    rec = {"type": "run", "run": run["databaseId"], "attempt": run.get("attempt") or 1, "sha": run["headSha"],
            "conclusion": run["conclusion"], "created": run["createdAt"], "who": who, "at": stamp()}
     if run["conclusion"] == RED:
-        rec.update(red_details(root, run["databaseId"]))
+        rec.update(red_details(root, rec["run"], rec["attempt"]))
     return rec
 
 
@@ -236,7 +249,7 @@ def expired_quarantines(root):
     """`quarantine expired: …` lines for quarantines whose date is before today."""
     listed = sh("git", "ls-files", "-z", "-co", "--exclude-standard", "--",
                 ":(glob)**/src/test/**/*.kt", ":(glob)**/src/androidTest/**/*.kt", cwd=root, check=False)
-    today = now().date().isoformat()
+    today = datetime.now().date().isoformat()  # local date: the day the quarantine's author meant
     lines = []
     for rel in filter(None, listed.split("\0")):
         f = Path(root) / rel
@@ -295,15 +308,16 @@ def claim_line(state):
 
 
 def record_new_runs(root, wf, led, who):
-    """Record finished success/failure runs newer than the last recorded one,
-    oldest first; an empty ledger takes only the newest. Queried by
-    conclusion: superseded pushes cancel most runs, so an unfiltered list can
-    hold no finished run at all. Returns them."""
+    """Record finished success/failure run attempts newer than the last
+    recorded one (a rerun of the same id counts as newer), oldest first; an
+    empty ledger takes only the newest. Queried by conclusion: superseded
+    pushes cancel most runs, so an unfiltered list can hold no finished run
+    at all. Returns them."""
     state = State(led.read())
-    floor = state.last["run"] if state.last else None
+    floor = run_key(state.last) if state.last else None
     finished = list_runs(root, wf, limit=10, status=GREEN) + list_runs(root, wf, limit=10, status=RED)
-    done = sorted((r for r in finished if floor is None or r["databaseId"] > floor),
-                  key=lambda r: r["databaseId"])
+    key = lambda r: (r["databaseId"], r.get("attempt") or 1)
+    done = sorted((r for r in finished if floor is None or key(r) > floor), key=key)
     if floor is None:
         done = done[-1:]
     return [r for r in done if led.append(run_record(r, who, root), unique_run=True)]
