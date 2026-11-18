@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ivandsky.example.app.e2e.ResumeSolveE2ETest" tests="1" skipped="0" failures="1" errors="0" timestamp="2026-11-18T03:56:15.279Z" hostname="host" time="5.031">
+  <properties/>
+  <testcase name="SC6 a game resumed after a kill records its play time and submits once" classname="com.ivandsky.example.app.e2e.ResumeSolveE2ETest" time="5.029">
+    <failure message="java.lang.AssertionError: expected:&lt;1&gt; but was:&lt;2&gt;" type="java.lang.AssertionError">java.lang.AssertionError: expected:&lt;1&gt; but was:&lt;2&gt;
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.ivandsky.example.app.e2e.ResumeSolveE2ETest.resume(ResumeSolveE2ETest.kt:41)
+</failure>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

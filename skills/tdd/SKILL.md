@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: Implement every feature and bug fix test-first — write one failing test, watch it fail, add the minimal code that passes, refactor while green — and own the test policy of what to test and what not to. Use when building or changing behavior in code, when the user says TDD, test-driven, red-green-refactor, test first, or failing test, when writing tests before implementation, when deciding which tests, goldens or flake fixes a change needs and which are redundant, or when reproducing a bug as a test.
+description: Implement every feature and bug fix test-first — write one failing test, watch it fail, add the minimal code that passes, refactor while green — and own the test policy of what to test and what not to. Use when building or changing behavior in code, when the user says TDD, test-driven, red-green-refactor, test first, or failing test, when writing tests before implementation, when deciding which tests, goldens or flake fixes a change needs and which are redundant, when a red test may be flaky and needs measuring before quarantine, or when reproducing a bug as a test.
 interaction: afk
 requires: []
 ---
@@ -67,7 +67,8 @@ The one test policy for every skill; `write-tickets`, `implement` and `user-chec
 - Committed goldens: shared and design-system goldens (component browser, theme) have one owner; feature workers never re-record them. One record job per milestone, followed by an md5 duplicate check.
 
 **Flakes.**
-- A test that flakes twice is quarantined, with a tracked ticket.
+- Measure before calling a red test flaky: `scripts/flake_rate.py --tests '<filter>'` runs it 10 times (through `build-slot`) and prints `pass P/N fail F abort A` per test plus a verdict. Never hand-roll a run-N-times loop.
+- A test with 2 or more non-pass runs out of 10 is quarantined, with a tracked ticket; 10 of 10 is broken, not flaky.
 - A known-failing test is fixed or deleted in the run that meets it, never carried.
 - A wall-clock sleep in a test becomes a test clock.
 
