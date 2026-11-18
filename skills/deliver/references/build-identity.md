@@ -32,8 +32,8 @@ It runs `build_identity.py allocate` (below), builds
 back with `aapt2 dump badging`. It refuses to ship unless the real
 versionCode, versionName and package (PROFILE `app-id`, or `app-id.<suffix>`
 for debug) equal the allocation. Then it copies the APK to
-`.scratch/<slug>/$APK_NAME`, Taildrops it to the PROFILE `tailscale:`
-`- device:` line, and appends one evidence line (UTC time, name, versionName,
+`.scratch/<slug>/$APK_NAME`, Taildrops it to the `- device:` line of
+the gitignored PROFILE.local.md (legacy: PROFILE.md `tailscale:` entry), and appends one evidence line (UTC time, name, versionName,
 versionCode, git sha, device or `build-only`, sha256, bytes) to
 `.scratch/<slug>/ledger.md`. It prints `APK_PATH`, `APK_NAME`,
 `VERSION_NAME`, `VERSION_CODE`, `SLUG`, `SHA256`, `BYTES` and `DEVICE`.
