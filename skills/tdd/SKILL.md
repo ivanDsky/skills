@@ -56,15 +56,15 @@ The one test policy for every skill; `write-tickets`, `implement` and `user-chec
 - flag-off tests for a flag headed for removal — at most one flag-off smoke test per flag;
 - retro pin tests of approved visual behavior;
 - echo, forwarding and constant tests;
-- hex or dp assertions where a golden exists;
+- hex or dp assertions where a screenshot capture covers the screen;
 - a UI test that repeats a ViewModel assertion;
 - DI-resolves tests beyond one graph check;
 - replay e2e tests that duplicate an existing journey.
 
-**Goldens** (committed screenshot references, rung 3 of the testing ladder).
+**Screenshot captures** (rung 3 of the testing ladder). PROFILE says whether a project commits them as goldens or keeps them as untracked review renders.
 - One hero state per composable, light and dark, at phone width. Tablet only where the layout branches.
-- Shared and design-system goldens (component browser, theme) have one owner; feature workers never re-record them.
-- One record job per milestone, followed by an md5 duplicate check.
+- Review renders: a UI change renders the screens it touched and opens every PNG itself. Nothing compares pixels, nothing is re-recorded and nothing is proven on a clean main.
+- Committed goldens: shared and design-system goldens (component browser, theme) have one owner; feature workers never re-record them. One record job per milestone, followed by an md5 duplicate check.
 
 **Flakes.**
 - A test that flakes twice is quarantined, with a tracked ticket.
