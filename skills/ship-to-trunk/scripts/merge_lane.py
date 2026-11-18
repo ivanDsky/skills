@@ -87,6 +87,13 @@ Sequence:
     @ <sha7>] (<s> suites[, <c> compiles])`, each rerun decision
     `merge: <NN..> main moved <k> commits - rerun|compile|push (<modules>)`,
     one `slice: <NN> PR #<n> merged @ <sha7>` per merge.
+ 9. Lane events (`EventLog`): one JSON line per suite or compile check, per
+    ticket result and per main-moved decision, appended to
+    `<git-common-dir>/agent-builds/lane-events.jsonl` (main_health's ledger
+    dir, a mkdir lock like main_health's ledger). Fields:
+    references/merge-loop.md § Lane events.
+    Logging never changes a decision or the exit code: an IO error is one
+    `merge_lane: event log: ...` line on stderr.
 
 Rerun rule (mechanical), judged over `git diff --name-only <base>..origin/main`
 mapped to modules (from `include(...)` in settings.gradle.kts, dependencies
@@ -114,6 +121,9 @@ import shutil
 import subprocess
 import sys
 import time
+import xml.etree.ElementTree as ET
+from contextlib import contextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 
 MAX_ROUNDS = 3  # full-suite reruns per land; compile checks are not counted
@@ -275,6 +285,86 @@ def names(wt, *rng):
 
 LOCK_WAIT_S = 30
 LOCK_STALE_S = 120
+EVENTS = "lane-events.jsonl"
+
+
+@contextmanager
+def mkdir_lock(lock):
+    """Hold `lock` (a directory, main_health ledger style); a lock older than
+    LOCK_STALE_S is taken over; TimeoutError after LOCK_WAIT_S."""
+    deadline = time.time() + LOCK_WAIT_S
+    while True:
+        try:
+            lock.mkdir()
+            break
+        except FileExistsError:
+            try:
+                if time.time() - lock.stat().st_mtime > LOCK_STALE_S:
+                    lock.rmdir()
+                    continue
+            except FileNotFoundError:
+                continue
+            if time.time() > deadline:
+                raise TimeoutError(f"locked > {LOCK_WAIT_S}s: {lock}")
+            time.sleep(0.1)
+    try:
+        yield
+    finally:
+        lock.rmdir()
+
+
+def batch_modules(wt, base, head):
+    """Modules the commits base..head touch, sorted; [] without a module graph."""
+    graph = module_graph(wt)
+    return sorted(to_modules(graph[0], names(wt, base, head))[0]) if graph else []
+
+
+def module_test_seconds(wt, since):
+    """{module: seconds}: `testsuite@time` summed over the JUnit XML in each
+    module's build/test-results written at or after `since` (older files are
+    an earlier run's). Modules from the module graph, else top-level dirs."""
+    graph = module_graph(wt)
+    mods = graph[0] if graph else {p.parent.name: p.parent.name for p in Path(wt).glob("*/build")}
+    secs = {}
+    for m, d in mods.items():
+        for x in (Path(wt) / d / "build" / "test-results").glob("**/*.xml"):
+            try:
+                if x.stat().st_mtime < since:
+                    continue
+                t = sum(float(s.get("time") or 0) for s in ET.parse(x).getroot().iter("testsuite"))
+            except (OSError, ET.ParseError, ValueError):
+                continue
+            secs[m] = secs.get(m, 0) + t
+    return {m: round(s, 3) for m, s in sorted(secs.items())}
+
+
+class EventLog:
+    """Lane events for later analysis, one JSON line each, in
+    <git-common-dir>/agent-builds/lane-events.jsonl (shared by every worktree,
+    never committed). The common dir comes from the first of `dirs` inside the
+    repo. `log` never raises: a failure is one stderr line and the lane goes on."""
+
+    def __init__(self, who, dirs):
+        self.who, self.dirs, self.path = who, dirs, None
+
+    def log(self, event, fields):
+        """`fields`: a dict, or a callable returning one (evaluated under the same guard)."""
+        try:
+            if self.path is None:
+                common = next((c for c in (
+                    run("git", "rev-parse", "--path-format=absolute", "--git-common-dir", cwd=d,
+                        check=False).stdout.strip() for d in self.dirs if Path(d).is_dir()) if c), None)
+                if not common:
+                    raise RuntimeError("no git repository among the queue's worktrees and the queue dir")
+                (Path(common) / "agent-builds").mkdir(exist_ok=True)
+                self.path = Path(common) / "agent-builds" / EVENTS
+            rec = {"ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "who": self.who,
+                   "event": event, **(fields() if callable(fields) else fields)}
+            with mkdir_lock(self.path.with_suffix(".lock")):
+                with self.path.open("a") as f:
+                    f.write(json.dumps(rec) + "\n")
+        except Exception as e:  # noqa: BLE001 - logging must never stop the lane
+            print(f"merge_lane: event log: {e!r}", file=sys.stderr)
 
 
 class Queue:
@@ -291,28 +381,14 @@ class Queue:
 
     def update(self, fn):
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        deadline = time.time() + LOCK_WAIT_S
-        while True:
-            try:
-                self.lock.mkdir()
-                break
-            except FileExistsError:
-                try:
-                    if time.time() - self.lock.stat().st_mtime > LOCK_STALE_S:
-                        self.lock.rmdir()
-                        continue
-                except FileNotFoundError:
-                    continue
-                if time.time() > deadline:
-                    fail(f"queue locked > {LOCK_WAIT_S}s: {self.lock}")
-                time.sleep(0.1)
         try:
-            recs = fn(self.read())
-            tmp = self.path.with_suffix(".tmp")
-            tmp.write_text("".join(json.dumps(r) + "\n" for r in recs))
-            tmp.replace(self.path)
-        finally:
-            self.lock.rmdir()
+            with mkdir_lock(self.lock):
+                recs = fn(self.read())
+                tmp = self.path.with_suffix(".tmp")
+                tmp.write_text("".join(json.dumps(r) + "\n" for r in recs))
+                tmp.replace(self.path)
+        except TimeoutError as e:
+            fail(f"queue {e}")
 
 
 def cmd_enqueue(a):
@@ -399,9 +475,11 @@ def land_batch(a):
     q = Queue(a.queue)
     out_ = {"results": {}, "slices": []}
     worktrees = {r["nn"]: r["worktree"] for r in q.read()}
+    events = EventLog(a.who, [*worktrees.values(), str(q.path.parent)])
 
     def emit(nn, result, **kw):
         print(json.dumps({"nn": nn, "result": result, **kw}), flush=True)
+        events.log("ticket", {"nn": nn, "result": result, "reason": kw.get("reason"), "pr": kw.get("pr")})
         out_["results"][nn] = result
         if result != "requeued":
             q.update(lambda recs: [r for r in recs if r["nn"] != nn])
@@ -458,21 +536,32 @@ def land_batch(a):
     suite_cmd = suite_command(wt0)
     slot = ["build-slot"] if shutil.which("build-slot") else []
 
-    def verify(prefix, cmd, tag):
-        """One build command (the suite or a compile check) on the prefix's top: (rc, log)."""
+    def verify(prefix, cmd, tag, base, phase):
+        """One build command (the suite or a compile check) on the prefix's top: (rc, log).
+        `base`: the main sha the prefix is stacked on; `phase`: stack | bisect | merge."""
         top = prefix[-1]
         (suites if tag == "suite" else compiles)[0] += 1
         logdir.mkdir(parents=True, exist_ok=True)
         log = logdir / (f"lane-{'-'.join(e['nn'] for e in prefix)}-{top['head_t'][:7]}"
                         f"{'' if tag == 'suite' else '-compile'}.log")
+        t0 = time.time()
         with log.open("w") as f:
             rc = subprocess.run(slot + ["bash", "-c", cmd], cwd=top["worktree"], stdout=f,
                                 stderr=subprocess.STDOUT).returncode
+        wall = time.time() - t0
+        events.log(tag, lambda: {
+            "batch": [e["nn"] for e in prefix], "batch_size": len(prefix), "round": rounds,
+            "phase": phase, "modules": batch_modules(top["worktree"], base, top["head_t"]),
+            "base": base[:7], "top": top["head_t"][:7], "result": "red" if rc else "green",
+            "wall_s": round(wall, 1),
+            # whole seconds: a coarse mtime clock must not hide a file this run wrote
+            "module_test_s": module_test_seconds(top["worktree"], int(t0))})
         return rc, str(log)
 
     green, base, pending = [], None, []
-    full, kind, cc, suite7 = 0, "rerun", None, ""
+    full, kind, cc, suite7, rounds = 0, "rerun", None, "", 0
     while True:
+        rounds += 1
         run("git", "fetch", "origin", cwd=wt0)
         base = out("git", "rev-parse", "origin/main", cwd=wt0)
         stack, pending, prev = [], [], base
@@ -493,12 +582,12 @@ def land_batch(a):
             cmd, tag = (suite_cmd, "suite") if kind == "rerun" else (cc, "compile")
             if tag == "suite":
                 full += 1
-            rc, log = verify(stack, cmd, tag)
+            rc, log = verify(stack, cmd, tag, base, "stack")
             if rc:
                 logs, lo, hi = {len(stack): log}, 0, len(stack)
                 while hi - lo > 1:
                     mid = (lo + hi) // 2
-                    rc2, log2 = verify(stack[:mid], cmd, tag)
+                    rc2, log2 = verify(stack[:mid], cmd, tag, base, "bisect")
                     if rc2:
                         hi, logs[mid] = mid, log2
                     else:
@@ -520,6 +609,10 @@ def land_batch(a):
         k = out("git", "rev-list", "--count", f"{base}..{moved}", cwd=wt0)
         print(f"merge: {','.join(e['nn'] for e in green)} main moved {k} commits — "
               f"{kind} ({label})")
+        # A rerun verdict past MAX_ROUNDS requeues instead: logged as such, so `rerun` counts real reruns.
+        events.log("main_moved", lambda: {
+            "batch": [e["nn"] for e in green], "phase": "stack", "commits": int(k), "reason": label,
+            "decision": "requeue" if kind == "rerun" and full == MAX_ROUNDS else kind})
         if kind == "push":
             break
         if kind == "rerun" and full == MAX_ROUNDS:
@@ -558,11 +651,14 @@ def land_batch(a):
             k = int(out("git", "rev-list", "--count", f"{base}..origin/main", cwd=wt)) - merged
             print(f"merge: {','.join(x['nn'] for x in rest)} main moved {k} commits — "
                   f"{kind} ({label})")
+            events.log("main_moved", {"batch": [x["nn"] for x in rest], "phase": "merge", "commits": k,
+                                      "decision": "requeue" if kind == "rerun" else kind, "reason": label})
             if kind == "rerun":
                 requeue(rest, "main moved: related")
                 break
             if kind == "compile":
-                rc, log = verify([dict(e, head_t=out("git", "rev-parse", "HEAD", cwd=wt))], cc, "compile")
+                rc, log = verify([dict(e, head_t=out("git", "rev-parse", "HEAD", cwd=wt))], cc, "compile",
+                                 main, "merge")
                 if rc:
                     emit(e["nn"], "red", log=log)
                     requeue(rest[1:], "stacked on a red ticket")
