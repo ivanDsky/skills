@@ -120,10 +120,10 @@ worktree never switches to main), then any post-merge step in PROFILE
    rebased head, or on a batch top it is part of) + `review-change` fast
    tier clean. `pr-check: none`: both pass before the PR exists — the
    worker writes the body once, after review (with a `**check:**` line),
-   and pushes the branch only; the orchestrator's merge lane
+   and pushes the branch only; the repository's merge lane
    (`merge_lane.py`) fills the check line (`local suite green on batch top
-   <sha7> (tickets <NN,NN>); no PR CI by design`), runs `gh pr create` and
-   merges, ticket by ticket. Body to
+   <sha7> (tickets <slug>/<NN>,<slug>/<NN>); no PR CI by design`), runs
+   `gh pr create` and merges, ticket by ticket. Body to
    `.scratch/<slug>/pr-<NN>.md`, **≤ ~120 words**, no screenshots or diagram:
    ```markdown
    <what-this-slice-does>

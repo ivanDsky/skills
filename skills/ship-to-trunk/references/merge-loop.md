@@ -54,23 +54,42 @@ fills. 4. `git push -u origin HEAD` (branch only), report `ready`, stop.
 The worker never runs the full suite, never rebases onto main, never opens
 the PR, never merges and never polls.
 
-**Orchestrator — the merge lane**: a queue of ready tickets, landed in
-batches by `merge_lane.py land` as one async background bash job (no turns
-spent), so the orchestrator keeps dispatching and answering while the
-suite runs.
+**Orchestrator — the merge lane**: one lane per repository, shared by
+every session that works in it. Each orchestrator enqueues its ready
+tickets and follows them with `merge_lane.py wait` as one async
+background bash job (no turns spent), so it keeps dispatching and
+answering while suites run. The lane lives in
+`<git-common-dir>/agent-builds/lane/` (queue, lock, two scratch
+worktrees, check logs, PR bodies, `land.log`), so every worktree of the
+repository finds the same one.
 
 ```bash
 ML=~/.agents/skills/ship-to-trunk/scripts/merge_lane.py   # python3 $ML -h: queue fields, results, exit codes
-Q=.scratch/<slug>/lane/queue.jsonl
-python3 $ML enqueue --queue $Q --nn <NN> --worktree ../<repo>-wt/<NN> --title "<conventional title>" \
+python3 $ML enqueue --who <run slug> --nn <NN> --worktree ../<repo>-wt/<NN> --title "<conventional title>" \
   --body-file .scratch/<slug>/pr-<NN>.md [--no-merge] [--red-fix <culprit>]   # when a worker reports ready
-python3 $ML land --queue $Q --who <run slug> [--max 4]   # async; start whenever the queue is non-empty; a second land exits 4 (lane busy)
+python3 $ML wait --who <run slug> --nn <NN> [<NN>...]   # async; follows these tickets to a final result
 ```
 
-One `land` run: stack up to `--max` tickets (ticket 1 on `origin/main`,
-ticket k on the rebased head of k-1; a rebase conflict drops that ticket),
-run one suite on the top, then merge each ticket in order. The
-instant-merge order per ticket, after the suite:
+`wait` starts `land` whenever no `land` holds the lane (one `land` lands
+every session's tickets), prints each result line of its own tickets and
+the ledger lines that name them, and exits 0 when all merged, 1 when any
+ended otherwise, 3 when main is red (`main red; lane paused` plus
+`main_health.py status`). Several `wait` jobs at once are fine: each
+follows only its tickets, and the lane runs one `land` at a time. A
+ticket that reports ready while a `wait` runs gets its own `wait`.
+`land --who <run slug> [--max 5]` runs the lane once in the foreground
+(exit 4 `lane busy` while another `land` holds it). `--queue` is gone:
+it exits 2 with the commands above.
+
+One `land` run takes two batches off the queue, oldest first: A (up to
+`--max` tickets, default 5) and B (the next up to 5). A stacks on
+`origin/main` (ticket 1 on main, ticket k on the rebased head of k-1; a
+rebase conflict drops that ticket), B stacks the same way on A's top, and
+both suites start at once, each in its own scratch worktree
+(`lane/wt/0`, `lane/wt/1`, reset between checks, ignored build output
+kept) through `build-slot`, so the two remote build slots run them side
+by side. A merges first, then B (Two batches below). The instant-merge
+order per ticket, after its suite:
 
 ```bash
 git fetch origin && git rebase --onto origin/main <tested head of k-1>   # lands the ticket on the main the squash of k-1 produced
@@ -85,7 +104,8 @@ git push origin --delete <branch> && git worktree remove ../<repo>-wt/<NN> && gi
 The PR exists only right before its merge: open about a minute, never a
 waiting room.
 
-Results (one JSON line per ticket) and what the orchestrator does next:
+Results (one JSON line per ticket, `{"who", "nn", "result", …}`) and what
+the orchestrator does next:
 
 - **merged** (`slice: <NN> PR #<n> merged @ <sha7>`, plus the `merge: …`
   ledger lines): close the ticket, start the `main_health.py watch` job
@@ -107,28 +127,43 @@ Results (one JSON line per ticket) and what the orchestrator does next:
   `main_health.py hold --pr <n> --who <id>` (Red main).
 - **claim_refused**: another orchestrator holds the red-main claim; report
   it, nothing merged.
-- **requeued**: nothing, the ticket is still queued and the next `land`
-  takes it. A ticket stays `claimed` from `ready` until merged.
+- **requeued**: nothing, the ticket is still queued and `wait` starts the
+  next `land` for it (`stacked on a red batch`: it was in B when A went
+  red). A ticket stays `claimed` from `ready` until merged.
 - **invalid**: the worktree is gone, holds uncommitted changes, or its HEAD
   moved after `enqueue` (a worker still running). Nothing touched; the
   worker finishes, then the ticket is enqueued again.
 - **exit 3** (`main red; lane paused`): wait for the watcher to record
-  green; only a `--red-fix` ticket lands meanwhile.
-- **exit 4** (`lane busy`): another `land` holds the lane; nothing touched.
-  Start no second job; the running one reports when it ends.
+  green, then `wait` again; only a `--red-fix` ticket lands meanwhile.
+
+### Two batches, two slots
+
+| State | A | B (stacked on A's top) |
+|---|---|---|
+| Both suites running | runs in `wt/0` | runs in `wt/1` |
+| A red (any round, or a red compile between merges) | bisects as alone; its green prefix merges | check killed, logged `discarded`; every ticket `requeued` ("stacked on a red batch"); no round counted |
+| A done, nothing red | merged, or requeued by its own rules | its check finishes (red → bisect within B); then `tree(origin/main) == tree(A's top)` → B's green run stands and merges; else the rerun rule below over `git diff --name-only <A's top> origin/main`: rerun = restack on main + suite (B's own 3 rounds), compile = restack + compile, push = merge |
+| A requeued ("main keeps moving") | requeued | the same tree compare: main lacks A, so the diff names A's changes too |
+| Main red at a merge | `main_health.py status` before each merge: the rest `requeued` ("main red") | the same |
+
+A `--no-merge` or `--red-fix` ticket is a batch of its own; B never
+stacks on a `--no-merge` A (it never merges), and on red main only the
+`--red-fix` ticket runs.
 
 - `<suite>`: the first backticked command in the `pr-check: none` comment
   that starts with a script in the repo (`./gradlew …`); none written →
   assemble debug + unit `runner:` + `structure:` (when set).
-- **Batch guarantee.** The suite tests only the batch top. The intermediate
-  main states (after the 1st, 2nd, … merge of a batch) are never tested on
-  their own. Accepted, because tickets in one queue are independent (the
-  frontier dispatches only tickets whose parents are merged), main's
-  post-merge workflow tests the newest push, and a red main still stops
-  everything.
-- **Throughput.** One suite covers up to `--max` tickets; at a ~5 min suite
-  and batches of 4 the ceiling is about 48 merges an hour per
-  orchestrator, minus about log2(batch) extra suites per red batch.
+- **Batch guarantee.** Each suite tests only its batch top; B's tests A's
+  top plus B. The intermediate main states (after the 1st, 2nd, … merge)
+  are never tested on their own. Accepted, because tickets in the queue
+  are independent (the frontier dispatches only tickets whose parents are
+  merged), main's post-merge workflow tests the newest push, and a red
+  main still stops everything. A requeued A ticket can land after B's:
+  independent tickets, so order across batches does not matter.
+- **Throughput.** At the 4.0 min suite median one slot runs about 15
+  suites an hour; two pipelined batches about 30, each covering up to 5
+  tickets, for every session of the repository together. A red batch
+  costs about log2(batch) extra suites, plus B's suite when B sat on it.
 - Main moved during the suite or between merges → judge `git diff
   --name-only <base>..origin/main` (`<base>` = the main sha the suite ran
   on) against the batch's changes, mapped to build modules
@@ -150,51 +185,60 @@ Results (one JSON line per ticket) and what the orchestrator does next:
     stops merges (Red main below).
   - A textual conflict at merge (`gh pr merge` refuses) → rebase,
     Conflicts below, suite again.
-  Ledger the call: `merge: <NN> main moved <k> commits —
-  rerun|compile|push (<modules>)`.
+  Ledger the call: `merge: <who>/<NN>,… main moved <k> commits —
+  rerun|compile|push (<modules>)` (`<k>`: commits neither batch merged).
 - Merging needs the authority table to let the agent do it (dark /
   non-behavioral slice + consent line). Otherwise the orchestrator
   enqueues with `--no-merge` and the ticket ends `waiting_user`.
 - `merge_lane.py` applies this mechanically: modules come from
   `include(...)` in `settings.gradle.kts`, project dependencies from
   `project(":x")` and `projects.x` in each module's build file. After 3
-  full reruns of main moving the batch is requeued ("main keeps moving")
-  and the lane exits 1; compile checks never count.
+  full reruns of main moving a batch is requeued ("main keeps moving");
+  compile checks never count, and B counts its own rounds.
 - The PR body is written once by the worker, after the fast review
   (`open-pr` slice template). The lane fills its `**check:**` line:
-  `local suite green on batch top <sha7> (tickets <NN,NN>)[, then compile
-  green after main moved]; no PR CI by design`.
+  `local suite green on batch top <sha7> (tickets <who>/<NN>,<who>/<NN>)[,
+  then compile green after main moved]; no PR CI by design`.
 
 ## Lane events
 
-`merge_lane.py land` appends one JSON line per event to
+`merge_lane.py` appends one JSON line per event to
 `<git-common-dir>/agent-builds/lane-events.jsonl` (next to
 `main-health.jsonl`, shared by every worktree, never committed, written
 under a mkdir lock like main_health's ledger). It answers how often main
 moving forces a rerun, how many tickets one suite covers, and which
-module's tests cost the suite time. Logging never changes a decision or
-the exit code: an IO error prints `merge_lane: event log: …` on stderr
-and the lane goes on.
-Every line has `ts` (UTC), `who` (the `--who` run slug) and `event`.
+module's tests cost the suite time; `wait` reads its results from it.
+Logging never changes a decision or the exit code: an IO error prints
+`merge_lane: event log: …` on stderr and the lane goes on (a `wait`
+whose ticket left the queue without a logged result then exits 1).
+Every line has `ts` (UTC), `who` (the run slug of the `land` or
+`enqueue` that wrote it; a `ticket` line names the ticket's own) and
+`event`. Tickets are labelled `<who>/<NN>`.
 
-- `suite` / `compile`: one per suite run or compile check. `batch` (ticket
-  NNs of the stack it ran on), `batch_size`, `round` (restack round of this
-  `land`, 1 first; compile rounds count), `phase` (`stack`, `bisect` for a
-  red batch's binary search, `merge` for a check between merges),
-  `modules` (modules the batch's commits touch; `[]` without a module
-  graph), `base` and `top` (sha7 of the main it stacked on and of the
-  head it ran on), `result` (`green`|`red`), `wall_s`, `module_test_s`
-  (`{module: seconds}`: JUnit `testsuite@time` summed per module from
-  `<module>/build/test-results/**/*.xml` written since the run started,
-  so earlier runs' files are ignored; `{}` when none).
-- `ticket`: one per result line. `nn`, `result` (the names above),
-  `reason` (the requeue or invalid reason verbatim, else null), `pr`
-  (null before a PR exists).
-- `main_moved`: one per main-moved verdict. `batch`, `phase` (`stack`|
-  `merge`), `commits`, `decision` (`rerun`|`compile`|`push`, or `requeue`
-  where a rerun verdict requeues instead: past the 3 full rounds, or
-  between merges), `reason` (the modules label of the ledger line,
-  `+shared build setup` etc. included).
+- `enqueue`: one per enqueue. `nn`, `id` (the queue entry's; `wait`
+  finds its tickets by it).
+- `suite` / `compile`: one per suite run or compile check. `pipe` (`A`|
+  `B`), `batch` (labels of the stack it ran on), `batch_size`, `round`
+  (restack round of this batch, 1 first; compile rounds count), `phase`
+  (`stack`, `bisect` for a red batch's binary search, `merge` for a check
+  between merges), `modules` (modules the batch's commits touch; `[]`
+  without a module graph), `base` and `top` (sha7 of the commit it stacked
+  on, main or A's top, and of the head it ran on), `result`
+  (`green`|`red`|`discarded`: B dropped because A went red), `wall_s`,
+  `module_test_s` (`{module: seconds}`: JUnit `testsuite@time` summed per
+  module from `<module>/build/test-results/**/*.xml` written since the
+  run started, so earlier runs' files are ignored; `{}` when none).
+- `ticket`: one per result line. `nn`, `id`, `pipe` (null for `invalid`),
+  `result` (the names above), `reason` (the requeue or invalid reason
+  verbatim, else null), `pr` (null before a PR exists), `line` (the
+  result line as printed).
+- `main_moved`: one per main-moved verdict. `pipe`, `batch`, `phase`
+  (`stack`|`merge`), `commits`, `decision` (`rerun`|`compile`|`push`, or
+  `requeue` where a rerun verdict requeues instead: past the 3 full
+  rounds, or between merges), `reason` (the modules label of the ledger
+  line, `+shared build setup` etc. included).
+- `ledger`: one per `merge:`, `slice:` or claim line `land` prints.
+  `line`, `ids` (the tickets it names).
 
 Rerun rate: `main_moved` lines with `decision: rerun` per `land`.
 Tickets per suite: `batch_size` of `suite` lines with `phase: stack`.
@@ -266,8 +310,9 @@ PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
   failing tests>`. `status` reads only the ledger, so it stays red until a
   watcher records the next green run.
 - **Red → every merge stops except the fix.** `merge_lane.py land` sees
-  `status` exit 3 and exits 3 (`main red; lane paused`): ready tickets wait
-  in the queue with no PR open, so no `hold` is needed, and the lane stays
+  `status` exit 3 and exits 3 (`main red; lane paused`), and every `wait`
+  following queued tickets exits 3 with it: ready tickets wait in the
+  queue with no PR open, so no `hold` is needed, and the lane stays
   paused until the watcher records green. Workers are not involved in red
   main at all. `main_health.py hold`/`held` stay for PRs that wait outside
   the lane: a `waiting_user` PR whose approval arrives while main is red is
@@ -296,17 +341,19 @@ PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
   in its own worktree: `git revert` of the culprit squash commit (the
   ticket reopens), or a fix forward when it is one obvious line, then the
   fast review of the revert or fix. It enqueues the ticket with
-  `merge_lane.py enqueue … --red-fix <culprit>` and starts `land`: a
-  `red_fix` ticket lands alone even on a red main, local suite included.
-  After its PR exists the lane records `main_health.py claim --who <id>
-  --culprit <culprit> --fix-pr <n>` (a refused claim → result
+  `merge_lane.py enqueue … --red-fix <culprit>` and follows it with
+  `wait`: a `red_fix` ticket lands alone even on a red main, local suite
+  included. After its PR exists the lane records `main_health.py claim
+  --who <id> --culprit <culprit> --fix-pr <n>` (a refused claim → result
   `claim_refused`, nothing merged) and merges despite `status` exit 3.
   Everyone else reads the claim in `status` and opens no second fix. A
   claim idle for 30 min with no merged fix → `claim --takeover` (refused
   while a merged fix has no red run after it yet).
 - **Green again**: the watcher records the green run, which closes the
-  incident. The lane resumes by itself: the next `land` takes the queued
-  tickets (nothing was held, so nothing to release). `main_health.py held`
+  incident. The lane resumes on the next `wait`: each orchestrator whose
+  `wait` exited 3 starts it again for its queued tickets, and the first
+  one starts `land`, which takes every session's queued tickets (nothing
+  was held, so nothing to release). `main_health.py held`
   lists PRs still held outside the lane (`waiting_user` PRs held on red):
   the orchestrator merges each after `status` is green, under the
   main-moved verdicts.
