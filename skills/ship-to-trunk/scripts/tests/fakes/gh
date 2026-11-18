@@ -8,10 +8,14 @@ State lives in $GH_FAKE_DIR/state.json (written by the test):
          checked out in another worktree) | "checkout_error_open" (fails with
          the same message but the PR stays OPEN) | "refused"
   create_url   URL printed by `gh pr create` (the PR is registered OPEN)
+  land   true: a merge also pushes the --match-head-commit sha to origin's main
+         (the squash of a linear branch), then runs the executable
+         $GH_FAKE_DIR/after_merge when the test wrote one (main moves under the lane)
 Every call is appended to $GH_FAKE_DIR/calls.log as one JSON argv line.
 """
 import json
 import os
+import subprocess
 import sys
 
 d = os.environ["GH_FAKE_DIR"]
@@ -76,6 +80,11 @@ elif args[:2] == ["pr", "merge"]:
     if mode != "checkout_error_open":
         pr["state"] = "MERGED"
         save()
+        if state.get("land"):
+            subprocess.run(["git", "push", "-q", "origin", opt("--match-head-commit") + ":refs/heads/main"], check=True)
+            hook = os.path.join(d, "after_merge")
+            if os.access(hook, os.X_OK):
+                subprocess.run([hook], check=True)
     if mode.startswith("checkout_error"):
         print("failed to run git: fatal: 'main' is already checked out at '/somewhere/main'", file=sys.stderr)
         sys.exit(1)
