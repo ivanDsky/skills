@@ -7,7 +7,8 @@
     "Grab whatever is ready in sync and ship each one as its own PR",
     "This worktree is for draining the backlog — claim a pack and go",
     "Fix the rotation bug that's in the backlog",
-    "Drain the backlog bugs here — PRs run no CI in this repo, so gate each one on the local suite and merge it yourself"
+    "Drain the backlog bugs here — PRs run no CI in this repo, so gate each one on the local suite and merge it yourself",
+    "Grab the next tickets, and ask me all your questions up front before you start, not one at a time"
   ],
   "negative": [
     {

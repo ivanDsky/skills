@@ -76,7 +76,7 @@ ready-for-human: judgment, credentials or device access no agent has.   wontfix:
   priority and then age.
 - **`needs-check`**: the change is merged (dark or live) and waits for the
   user's hands-on check. The feedback session batches these into one build
-  (`file-tickets` § Check batch). Workers never ask the user.
+  (`file-tickets` § Check batch). Workers never ask the user for a check.
 - `done` and `wontfix` close the ticket. Every transition takes a note that
   goes into the ticket's comments.
 
