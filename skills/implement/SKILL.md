@@ -42,13 +42,13 @@ recollection.
    pushed, ready" (fast review done, no suite, no rebase, no PR, no merge,
    no polling); the orchestrator feeds the repository's one merge lane
    (`ship-to-trunk`/references/merge-loop.md): on each `ready` report it
-   runs `merge_lane.py enqueue --who <slug>` and, when no `wait` job of
-   its own runs, starts `merge_lane.py wait --who <slug> --nn <NN>...` for
-   its queued tickets as one background bash job (the lane is shared by
-   every session: batches of up to 5, one suite per batch top, two batches
-   pipelined, then PR + merge per ticket). It handles each result line per
-   merge-loop.md (red → fix worker, conflict → rebase worker, waiting_user
-   → ask tool). The orchestrator also runs one
+   runs `merge_lane.py enqueue --who <slug> --nn <NN> ...` and starts one
+   `merge_lane.py wait --who <slug> --nn <NN>` background bash job for
+   that ticket (the lane is shared by every session: batches of up to 5,
+   one suite per batch top, two batches pipelined, then PR + merge per
+   ticket). It handles each result line per merge-loop.md (red → fix
+   worker, conflict → rebase worker, refused/closed/stuck → the reason
+   first, waiting_user → ask tool). The orchestrator also runs one
    `main_health.py watch --who <slug>`
    background bash job, started after the run's first merge and after a
    later merge when none is running; on red it attributes the culprit and

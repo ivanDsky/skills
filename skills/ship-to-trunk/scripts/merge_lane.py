@@ -4,9 +4,12 @@
 One lane per repository, shared by every session and worktree of it, in
 `<git-common-dir>/agent-builds/lane/`. Orchestrators enqueue their ready
 tickets, then wait for them; whichever `wait` finds the lane idle starts one
-`land`. A `land` holds `lane/land/` (owner pid) for its whole run; a second
-`land` exits 4 without touching anything. Workers never run the lane: they
-push the branch and report ready; the orchestrator enqueues the ticket.
+`land`. A `land` holds an exclusive flock on `lane/land.lock` for its whole
+run (the kernel releases it however the land dies; the file names the
+holder's pid for messages only); a second `land` exits 4 without touching
+anything. SIGTERM stops a `land` and every check it started. Workers never
+run the lane: they push the branch and report ready; the orchestrator
+enqueues the ticket.
 
   merge_lane.py enqueue --who <run slug> --nn <NN> --worktree <path>
                         --title "<conventional title>" --body-file <f>
@@ -20,13 +23,14 @@ slug of the session that owns it. `enqueue` fills the rest from the worktree,
 gives the entry a fresh `id`, and replaces an entry with the same who and nn
 (a ticket that re-enters after a fix):
   {"who","nn","id","worktree","branch","head","base","title","body_file",
-   "no_merge":false,"red_fix":null,"lane_head"?}
+   "no_merge":false,"red_fix":null,"lane_head"?,"requeues"?}
 `base` is the ticket's merge-base with origin/main; `base..head` is its own
 commits, restacked from scratch on every lane run. `no_merge: true` marks a
 PR only the user may merge (unflaggable live change, flip PR). `red_fix`
 (culprit sha|#PR) marks the fix PR of a red main. `lane_head` is the
-worktree HEAD the lane left after rebasing a requeued ticket. `enqueue` logs
-an `enqueue` event (nn, id) before it writes the queue.
+worktree HEAD the lane left after rebasing a requeued ticket; `requeues`
+counts the entry's requeues. `enqueue` logs an `enqueue` event (nn, id)
+before it writes the queue.
 
 `wait` maps each NN to the id of the last `enqueue` event of <who> for it and
 reads the lane events from the start of the file. It prints the result line
@@ -47,20 +51,31 @@ plus plain ledger lines (`merge: ...`, `slice: ...`; lines not starting with
   red           (+ log): the ticket turned the suite red
   waiting_user  (+ url): `no_merge` ticket, PR open, suite green
   claim_refused (+ reason): `red_fix` claim refused, nothing merged
+  refused       (+ reason[, pr]): `gh pr create` failed, or `gh pr merge`
+                refused the PR (reason: gh's stderr) for any cause but a
+                head or base sha that moved on GitHub (that one requeues)
+  closed        (+ pr, url): the branch's PR was closed (by the user); the
+                lane never pushes to it or opens another
   invalid       (+ reason): worktree missing, holding uncommitted changes, or
                 its HEAD is neither `head` nor `lane_head` (moved since enqueue)
   requeued      (+ reason): stays in the queue, in order
-Finished tickets (everything but requeued) leave the queue.
+  stuck         (+ reason): the entry was already requeued REQUEUE_CAP (6)
+                times; reason is the requeue reason it would have had
+Finished tickets (everything but requeued) leave the queue. Tickets stacked
+after a red, refused or closed ticket are requeued ("stacked on a red |
+refused | closed ticket").
 Exit 0 when every ticket of both batches merged, 1 otherwise, 3 when main was
-red at the start and the queue holds no `red_fix` ticket (nothing touched),
-4 when another `land` holds the lane (nothing touched).
+red at the start and the queue holds no `red_fix` ticket (nothing touched) or
+the `red_fix` ticket did not merge, 4 when another `land` holds the lane
+(nothing touched).
 
 Sequence:
  1. `main_health.py status`. Red -> `main red; lane paused`, exit 3: the
     queue is the hold, no PR is opened. Red with a `red_fix` ticket queued
     -> that ticket lands alone, no batch B (steps 3-7; 7.1 skipped; after its
     PR exists `main_health.py claim --who <its who> --culprit <x> --fix-pr
-    <n>`, refused -> claim_refused; then it merges despite red).
+    <n>`, refused -> claim_refused; then it merges despite red). The fix not
+    merged (any other result) -> `main red; lane paused`, exit 3.
  2. Batches: A is the queue head, up to --max (default 5), stopping before
     the first `no_merge` or `red_fix` ticket; such a ticket at the head lands
     alone (a `no_merge` one ends with its PR open: waiting_user, no merge).
@@ -72,7 +87,8 @@ Sequence:
  4. One check per batch, both started at once, each in its own scratch
     worktree (`lane/wt/0` for A, `lane/wt/1` for B) detached at the batch
     top and reset before every use (`checkout -f`, `clean -fd`; ignored
-    build output stays), through `build-slot` when on PATH. The suite is the
+    build output stays), with the main checkout's `local.properties` copied
+    in when it has one, through `build-slot` when on PATH. The suite is the
     command in PROFILE's `pr-check: none` comment, else debug + unit
     `runner:` + `structure:`; log `lane/logs/lane-<NN-NN>-<sha7>.log`
     (`...-compile.log` for a compile check, step 6).
@@ -90,7 +106,8 @@ Sequence:
     then the batch is requeued ("main keeps moving"). `compile` -> back to 3
     on the new origin/main, but the check is the compile command (a red one
     bisects like a red suite); compile rounds never count toward the 3.
-    `push` -> merge.
+    `push` -> merge. A restack takes only the green tickets: a red ticket
+    stays red, its followers stay requeued.
  7. Merge A in order, then B, k = 1..n: 7.1 `main_health.py status`, red ->
     the rest requeued ("main red"). 7.2 `git fetch origin`,
     `git rebase --onto origin/main <tested head of k-1>` (for k = 1 the
@@ -99,15 +116,18 @@ Sequence:
     over the outside commits against tickets k..n; `rerun` -> k..n requeued
     ("main moved: related"); `compile` -> compile check on k's rebased head,
     red -> k gets `red` and k+1..n are requeued ("stacked on a red ticket").
-    7.4 push `--force-with-lease`; reuse the OPEN PR of the branch
-    (`gh pr view`), else `gh pr create` (body check line: `local suite green
-    on batch top <sha7> (tickets <who>/<NN>,...)[, then compile green after
-    main moved]; no PR CI by design`). 7.5 `gh pr merge <n> --squash
-    --match-head-commit <sha>` (always with the PR number, never
-    `--delete-branch`: gh would check out main locally); non-zero exit ->
-    `gh pr view <n>` decides: MERGED counts as merged, anything else is
-    refused -> requeued. 7.6 delete the remote branch, `git worktree remove`,
-    delete the local branch.
+    7.4 `gh pr view <branch>`: CLOSED -> `closed`, k+1..n requeued ("stacked
+    on a closed ticket"), nothing pushed. Else push `--force-with-lease`;
+    reuse the OPEN PR, else `gh pr create` (body check line: `local suite
+    green on batch top <sha7> (tickets <who>/<NN>,...)[, then compile green
+    after main moved]; no PR CI by design`); create fails -> `refused`.
+    7.5 `gh pr merge <n> --squash --match-head-commit <sha>` (always with the
+    PR number, never `--delete-branch`: gh would check out main locally);
+    non-zero exit -> `gh pr view <n>` decides: MERGED counts as merged; a
+    head or base sha that moved on GitHub ("... branch was modified")
+    requeues k..n; anything else is `refused` with k+1..n requeued
+    ("stacked on a refused ticket"). 7.6 delete the remote branch,
+    `git worktree remove`, delete the local branch.
  8. Ledger lines, tickets named <who>/<NN>: `merge: batch <labels> suite
     green @ <sha7>[, compile green @ <sha7>] (<s> suites[, <c> compiles])`,
     each rerun decision `merge: <labels> main moved <k> commits - rerun|
@@ -143,6 +163,7 @@ queue order, but a ticket requeued from A goes back to the queue while B may
 still merge: tickets are independent by construction.
 """
 import argparse
+import fcntl
 import json
 import os
 import re
@@ -160,6 +181,7 @@ from pathlib import Path
 
 MAX_ROUNDS = 3  # full-suite reruns per batch; compile checks are not counted
 MAX_BATCH = 5  # tickets per batch
+REQUEUE_CAP = 6  # requeues of one queue entry; the next one ends it `stuck`
 COMPILE_TASKS = ("compileDebugKotlin", "compileDebugUnitTestKotlin")
 HERE = Path(__file__).resolve().parent
 SHARED_ROOT_FILES = re.compile(
@@ -321,9 +343,13 @@ LOCK_STALE_S = 120
 EVENTS = "lane-events.jsonl"
 WAIT_POLL_S = 0.5
 KILL_GRACE_S = 30
+BUSY_RETRY_S = 0.3  # a `wait` probing the lane lock holds it for microseconds; a real holder for minutes
+# GitHub refuses a merge whose head or base moved since the request: a race, so the ticket is requeued.
+SHA_MOVED = re.compile(r"(Head|Base) branch was modified")
 MOVED = ("--queue is gone: one lane per repository now (<git-common-dir>/agent-builds/lane/); use: "
          "merge_lane.py enqueue --who <run slug> --nn <NN> --worktree <path> --title <title> "
-         "--body-file <f>, then merge_lane.py wait --who <run slug> --nn <NN>...")
+         "--body-file <f>, then merge_lane.py wait --who <run slug> --nn <NN>...; "
+         "re-enqueue anything left in the old .scratch/<slug>/lane/queue.jsonl")
 
 
 @contextmanager
@@ -482,66 +508,70 @@ def cmd_enqueue(a):
 
 
 class LaneLock:
-    """One `land` per repository: `<lane>/land/pid` names the owner; a dead pid is stale."""
+    """One `land` per repository: an exclusive flock on `<lane>/land.lock`. The
+    kernel releases it when the holder exits, however it dies, so there is no
+    stale lock to detect. The file holds the holder's pid, for messages only."""
 
     def __init__(self, lane):
-        self.path = Path(lane) / "land"
+        self.path = Path(lane) / "land.lock"
+        self.fd = None
 
     def holder(self):
-        """The owner's pid while it lives, -1 while an owner is between mkdir and
-        its pid write, else None (no lock, or a stale one)."""
+        """The holder's pid (-1 before it wrote it) while the lock is held, else None."""
         try:
-            pid = int((self.path / "pid").read_text())
-        except (FileNotFoundError, ValueError):
+            fd = os.open(self.path, os.O_RDONLY)
+        except FileNotFoundError:
+            return None
+        try:
+            fcntl.flock(fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
+            return None
+        except BlockingIOError:
             try:
-                return -1 if time.time() - self.path.stat().st_mtime < 5 else None
-            except FileNotFoundError:
-                return None
-        return pid if pid_alive(pid) else None
+                return int(os.read(fd, 32) or b"-1")
+            except ValueError:
+                return -1
+        finally:
+            os.close(fd)  # drops the probe's shared lock too
 
     def __enter__(self):
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        fd = os.open(self.path, os.O_RDWR | os.O_CREAT, 0o644)  # not inherited by the checks
+        deadline = time.time() + BUSY_RETRY_S
         while True:
             try:
-                self.path.mkdir()
-                (self.path / "pid").write_text(str(os.getpid()))
-                return self
-            except FileExistsError:
-                pid = self.holder()
-                if pid == -1:
-                    time.sleep(0.2)
-                    continue
-                if pid:
-                    fail(f"lane busy: land pid {pid} holds {self.path}", 4)
-                shutil.rmtree(self.path, ignore_errors=True)
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                if time.time() > deadline:
+                    os.close(fd)
+                    fail(f"lane busy: land pid {self.holder() or '?'} holds {self.path}", 4)
+                time.sleep(0.05)
+        os.ftruncate(fd, 0)
+        os.write(fd, str(os.getpid()).encode())
+        self.fd = fd
+        return self
 
     def __exit__(self, *exc):
-        shutil.rmtree(self.path, ignore_errors=True)
-
-
-def pid_alive(pid):
-    try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
-        return True
-    return True
+        os.close(self.fd)
 
 
 def scratch(lane, k, sha, repo):
     """Scratch worktree `lane/wt/<k>` detached at `sha`, reset from whatever an
     earlier (maybe killed) check left: tracked files restored, untracked ones
-    removed, ignored build output kept for an incremental build."""
+    removed, ignored build output kept for an incremental build. The main
+    checkout's `local.properties` (Android SDK path, never committed) is copied in."""
     wt = Path(lane) / "wt" / str(k)
     if (wt / ".git").is_file() and run("git", "rev-parse", "--git-dir", cwd=wt, check=False).returncode == 0:
         run("git", "checkout", "-q", "-f", "--detach", sha, cwd=wt)
         run("git", "clean", "-fdq", cwd=wt)
-        return wt
-    shutil.rmtree(wt, ignore_errors=True)
-    run("git", "worktree", "prune", cwd=repo)
-    wt.parent.mkdir(parents=True, exist_ok=True)
-    run("git", "worktree", "add", "-q", "--detach", str(wt), sha, cwd=repo)
+    else:
+        shutil.rmtree(wt, ignore_errors=True)
+        run("git", "worktree", "prune", cwd=repo)
+        wt.parent.mkdir(parents=True, exist_ok=True)
+        run("git", "worktree", "add", "-q", "--detach", str(wt), sha, cwd=repo)
+    props = Path(lane).parents[2] / "local.properties"  # <checkout>/.git/agent-builds/lane -> main checkout
+    if props.is_file():
+        shutil.copyfile(props, wt / "local.properties")
     return wt
 
 
@@ -604,10 +634,16 @@ class Land:
         self.q = Queue(self.lane / "queue.jsonl")
         self.events = EventLog(who, self.lane)
         self.results = {}  # entry id -> result
+        self.procs = []  # every check started, killed by stop()
         self.mh = [sys.executable, str(HERE / "main_health.py")]
         self.slot = ["build-slot"] if shutil.which("build-slot") else []
 
     def emit(self, e, result, pipe, **kw):
+        n = 0
+        if result == "requeued":
+            n = next((r.get("requeues", 0) for r in self.q.read() if r.get("id") == e["id"]), 0)
+            if n >= REQUEUE_CAP:
+                result = "stuck"
         line = {"who": e["who"], "nn": e["nn"], "result": result, **kw}
         print(json.dumps(line), flush=True)
         self.events.log("ticket", {"who": e["who"], "nn": e["nn"], "id": e["id"], "pipe": pipe,
@@ -617,14 +653,20 @@ class Land:
         if result != "requeued":
             self.q.update(lambda recs: [r for r in recs if r.get("id") != e["id"]])
             return
-        wt = e["worktree"]
-        if Path(wt).is_dir():  # the lane rebased it: its HEAD is still ours
-            h = out("git", "rev-parse", "HEAD", cwd=wt)
-            self.q.update(lambda recs: [dict(r, lane_head=h) if r.get("id") == e["id"] else r for r in recs])
+        upd = {"requeues": n + 1}
+        if Path(e["worktree"]).is_dir():  # the lane rebased it: its HEAD is still ours
+            upd["lane_head"] = out("git", "rev-parse", "HEAD", cwd=e["worktree"])
+        self.q.update(lambda recs: [dict(r, **upd) if r.get("id") == e["id"] else r for r in recs])
 
     def requeue(self, entries, reason, pipe):
         for e in entries:
             self.emit(e, "requeued", pipe, reason=reason)
+
+    def stop(self):
+        """Kill every check still running (the land is exiting)."""
+        for p in self.procs:
+            if p.poll() is None:
+                kill_group(p)
 
     def ledger(self, line, entries):
         print(line, flush=True)
@@ -647,7 +689,8 @@ class Land:
         if not recs:
             return 0 if not self.results else 1
         st = self.status(recs[0]["worktree"])
-        if st.returncode == 3:
+        red = st.returncode == 3
+        if red:
             fx = next((r for r in recs if r.get("red_fix")), None)
             if not fx:
                 print("main red; lane paused")
@@ -674,6 +717,10 @@ class Land:
             else:
                 b.settle()
                 b.merge()
+        if red and self.results.get(parts[0][0]["id"]) != "merged":
+            print("main red; lane paused")
+            print(st.stdout.strip())
+            return 3
         return 0 if all(self.results.get(e["id"]) == "merged" for e in parts[0] + parts[1]) else 1
 
 
@@ -684,7 +731,7 @@ class Batch:
         self.land, self.pipe, self.cands, self.k = land, pipe, cands, k
         self.rounds = self.full = self.suites = self.compiles = self.merged = 0
         self.kind, self.cc, self.tag, self.cmd = "rerun", None, "suite", None
-        self.stack, self.green, self.pending, self.check = [], [], [], None
+        self.stack, self.green, self.pending, self.check = [], list(cands), [], None
         self.base = self.main0 = self.under = None
         self.suite7, self.red, self.live = "", False, True
         self.git = land.git
@@ -695,12 +742,13 @@ class Batch:
         return self.stack[-1]["head_t"] if self.stack else None
 
     def round(self, base, main0=None, under=None):
-        """Stack the batch on `base` and start its check. `under`: the batch whose
-        top `base` is; `main0`: then the origin/main that batch was stacked on."""
+        """Stack the green tickets (all of them at first) on `base` and start their
+        check. `under`: the batch whose top `base` is; `main0`: then the origin/main
+        that batch was stacked on. A ticket already red or requeued stays so."""
         self.rounds += 1
         self.base, self.main0, self.under = base, main0 or base, under
-        self.stack, self.pending, self.check, prev = [], [], None, base
-        for e in self.cands:
+        self.stack, self.check, prev = [], None, base
+        for e in self.green:
             wt = e["worktree"]
             run("git", "checkout", "-q", "-B", e["branch"], e["head"], cwd=wt)
             if run("git", "rebase", "--onto", prev, e["base"], cwd=wt, check=False).returncode:
@@ -736,6 +784,7 @@ class Batch:
         with log.open("w") as f:
             p = subprocess.Popen(self.land.slot + ["bash", "-c", cmd], cwd=wt, stdin=subprocess.DEVNULL,
                                  stdout=f, stderr=subprocess.STDOUT, start_new_session=True)
+        self.land.procs.append(p)
         return {"p": p, "t0": t0, "log": str(log), "prefix": prefix, "tag": tag, "phase": phase,
                 "base": base, "wt": wt, "round": self.rounds}
 
@@ -813,9 +862,9 @@ class Batch:
             if self.kind == "push":
                 break
             if self.kind == "rerun" and self.full == MAX_ROUNDS:
-                self.land.requeue(self.cands, "main keeps moving", self.pipe)
+                self.land.requeue(self.green, "main keeps moving", self.pipe)
                 self.live, self.green = False, []
-                return
+                break
             self.round(moved)
         for e, result, kw in self.pending:
             self.land.emit(e, result, self.pipe, **kw)
@@ -838,6 +887,12 @@ class Batch:
             compiled = after_compile
             if not e.get("red_fix") and L.status(wt).returncode == 3:
                 L.requeue(rest, "main red", self.pipe)
+                break
+            view = run("gh", "pr", "view", e["branch"], "--json", "number,url,state", cwd=wt, check=False)
+            info = json.loads(view.stdout) if view.returncode == 0 and view.stdout.strip() else {}
+            if info.get("state") == "CLOSED":  # closed by the user: never pushed to or opened again
+                L.emit(e, "closed", self.pipe, pr=int(info["number"]), url=info["url"])
+                L.requeue(rest[1:], "stacked on a closed ticket", self.pipe)
                 break
             run("git", "fetch", "origin", cwd=wt)
             main = out("git", "rev-parse", "origin/main", cwd=wt)
@@ -879,8 +934,6 @@ class Batch:
                 body = body.rstrip("\n") + "\n" + check + "\n"
             bf = L.lane / f"body-{safe(e['who'])}-{e['nn']}.md"
             bf.write_text(body)
-            view = run("gh", "pr", "view", e["branch"], "--json", "number,url,state", cwd=wt, check=False)
-            info = json.loads(view.stdout) if view.returncode == 0 and view.stdout.strip() else {}
             if info.get("state") == "OPEN":
                 pr, url = str(info["number"]), info["url"]
             else:
@@ -888,7 +941,8 @@ class Batch:
                         "--body-file", str(bf), cwd=wt, check=False)
                 m = re.search(r"/pull/(\d+)", c.stdout)
                 if c.returncode or not m:
-                    L.requeue(rest, f"gh pr create failed: {(c.stderr or c.stdout).strip()}", self.pipe)
+                    L.emit(e, "refused", self.pipe, reason=f"gh pr create failed: {(c.stderr or c.stdout).strip()}")
+                    L.requeue(rest[1:], "stacked on a refused ticket", self.pipe)
                     break
                 url, pr = c.stdout.strip().splitlines()[-1], m.group(1)
             if e.get("no_merge"):
@@ -906,7 +960,12 @@ class Batch:
             # "'main' is already checked out" in a worktree even after a good merge.
             m = run("gh", "pr", "merge", pr, "--squash", "--match-head-commit", head, cwd=wt, check=False)
             if m.returncode and not pr_merged(wt, pr):
-                L.requeue(rest, f"merge refused for PR #{pr}: {m.stderr.strip()}", self.pipe)
+                err = (m.stderr or m.stdout).strip()
+                if SHA_MOVED.search(err):  # a race on GitHub: try again next run
+                    L.requeue(rest, f"merge refused for PR #{pr}: {err}", self.pipe)
+                else:
+                    L.emit(e, "refused", self.pipe, pr=int(pr), reason=err)
+                    L.requeue(rest[1:], "stacked on a refused ticket", self.pipe)
                 break
             run("git", "push", "origin", "--delete", e["branch"], cwd=wt, check=False)
             run("git", "worktree", "remove", wt, cwd=L.repo, check=False)
@@ -921,7 +980,13 @@ class Batch:
 def land(a):
     lane = lane_dir(os.getcwd())
     with LaneLock(lane):
-        return Land(a.who, lane, a.max).run()
+        L = Land(a.who, lane, a.max)
+        old = signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))  # unwinds into the finally
+        try:
+            return L.run()
+        finally:
+            L.stop()
+            signal.signal(signal.SIGTERM, old)
 
 
 def cmd_wait(a):
