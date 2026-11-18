@@ -6,6 +6,7 @@ Regressions: #31 (suite_command took the first backticked text of the
 gh's "'main' is already checked out" error, one lane per queue.
 Run: python3 -m pytest skills/ship-to-trunk/scripts/tests
 """
+import argparse
 import json
 import os
 import re
@@ -534,6 +535,8 @@ def test_same_module_move_between_merges_requeues_the_next_ticket(make_lane, gh)
     assert res[1]["reason"] == "main moved: related"
     assert "merge: 02 main moved 1 commits — rerun (feature)" in merge_lines(r)
     assert gradle_log(gh) == [] and lane.queue_nns() == ["02"]
+    assert [(e["phase"], e["decision"], e["reason"]) for e in events(lane, "main_moved")] == [
+        ("merge", "requeue", "feature")]  # a rerun verdict between merges requeues, never reruns
 
 
 # ------------------------------------------------------------------ lane events
@@ -593,13 +596,22 @@ def test_green_batch_logs_the_suite_with_module_test_time_and_the_merge(glane, g
     assert events(glane, "main_moved", "compile") == []
 
 
-def test_red_batch_logs_each_bisect_run_and_each_ticket_outcome(lane, gh):
+def red_batch(lane):
+    """Batch 01, 02 (turns the suite red), 03."""
     wt2 = lane.add_ticket("2", "two.txt")
     (wt2 / "suite.sh").write_text("#!/bin/sh\nexit 1\n")
     git("commit", "-q", "-am", "break suite", cwd=wt2)
     lane.enqueue("01")
     lane.enqueue("02", wt=wt2)
     lane.enqueue("03", wt=lane.add_ticket("3", "three.txt"))
+
+
+RED_BATCH_TICKETS = [("02", "red", None, None), ("03", "requeued", "stacked on a red ticket", None),
+                     ("01", "merged", None, 42)]
+
+
+def test_red_batch_logs_each_bisect_run_and_each_ticket_outcome(lane, gh):
+    red_batch(lane)
     r = lane.land()
     assert r.returncode == 1
     suites = events(lane, "suite")
@@ -607,8 +619,30 @@ def test_red_batch_logs_each_bisect_run_and_each_ticket_outcome(lane, gh):
         (["01", "02", "03"], 3, "stack", "red"), (["01"], 1, "bisect", "green"), (["01", "02"], 2, "bisect", "red")]
     assert {(e["round"], e["base"]) for e in suites} == {(1, suites[0]["base"])}
     assert all(e["modules"] == [] and e["module_test_s"] == {} for e in suites)  # no module graph, no XML
-    assert [(e["nn"], e["result"], e["reason"], e["pr"]) for e in events(lane, "ticket")] == [
-        ("02", "red", None, None), ("03", "requeued", "stacked on a red ticket", None), ("01", "merged", None, 42)]
+    assert [(e["nn"], e["result"], e["reason"], e["pr"]) for e in events(lane, "ticket")] == RED_BATCH_TICKETS
+
+
+def test_event_fields_that_raise_during_a_bisect_change_no_outcome(lane, gh, monkeypatch, capsys):
+    """In process, so batch_modules can be patched to fail on every bisect run (not the first suite)."""
+    red_batch(lane)
+    calls = []
+
+    def flaky(*args):
+        calls.append(args)
+        if len(calls) > 1:
+            raise RuntimeError("graph boom")
+        return []
+
+    monkeypatch.setattr(ml, "batch_modules", flaky)
+    rc = ml.land(argparse.Namespace(queue=str(lane.queue), who="test-run", max=4))
+    out, err = capsys.readouterr()
+    assert rc == 1
+    results = [json.loads(l) for l in out.splitlines() if l.startswith("{")]
+    assert [(x["nn"], x["result"]) for x in results] == [(nn, res) for nn, res, _, _ in RED_BATCH_TICKETS]
+    assert err.count("merge_lane: event log: RuntimeError('graph boom')") == 2  # both bisect runs
+    assert [(e["phase"], e["result"]) for e in events(lane, "suite")] == [("stack", "red")]
+    assert [(e["nn"], e["result"], e["reason"], e["pr"]) for e in events(lane, "ticket")] == RED_BATCH_TICKETS
+    assert lane.queue_nns() == ["03"]
 
 
 def test_requeued_batch_logs_every_round_and_rerun_decision(glane, gh):
@@ -620,7 +654,8 @@ def test_requeued_batch_logs_every_round_and_rerun_decision(glane, gh):
     assert [(e["round"], e["result"], e["modules"]) for e in suites] == [(n, "green", ["feature"]) for n in (1, 2, 3)]
     assert len({e["base"] for e in suites}) == 3  # each round restacked on the moved main
     assert [(e["batch"], e["phase"], e["commits"], e["decision"], e["reason"])
-            for e in events(glane, "main_moved")] == [(["01"], "stack", 1, "rerun", "feature")] * 3
+            for e in events(glane, "main_moved")] == [(["01"], "stack", 1, d, "feature")
+                                                      for d in ("rerun", "rerun", "requeue")]
     assert [(e["nn"], e["result"], e["reason"]) for e in events(glane, "ticket")] == [
         ("01", "requeued", "main keeps moving")]
 

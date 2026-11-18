@@ -90,7 +90,8 @@ Sequence:
  9. Lane events (`EventLog`): one JSON line per suite or compile check, per
     ticket result and per main-moved decision, appended to
     `<git-common-dir>/agent-builds/lane-events.jsonl` (main_health's ledger
-    dir, same mkdir lock). Fields: references/merge-loop.md § Lane events.
+    dir, a mkdir lock like main_health's ledger). Fields:
+    references/merge-loop.md § Lane events.
     Logging never changes a decision or the exit code: an IO error is one
     `merge_lane: event log: ...` line on stderr.
 
@@ -608,8 +609,10 @@ def land_batch(a):
         k = out("git", "rev-list", "--count", f"{base}..{moved}", cwd=wt0)
         print(f"merge: {','.join(e['nn'] for e in green)} main moved {k} commits — "
               f"{kind} ({label})")
-        events.log("main_moved", lambda: {"batch": [e["nn"] for e in green], "phase": "stack",
-                                          "commits": int(k), "decision": kind, "reason": label})
+        # A rerun verdict past MAX_ROUNDS requeues instead: logged as such, so `rerun` counts real reruns.
+        events.log("main_moved", lambda: {
+            "batch": [e["nn"] for e in green], "phase": "stack", "commits": int(k), "reason": label,
+            "decision": "requeue" if kind == "rerun" and full == MAX_ROUNDS else kind})
         if kind == "push":
             break
         if kind == "rerun" and full == MAX_ROUNDS:
@@ -649,7 +652,7 @@ def land_batch(a):
             print(f"merge: {','.join(x['nn'] for x in rest)} main moved {k} commits — "
                   f"{kind} ({label})")
             events.log("main_moved", {"batch": [x["nn"] for x in rest], "phase": "merge", "commits": k,
-                                      "decision": kind, "reason": label})
+                                      "decision": "requeue" if kind == "rerun" else kind, "reason": label})
             if kind == "rerun":
                 requeue(rest, "main moved: related")
                 break

@@ -170,10 +170,11 @@ Results (one JSON line per ticket) and what the orchestrator does next:
 `merge_lane.py land` appends one JSON line per event to
 `<git-common-dir>/agent-builds/lane-events.jsonl` (next to
 `main-health.jsonl`, shared by every worktree, never committed, written
-under the same mkdir lock). It answers how often main moving forces a
-rerun, how many tickets one suite covers, and which module's tests cost
-the suite time. Logging never changes a decision or the exit code: an IO
-error prints `merge_lane: event log: …` on stderr and the lane goes on.
+under a mkdir lock like main_health's ledger). It answers how often main
+moving forces a rerun, how many tickets one suite covers, and which
+module's tests cost the suite time. Logging never changes a decision or
+the exit code: an IO error prints `merge_lane: event log: …` on stderr
+and the lane goes on.
 Every line has `ts` (UTC), `who` (the `--who` run slug) and `event`.
 
 - `suite` / `compile`: one per suite run or compile check. `batch` (ticket
@@ -190,9 +191,10 @@ Every line has `ts` (UTC), `who` (the `--who` run slug) and `event`.
   `reason` (the requeue or invalid reason verbatim, else null), `pr`
   (null before a PR exists).
 - `main_moved`: one per main-moved verdict. `batch`, `phase` (`stack`|
-  `merge`), `commits`, `decision` (`rerun`|`compile`|`push`), `reason`
-  (the modules label of the ledger line, `+shared build setup` etc.
-  included).
+  `merge`), `commits`, `decision` (`rerun`|`compile`|`push`, or `requeue`
+  where a rerun verdict requeues instead: past the 3 full rounds, or
+  between merges), `reason` (the modules label of the ledger line,
+  `+shared build setup` etc. included).
 
 Rerun rate: `main_moved` lines with `decision: rerun` per `land`.
 Tickets per suite: `batch_size` of `suite` lines with `phase: stack`.
