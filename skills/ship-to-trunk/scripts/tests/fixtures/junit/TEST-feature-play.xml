@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ivandsky.example.feature.play.PlayViewModelTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-18T03:56:15.279Z" hostname="host" time="1.5">
+  <properties/>
+  <testcase name="a hint reveals one cell" classname="com.ivandsky.example.feature.play.PlayViewModelTest" time="1.25"/>
+  <testcase name="undo restores the previous board" classname="com.ivandsky.example.feature.play.PlayViewModelTest" time="0.25"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

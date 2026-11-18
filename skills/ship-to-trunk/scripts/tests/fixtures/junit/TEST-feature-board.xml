@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ivandsky.example.feature.play.BoardTest" tests="1" skipped="0" failures="1" errors="0" timestamp="2026-11-18T03:56:17.004Z" hostname="host" time="2.25">
+  <properties/>
+  <testcase name="a full board is solved" classname="com.ivandsky.example.feature.play.BoardTest" time="2.25">
+    <failure message="expected true" type="java.lang.AssertionError">java.lang.AssertionError: expected true</failure>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

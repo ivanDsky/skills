@@ -165,6 +165,38 @@ Results (one JSON line per ticket) and what the orchestrator does next:
   `local suite green on batch top <sha7> (tickets <NN,NN>)[, then compile
   green after main moved]; no PR CI by design`.
 
+## Lane events
+
+`merge_lane.py land` appends one JSON line per event to
+`<git-common-dir>/agent-builds/lane-events.jsonl` (next to
+`main-health.jsonl`, shared by every worktree, never committed, written
+under the same mkdir lock). It answers how often main moving forces a
+rerun, how many tickets one suite covers, and which module's tests cost
+the suite time. Logging never changes a decision or the exit code: an IO
+error prints `merge_lane: event log: …` on stderr and the lane goes on.
+Every line has `ts` (UTC), `who` (the `--who` run slug) and `event`.
+
+- `suite` / `compile`: one per suite run or compile check. `batch` (ticket
+  NNs of the stack it ran on), `batch_size`, `round` (restack round of this
+  `land`, 1 first; compile rounds count), `phase` (`stack`, `bisect` for a
+  red batch's binary search, `merge` for a check between merges),
+  `modules` (modules the batch's commits touch; `[]` without a module
+  graph), `base` and `top` (sha7 of the main it stacked on and of the
+  head it ran on), `result` (`green`|`red`), `wall_s`, `module_test_s`
+  (`{module: seconds}`: JUnit `testsuite@time` summed per module from
+  `<module>/build/test-results/**/*.xml` written since the run started,
+  so earlier runs' files are ignored; `{}` when none).
+- `ticket`: one per result line. `nn`, `result` (the names above),
+  `reason` (the requeue or invalid reason verbatim, else null), `pr`
+  (null before a PR exists).
+- `main_moved`: one per main-moved verdict. `batch`, `phase` (`stack`|
+  `merge`), `commits`, `decision` (`rerun`|`compile`|`push`), `reason`
+  (the modules label of the ledger line, `+shared build setup` etc.
+  included).
+
+Rerun rate: `main_moved` lines with `decision: rerun` per `land`.
+Tickets per suite: `batch_size` of `suite` lines with `phase: stack`.
+
 ## Main moved while the PR waits
 
 `gh pr update-branch <n> --rebase`, wait for the check again, then merge

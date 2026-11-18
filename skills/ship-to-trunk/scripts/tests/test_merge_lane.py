@@ -9,6 +9,7 @@ Run: python3 -m pytest skills/ship-to-trunk/scripts/tests
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -17,7 +18,7 @@ from pathlib import Path
 import pytest
 
 import merge_lane as ml
-from conftest import SCRIPTS, git, init_repo
+from conftest import FIXTURES, SCRIPTS, git, init_repo
 
 SCRIPT = SCRIPTS / "merge_lane.py"
 PR_URL = "https://github.com/example/PuzzleBox/pull/42"
@@ -533,3 +534,112 @@ def test_same_module_move_between_merges_requeues_the_next_ticket(make_lane, gh)
     assert res[1]["reason"] == "main moved: related"
     assert "merge: 02 main moved 1 commits — rerun (feature)" in merge_lines(r)
     assert gradle_log(gh) == [] and lane.queue_nns() == ["02"]
+
+
+# ------------------------------------------------------------------ lane events
+
+JUNIT = FIXTURES / "junit"
+TS = re.compile(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$")
+
+
+def events(lane, *kinds):
+    common = Path(git("rev-parse", "--path-format=absolute", "--git-common-dir", cwd=lane.co))
+    p = common / "agent-builds" / ml.EVENTS
+    evs = [json.loads(l) for l in p.read_text().splitlines()] if p.exists() else []
+    return [e for e in evs if not kinds or e["event"] in kinds]
+
+
+def put_xml(root, module_dir, name, mtime=None):
+    d = Path(root) / module_dir / "build" / "test-results" / "testDebugUnitTest"
+    d.mkdir(parents=True, exist_ok=True)
+    shutil.copy(JUNIT / name, d / name)  # copy, not copy2: a fresh mtime, as a run writes it
+    if mtime is not None:
+        os.utime(d / name, (mtime, mtime))
+
+
+def test_module_test_seconds_sums_fresh_junit_xml_per_module_and_skips_stale(tmp_path):
+    (tmp_path / "settings.gradle.kts").write_text('include(":feature:play")\ninclude(":core")\n')
+    for d in ("feature/play", "core"):
+        (tmp_path / d).mkdir(parents=True)
+        (tmp_path / d / "build.gradle.kts").write_text("")
+    since = int(time.time())
+    put_xml(tmp_path, "feature/play", "TEST-feature-play.xml")    # 1.5 s
+    put_xml(tmp_path, "feature/play", "TEST-feature-board.xml")   # 2.25 s, a failing suite counts too
+    put_xml(tmp_path, "core", "TEST-core.xml", mtime=since - 3600)  # an earlier run's result
+    assert ml.module_test_seconds(tmp_path, since) == {"feature:play": 3.75}
+    assert ml.module_test_seconds(tmp_path, since - 7200) == {"core": 0.75, "feature:play": 3.75}
+    assert ml.module_test_seconds(tmp_path / "missing", since) == {}
+
+
+def test_green_batch_logs_the_suite_with_module_test_time_and_the_merge(glane, gh):
+    # The suite writes fresh JUnit XML for :feature; a stale :core result from an earlier run stays behind.
+    put_xml(glane.wt, "core", "TEST-core.xml", mtime=time.time() - 3600)
+    hook = gh.dir / "on_build"
+    hook.write_text(f"#!/bin/sh\nd=feature/build/test-results/testDebugUnitTest\nmkdir -p $d\n"
+                    f"cp '{JUNIT}/TEST-feature-play.xml' '{JUNIT}/TEST-feature-board.xml' $d/\n")
+    hook.chmod(0o755)
+    base7 = git("rev-parse", "--short=7", "main", cwd=glane.origin)
+    glane.enqueue()
+    r = glane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    sha = glane.results(r)[0]["sha"]
+    (suite,) = events(glane, "suite")
+    assert TS.match(suite.pop("ts")) and isinstance(suite.pop("wall_s"), float)
+    assert suite == {"who": "test-run", "event": "suite", "batch": ["01"], "batch_size": 1, "round": 1,
+                     "phase": "stack", "modules": ["feature"], "base": base7, "top": sha, "result": "green",
+                     "module_test_s": {"feature": 3.75}}
+    assert [(e["who"], e["nn"], e["result"], e["reason"], e["pr"]) for e in events(glane, "ticket")] == [
+        ("test-run", "01", "merged", None, 42)]
+    assert events(glane, "main_moved", "compile") == []
+
+
+def test_red_batch_logs_each_bisect_run_and_each_ticket_outcome(lane, gh):
+    wt2 = lane.add_ticket("2", "two.txt")
+    (wt2 / "suite.sh").write_text("#!/bin/sh\nexit 1\n")
+    git("commit", "-q", "-am", "break suite", cwd=wt2)
+    lane.enqueue("01")
+    lane.enqueue("02", wt=wt2)
+    lane.enqueue("03", wt=lane.add_ticket("3", "three.txt"))
+    r = lane.land()
+    assert r.returncode == 1
+    suites = events(lane, "suite")
+    assert [(e["batch"], e["batch_size"], e["phase"], e["result"]) for e in suites] == [
+        (["01", "02", "03"], 3, "stack", "red"), (["01"], 1, "bisect", "green"), (["01", "02"], 2, "bisect", "red")]
+    assert {(e["round"], e["base"]) for e in suites} == {(1, suites[0]["base"])}
+    assert all(e["modules"] == [] and e["module_test_s"] == {} for e in suites)  # no module graph, no XML
+    assert [(e["nn"], e["result"], e["reason"], e["pr"]) for e in events(lane, "ticket")] == [
+        ("02", "red", None, None), ("03", "requeued", "stacked on a red ticket", None), ("01", "merged", None, 42)]
+
+
+def test_requeued_batch_logs_every_round_and_rerun_decision(glane, gh):
+    glane.move_main("feature/Other.kt", times=9)
+    glane.enqueue()
+    r = glane.land()
+    assert r.returncode == 1
+    suites = events(glane, "suite")
+    assert [(e["round"], e["result"], e["modules"]) for e in suites] == [(n, "green", ["feature"]) for n in (1, 2, 3)]
+    assert len({e["base"] for e in suites}) == 3  # each round restacked on the moved main
+    assert [(e["batch"], e["phase"], e["commits"], e["decision"], e["reason"])
+            for e in events(glane, "main_moved")] == [(["01"], "stack", 1, "rerun", "feature")] * 3
+    assert [(e["nn"], e["result"], e["reason"]) for e in events(glane, "ticket")] == [
+        ("01", "requeued", "main keeps moving")]
+
+
+def test_compile_check_between_merges_is_logged_with_its_decision(make_lane, gh):
+    lane = stack_batch(make_lane, gh, "core/C.kt", third=True)
+    (gh.dir / "compile_red").write_text("")
+    lane.land()
+    assert [(e["batch"], e["phase"], e["decision"], e["reason"]) for e in events(lane, "main_moved")] == [
+        (["02", "03"], "merge", "compile", "core,docs,feature")]  # 03 adds docs/E.md
+    (check,) = events(lane, "compile")
+    assert (check["batch"], check["phase"], check["modules"], check["result"]) == (["02"], "merge", ["feature"], "red")
+
+
+def test_event_log_failure_changes_no_decision_or_exit_code(lane, gh):
+    common = Path(git("rev-parse", "--path-format=absolute", "--git-common-dir", cwd=lane.co))
+    (common / "agent-builds" / ml.EVENTS).mkdir(parents=True)  # appending to it fails
+    lane.enqueue()
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert lane.results(r)[0]["result"] == "merged" and lane.queue_nns() == []
+    assert "merge_lane: event log: IsADirectoryError" in r.stderr
