@@ -6,8 +6,10 @@ State lives in $GH_FAKE_DIR/state.json (written by the test):
   prs    {"<number>": {... `gh pr view --json` object ...}}
   merge  "ok" | "checkout_error" (merges, then fails like gh does when main is
          checked out in another worktree) | "checkout_error_open" (fails with
-         the same message but the PR stays OPEN) | "refused" | "head_moved"
-         (GitHub's head-sha mismatch: fails, the PR stays OPEN)
+         the same message but the PR stays OPEN) | "refused" (a required
+         review: final) | "not_mergeable" (mergeability not computed yet:
+         transient) | "head_moved" (GitHub's head-sha mismatch); these last
+         three fail and leave the PR OPEN
   merge_seq    list of merge modes, one taken per `gh pr merge`; `merge` once empty
   create_url   URL printed by `gh pr create` (the PR is registered OPEN)
   create_error stderr of a failing `gh pr create` (exit 1, no PR)
@@ -93,6 +95,10 @@ elif args[:2] == ["pr", "merge"]:
     save()
     pr = state["prs"][args[2]]
     if mode == "refused":
+        print("GraphQL: At least 1 approving review is required by reviewers with write access. "
+              "(mergePullRequest)", file=sys.stderr)
+        sys.exit(1)
+    if mode == "not_mergeable":
         print("Pull request is not mergeable", file=sys.stderr)
         sys.exit(1)
     if mode == "head_moved":

@@ -7,9 +7,12 @@ tickets, then wait for them; whichever `wait` finds the lane idle starts one
 `land`. A `land` holds an exclusive flock on `lane/land.lock` for its whole
 run (the kernel releases it however the land dies; the file names the
 holder's pid for messages only); a second `land` exits 4 without touching
-anything. SIGTERM stops a `land` and every check it started. Workers never
-run the lane: they push the branch and report ready; the orchestrator
-enqueues the ticket.
+anything. SIGTERM stops a `land` and every check it started (each logged
+`discarded`). Each check runs in its own process group, recorded in
+`lane/check-groups` while it runs; a `land` that takes the lock first kills
+the groups still alive on that record (the checks of a SIGKILLed land), then
+clears it. Workers never run the lane: they push the branch and report
+ready; the orchestrator enqueues the ticket.
 
   merge_lane.py enqueue --who <run slug> --nn <NN> --worktree <path>
                         --title "<conventional title>" --body-file <f>
@@ -18,19 +21,22 @@ enqueues the ticket.
   merge_lane.py land    --who <run slug> [--max 5]
 
 Queue: `lane/queue.jsonl`, one JSON object per ready ticket, edited only under
-a mkdir lock (`queue.jsonl.lock`). A ticket is (who, nn): `who` is the run
-slug of the session that owns it. `enqueue` fills the rest from the worktree,
-gives the entry a fresh `id`, and replaces an entry with the same who and nn
-(a ticket that re-enters after a fix):
-  {"who","nn","id","worktree","branch","head","base","title","body_file",
-   "no_merge":false,"red_fix":null,"lane_head"?,"requeues"?}
-`base` is the ticket's merge-base with origin/main; `base..head` is its own
-commits, restacked from scratch on every lane run. `no_merge: true` marks a
-PR only the user may merge (unflaggable live change, flip PR). `red_fix`
-(culprit sha|#PR) marks the fix PR of a red main. `lane_head` is the
-worktree HEAD the lane left after rebasing a requeued ticket; `requeues`
-counts the entry's requeues. `enqueue` logs an `enqueue` event (nn, id)
-before it writes the queue.
+an exclusive flock on `queue.jsonl.lock` (written to a tmp file, then renamed
+over it). A ticket is (who, nn): `who` is the run slug of the session that
+owns it. `enqueue` fills the rest from the worktree, gives the entry a fresh
+`id`, and replaces an entry with the same who and nn (a ticket that re-enters
+after a fix):
+  {"who","nn","id","enqueued","worktree","branch","head","base","title",
+   "body_file","no_merge":false,"red_fix":null,"lane_head"?,"requeues"?}
+`enqueued` is the UTC time of the enqueue (`2026-01-31T12:00:00Z`). `base` is
+the ticket's merge-base with origin/main; `base..head` is its own commits,
+restacked from scratch on every lane run. `no_merge: true` marks a PR only
+the user may merge (unflaggable live change, flip PR). `red_fix` (culprit
+sha|#PR) marks the fix PR of a red main. `lane_head` is the worktree HEAD the
+lane left after rebasing a requeued ticket; `requeues` counts the requeues
+the ticket caused itself (main moved or red, main keeps moving, GitHub's sha
+race), not those for a ticket or batch it was stacked on ("stacked on ...").
+`enqueue` logs an `enqueue` event (nn, id) before it writes the queue.
 
 `wait` maps each NN to the id of the last `enqueue` event of <who> for it and
 reads the lane events from the start of the file. It prints the result line
@@ -53,14 +59,15 @@ plus plain ledger lines (`merge: ...`, `slice: ...`; lines not starting with
   claim_refused (+ reason): `red_fix` claim refused, nothing merged
   refused       (+ reason[, pr]): `gh pr create` failed, or `gh pr merge`
                 refused the PR (reason: gh's stderr) for any cause but a
-                head or base sha that moved on GitHub (that one requeues)
-  closed        (+ pr, url): the branch's PR was closed (by the user); the
+                head or base sha that moved on GitHub (that one requeues);
+                a transient refusal is retried first (step 7.5)
+  closed        (+ pr, url): the ticket's PR was closed (by the user); the
                 lane never pushes to it or opens another
   invalid       (+ reason): worktree missing, holding uncommitted changes, or
                 its HEAD is neither `head` nor `lane_head` (moved since enqueue)
   requeued      (+ reason): stays in the queue, in order
-  stuck         (+ reason): the entry was already requeued REQUEUE_CAP (6)
-                times; reason is the requeue reason it would have had
+  stuck         (+ reason): the ticket already caused REQUEUE_CAP (6)
+                requeues; reason is the requeue reason it would have had
 Finished tickets (everything but requeued) leave the queue. Tickets stacked
 after a red, refused or closed ticket are requeued ("stacked on a red |
 refused | closed ticket").
@@ -116,18 +123,23 @@ Sequence:
     over the outside commits against tickets k..n; `rerun` -> k..n requeued
     ("main moved: related"); `compile` -> compile check on k's rebased head,
     red -> k gets `red` and k+1..n are requeued ("stacked on a red ticket").
-    7.4 `gh pr view <branch>`: CLOSED -> `closed`, k+1..n requeued ("stacked
-    on a closed ticket"), nothing pushed. Else push `--force-with-lease`;
-    reuse the OPEN PR, else `gh pr create` (body check line: `local suite
-    green on batch top <sha7> (tickets <who>/<NN>,...)[, then compile green
-    after main moved]; no PR CI by design`); create fails -> `refused`.
+    7.4 `gh pr view <branch>`: CLOSED and the ticket's own (closed at or
+    after `enqueued`, or its head is `head` or `lane_head`) -> `closed`,
+    k+1..n requeued ("stacked on a closed ticket"), nothing pushed; any
+    other CLOSED PR is an older one of a reused branch name and is ignored.
+    Push `--force-with-lease`; reuse the OPEN PR, else `gh pr create` (body
+    check line: `local suite green on batch top <sha7> (tickets
+    <who>/<NN>,...)[, then compile green after main moved]; no PR CI by
+    design`); create fails -> `refused`.
     7.5 `gh pr merge <n> --squash --match-head-commit <sha>` (always with the
     PR number, never `--delete-branch`: gh would check out main locally);
     non-zero exit -> `gh pr view <n>` decides: MERGED counts as merged; a
     head or base sha that moved on GitHub ("... branch was modified")
-    requeues k..n; anything else is `refused` with k+1..n requeued
-    ("stacked on a refused ticket"). 7.6 delete the remote branch,
-    `git worktree remove`, delete the local branch.
+    requeues k..n; a transient refusal ("not mergeable", "mergeable state",
+    "try again", HTTP 5xx, a network error) is retried up to 3 times, 5 s
+    apart; anything else, or the last retry's error, is `refused` with
+    k+1..n requeued ("stacked on a refused ticket"). 7.6 delete the remote
+    branch, `git worktree remove`, delete the local branch.
  8. Ledger lines, tickets named <who>/<NN>: `merge: batch <labels> suite
     green @ <sha7>[, compile green @ <sha7>] (<s> suites[, <c> compiles])`,
     each rerun decision `merge: <labels> main moved <k> commits - rerun|
@@ -136,7 +148,7 @@ Sequence:
  9. Lane events (`EventLog`): one JSON line per enqueue, suite or compile
     check, ticket result, main-moved decision and ledger line, appended to
     `<git-common-dir>/agent-builds/lane-events.jsonl` (main_health's ledger
-    dir, a mkdir lock like main_health's ledger). Fields:
+    dir) under an exclusive flock on `lane-events.lock`. Fields:
     references/merge-loop.md § Lane events.
     Logging never changes a decision or the exit code: an IO error is one
     `merge_lane: event log: ...` line on stderr (`wait` reads this log, so a
@@ -339,42 +351,49 @@ def names(wt, *rng):
 
 
 LOCK_WAIT_S = 30
-LOCK_STALE_S = 120
 EVENTS = "lane-events.jsonl"
+CHECK_GROUPS = "check-groups"  # process groups of the running checks, one per line
 WAIT_POLL_S = 0.5
 KILL_GRACE_S = 30
 BUSY_RETRY_S = 0.3  # a `wait` probing the lane lock holds it for microseconds; a real holder for minutes
 # GitHub refuses a merge whose head or base moved since the request: a race, so the ticket is requeued.
 SHA_MOVED = re.compile(r"(Head|Base) branch was modified")
+# GitHub refusals that pass on their own (mergeability not computed yet, a 5xx, the network): retried.
+MERGE_TRANSIENT = re.compile(r"not mergeable|mergeable state|try again|HTTP 5\d\d|error connecting|"
+                             r"connection (reset|refused)|timeout|timed out|deadline exceeded|no such host|"
+                             r"unexpected EOF", re.I)
+MERGE_RETRIES = 3
+MERGE_RETRY_S = 5
 MOVED = ("--queue is gone: one lane per repository now (<git-common-dir>/agent-builds/lane/); use: "
          "merge_lane.py enqueue --who <run slug> --nn <NN> --worktree <path> --title <title> "
          "--body-file <f>, then merge_lane.py wait --who <run slug> --nn <NN>...; "
          "re-enqueue anything left in the old .scratch/<slug>/lane/queue.jsonl")
 
 
-@contextmanager
-def mkdir_lock(lock):
-    """Hold `lock` (a directory, main_health ledger style); a lock older than
-    LOCK_STALE_S is taken over; TimeoutError after LOCK_WAIT_S."""
-    deadline = time.time() + LOCK_WAIT_S
+def flock_ex(fd, wait_s):
+    """Take an exclusive flock on `fd`, retrying for `wait_s`: False while another holds it."""
+    deadline = time.time() + wait_s
     while True:
         try:
-            lock.mkdir()
-            break
-        except FileExistsError:
-            try:
-                if time.time() - lock.stat().st_mtime > LOCK_STALE_S:
-                    lock.rmdir()
-                    continue
-            except FileNotFoundError:
-                continue
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return True
+        except BlockingIOError:
             if time.time() > deadline:
-                raise TimeoutError(f"locked > {LOCK_WAIT_S}s: {lock}")
-            time.sleep(0.1)
+                return False
+            time.sleep(0.05)
+
+
+@contextmanager
+def file_lock(path):
+    """Hold an exclusive flock on `path` (created when missing); the kernel drops it
+    however the holder dies. TimeoutError after LOCK_WAIT_S."""
+    fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o644)
     try:
+        if not flock_ex(fd, LOCK_WAIT_S):
+            raise TimeoutError(f"locked > {LOCK_WAIT_S}s: {path}")
         yield
     finally:
-        lock.rmdir()
+        os.close(fd)
 
 
 def batch_modules(wt, base, head):
@@ -422,6 +441,10 @@ def safe(s):
     return re.sub(r"[^A-Za-z0-9_.-]", "_", s)
 
 
+def utc_now():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 class EventLog:
     """Lane events for later analysis and for `wait`, one JSON line each, in
     <git-common-dir>/agent-builds/lane-events.jsonl (next to the lane dir, never
@@ -436,9 +459,9 @@ class EventLog:
         """`fields`: a dict, or a callable returning one (evaluated under the same guard)."""
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
-            rec = {"ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "who": self.who,
-                   "event": event, **(fields() if callable(fields) else fields)}
-            with mkdir_lock(self.path.with_suffix(".lock")):
+            rec = {"ts": utc_now(), "who": self.who, "event": event,
+                   **(fields() if callable(fields) else fields)}
+            with file_lock(self.path.with_suffix(".lock")):
                 with self.path.open("a") as f:
                     f.write(json.dumps(rec) + "\n")
         except Exception as e:  # noqa: BLE001 - logging must never stop the lane
@@ -465,7 +488,7 @@ def read_events(path, off):
 
 
 class Queue:
-    """JSONL queue, edited only under a mkdir lock (main_health ledger style)."""
+    """JSONL queue, edited only under an exclusive flock on `<queue>.lock`."""
 
     def __init__(self, path):
         self.path = Path(path)
@@ -479,7 +502,7 @@ class Queue:
     def update(self, fn):
         self.path.parent.mkdir(parents=True, exist_ok=True)
         try:
-            with mkdir_lock(self.lock):
+            with file_lock(self.lock):
                 recs = fn(self.read())
                 tmp = self.path.with_suffix(".tmp")
                 tmp.write_text("".join(json.dumps(r) + "\n" for r in recs))
@@ -493,7 +516,7 @@ def cmd_enqueue(a):
     if not Path(wt).is_dir():
         fail(f"no worktree at {wt}")
     lane = lane_dir(wt)
-    e = {"who": a.who, "nn": a.nn, "id": uuid.uuid4().hex[:12], "worktree": wt,
+    e = {"who": a.who, "nn": a.nn, "id": uuid.uuid4().hex[:12], "enqueued": utc_now(), "worktree": wt,
          "branch": out("git", "rev-parse", "--abbrev-ref", "HEAD", cwd=wt),
          "head": out("git", "rev-parse", "HEAD", cwd=wt),
          "base": out("git", "merge-base", "HEAD", "origin/main", cwd=wt),
@@ -536,16 +559,9 @@ class LaneLock:
     def __enter__(self):
         self.path.parent.mkdir(parents=True, exist_ok=True)
         fd = os.open(self.path, os.O_RDWR | os.O_CREAT, 0o644)  # not inherited by the checks
-        deadline = time.time() + BUSY_RETRY_S
-        while True:
-            try:
-                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                break
-            except BlockingIOError:
-                if time.time() > deadline:
-                    os.close(fd)
-                    fail(f"lane busy: land pid {self.holder() or '?'} holds {self.path}", 4)
-                time.sleep(0.05)
+        if not flock_ex(fd, BUSY_RETRY_S):
+            os.close(fd)
+            fail(f"lane busy: land pid {self.holder() or '?'} holds {self.path}", 4)
         os.ftruncate(fd, 0)
         os.write(fd, str(os.getpid()).encode())
         self.fd = fd
@@ -590,6 +606,35 @@ def kill_group(p):
         pass
 
 
+def kill_orphans(lane):
+    """Kill the checks a SIGKILLed `land` left running: each process group still alive on
+    the CHECK_GROUPS record gets SIGTERM, SIGKILL after KILL_GRACE_S. Then clear the
+    record. Only a `land` holding the lane lock reads or writes it."""
+    rec = Path(lane) / CHECK_GROUPS
+    try:
+        groups = [int(g) for g in rec.read_text().split()]
+    except FileNotFoundError:
+        return
+    for g in groups:
+        try:
+            os.killpg(g, signal.SIGTERM)
+        except (ProcessLookupError, PermissionError):
+            continue
+        deadline = time.time() + KILL_GRACE_S
+        while time.time() < deadline:
+            try:
+                os.killpg(g, 0)
+            except ProcessLookupError:
+                break
+            time.sleep(0.1)
+        else:
+            try:
+                os.killpg(g, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+    rec.unlink()
+
+
 def worktree_problem(r):
     """Why the lane must not touch this entry's worktree, or None."""
     wt = r["worktree"]
@@ -605,6 +650,30 @@ def worktree_problem(r):
 def pr_merged(wt, pr):
     v = run("gh", "pr", "view", pr, "--json", "state", "-q", ".state", cwd=wt, check=False)
     return v.returncode == 0 and v.stdout.strip() == "MERGED"
+
+
+def gh_merge(wt, pr, head):
+    """Squash-merge PR `pr` at `head`: None once merged, else gh's error. A transient
+    refusal (MERGE_TRANSIENT) is retried MERGE_RETRIES times, MERGE_RETRY_S apart."""
+    for attempt in range(MERGE_RETRIES + 1):
+        # No --delete-branch: gh then checks out main locally, which fails with
+        # "'main' is already checked out" in a worktree even after a good merge.
+        m = run("gh", "pr", "merge", pr, "--squash", "--match-head-commit", head, cwd=wt, check=False)
+        if not m.returncode or pr_merged(wt, pr):
+            return None
+        err = (m.stderr or m.stdout).strip()
+        if attempt == MERGE_RETRIES or SHA_MOVED.search(err) or not MERGE_TRANSIENT.search(err):
+            return err
+        time.sleep(MERGE_RETRY_S)
+
+
+def own_closed_pr(info, e):
+    """`info` (`gh pr view <branch>`) is this ticket's PR, closed by the user: closed at or
+    after the enqueue, or on the ticket's head. Any other CLOSED PR is an older one of a
+    reused branch name: the ticket gets a new PR."""
+    head = info.get("headRefOid")
+    return info.get("state") == "CLOSED" and (
+        (info.get("closedAt") or "") >= e["enqueued"] or bool(head) and head in (e["head"], e.get("lane_head")))
 
 
 def tree(wt, rev):
@@ -634,13 +703,16 @@ class Land:
         self.q = Queue(self.lane / "queue.jsonl")
         self.events = EventLog(who, self.lane)
         self.results = {}  # entry id -> result
-        self.procs = []  # every check started, killed by stop()
+        self.checks = []  # (batch, check) for every check started; stop() ends the live ones
+        self.groups = self.lane / CHECK_GROUPS
         self.mh = [sys.executable, str(HERE / "main_health.py")]
         self.slot = ["build-slot"] if shutil.which("build-slot") else []
 
     def emit(self, e, result, pipe, **kw):
+        # Only a requeue the ticket caused counts toward the cap, not one for a ticket or batch under it.
+        counts = result == "requeued" and not kw["reason"].startswith("stacked on")
         n = 0
-        if result == "requeued":
+        if counts:
             n = next((r.get("requeues", 0) for r in self.q.read() if r.get("id") == e["id"]), 0)
             if n >= REQUEUE_CAP:
                 result = "stuck"
@@ -653,7 +725,7 @@ class Land:
         if result != "requeued":
             self.q.update(lambda recs: [r for r in recs if r.get("id") != e["id"]])
             return
-        upd = {"requeues": n + 1}
+        upd = {"requeues": n + 1} if counts else {}
         if Path(e["worktree"]).is_dir():  # the lane rebased it: its HEAD is still ours
             upd["lane_head"] = out("git", "rev-parse", "HEAD", cwd=e["worktree"])
         self.q.update(lambda recs: [dict(r, **upd) if r.get("id") == e["id"] else r for r in recs])
@@ -662,11 +734,16 @@ class Land:
         for e in entries:
             self.emit(e, "requeued", pipe, reason=reason)
 
+    def track(self):
+        """Record the process groups of the checks still running (kill_orphans reads it)."""
+        self.groups.write_text("".join(f"{c['p'].pid}\n" for _, c in self.checks if c["p"].returncode is None))
+
     def stop(self):
-        """Kill every check still running (the land is exiting)."""
-        for p in self.procs:
-            if p.poll() is None:
-                kill_group(p)
+        """The land is exiting: kill every check still running (logged `discarded`), clear the record."""
+        for batch, c in self.checks:
+            if c["p"].returncode is None:
+                batch.finish(c, discard=True)
+        self.groups.unlink(missing_ok=True)
 
     def ledger(self, line, entries):
         print(line, flush=True)
@@ -784,9 +861,11 @@ class Batch:
         with log.open("w") as f:
             p = subprocess.Popen(self.land.slot + ["bash", "-c", cmd], cwd=wt, stdin=subprocess.DEVNULL,
                                  stdout=f, stderr=subprocess.STDOUT, start_new_session=True)
-        self.land.procs.append(p)
-        return {"p": p, "t0": t0, "log": str(log), "prefix": prefix, "tag": tag, "phase": phase,
-                "base": base, "wt": wt, "round": self.rounds}
+        c = {"p": p, "t0": t0, "log": str(log), "prefix": prefix, "tag": tag, "phase": phase,
+             "base": base, "wt": wt, "round": self.rounds}
+        self.land.checks.append((self, c))
+        self.land.track()
+        return c
 
     def finish(self, c, discard=False):
         """Wait for a started check (killed first when discarding) and log it: (rc, log)."""
@@ -794,6 +873,7 @@ class Batch:
         if discard and p.poll() is None:
             kill_group(p)
         rc = p.wait()
+        self.land.track()
         wall = time.time() - c["t0"]
         prefix, top = c["prefix"], c["prefix"][-1]
         self.land.events.log(c["tag"], lambda: {
@@ -888,9 +968,10 @@ class Batch:
             if not e.get("red_fix") and L.status(wt).returncode == 3:
                 L.requeue(rest, "main red", self.pipe)
                 break
-            view = run("gh", "pr", "view", e["branch"], "--json", "number,url,state", cwd=wt, check=False)
+            view = run("gh", "pr", "view", e["branch"], "--json", "number,url,state,closedAt,headRefOid",
+                       cwd=wt, check=False)
             info = json.loads(view.stdout) if view.returncode == 0 and view.stdout.strip() else {}
-            if info.get("state") == "CLOSED":  # closed by the user: never pushed to or opened again
+            if own_closed_pr(info, e):  # closed by the user: never pushed to or opened again
                 L.emit(e, "closed", self.pipe, pr=int(info["number"]), url=info["url"])
                 L.requeue(rest[1:], "stacked on a closed ticket", self.pipe)
                 break
@@ -956,11 +1037,8 @@ class Batch:
                            reason=(claim.stderr or claim.stdout).strip())
                     break
                 L.ledger(claim.stdout.strip(), [e])
-            # No --delete-branch: gh then checks out main locally, which fails with
-            # "'main' is already checked out" in a worktree even after a good merge.
-            m = run("gh", "pr", "merge", pr, "--squash", "--match-head-commit", head, cwd=wt, check=False)
-            if m.returncode and not pr_merged(wt, pr):
-                err = (m.stderr or m.stdout).strip()
+            err = gh_merge(wt, pr, head)
+            if err is not None:
                 if SHA_MOVED.search(err):  # a race on GitHub: try again next run
                     L.requeue(rest, f"merge refused for PR #{pr}: {err}", self.pipe)
                 else:
@@ -980,6 +1058,7 @@ class Batch:
 def land(a):
     lane = lane_dir(os.getcwd())
     with LaneLock(lane):
+        kill_orphans(lane)
         L = Land(a.who, lane, a.max)
         old = signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))  # unwinds into the finally
         try:

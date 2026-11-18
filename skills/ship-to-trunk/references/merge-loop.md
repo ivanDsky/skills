@@ -59,9 +59,11 @@ every session that works in it. Each orchestrator enqueues its ready
 tickets and follows them with `merge_lane.py wait` as one async
 background bash job (no turns spent), so it keeps dispatching and
 answering while suites run. The lane lives in
-`<git-common-dir>/agent-builds/lane/` (queue, lock, two scratch
-worktrees, check logs, PR bodies, `land.log`), so every worktree of the
-repository finds the same one. The scratch worktrees sit in
+`<git-common-dir>/agent-builds/lane/` (queue, rewritten under a flock
+on `queue.jsonl.lock` so concurrent `enqueue`s never drop an entry,
+lock, two scratch worktrees, check logs, PR bodies, `land.log`), so
+every worktree of the repository finds the same one. The scratch
+worktrees sit in
 `.git/agent-builds/lane/wt` of the main checkout: exclude that path from
 IDE indexing and backups. Each check gets the main checkout's
 `local.properties` copied into its scratch worktree, so the lane's
@@ -83,7 +85,11 @@ several at once are fine: each follows only its tickets, and the lane
 runs one `land` at a time. `land --who <run slug> [--max 5]` runs the
 lane once in the foreground (exit 4 `lane busy` while another `land`
 holds it). A `land` holds a flock on `lane/land.lock`, which the kernel
-drops however the `land` dies; SIGTERM also stops the checks it started.
+drops however the `land` dies; SIGTERM also stops the checks it started
+and logs them `discarded`. The process group of every running check is
+recorded in `lane/check-groups`: a `land` killed outright (SIGKILL)
+leaves its checks running, and the next `land` kills them right after it
+takes the lock.
 `--queue` is gone: it exits 2 with the commands above and asks to
 re-enqueue anything left in the old `.scratch/<slug>/lane/queue.jsonl`.
 
@@ -101,8 +107,8 @@ order per ticket, after its suite:
 git fetch origin && git rebase --onto origin/main <tested head of k-1>   # lands the ticket on the main the squash of k-1 produced
 python3 ~/.agents/skills/ship-to-trunk/scripts/main_health.py status   # red (exit 3) → the rest stay queued, no PR opened
 git push -u --force-with-lease origin HEAD
-gh pr create --base main --title "<conventional title>" --body-file <body>   # an OPEN PR for the branch is reused (gh pr view <branch>, read before the push: CLOSED → result closed, nothing pushed)
-gh pr merge <n> --squash --match-head-commit <sha>   # immediately; <n> always passed, never --delete-branch; non-zero exit → gh pr view <n> decides (MERGED = merged; else "Head|Base branch was modified" → requeued, anything else → refused); <sha> = the head the suite ran on
+gh pr create --base main --title "<conventional title>" --body-file <body>   # an OPEN PR for the branch is reused (gh pr view <branch>, read before the push: the ticket's own CLOSED PR → result closed, nothing pushed; a CLOSED PR closed before the enqueue and not on the ticket's head is an older PR of a reused branch name → ignored, a new PR is opened)
+gh pr merge <n> --squash --match-head-commit <sha>   # immediately; <n> always passed, never --delete-branch; a transient refusal (not mergeable yet, HTTP 5xx, network) is retried up to 3 times 5 s apart; non-zero exit → gh pr view <n> decides (MERGED = merged; else "Head|Base branch was modified" → requeued, anything else → refused); <sha> = the head the suite ran on
 # never watch main after the merge (no gh run watch/view/list): the orchestrator's watcher does
 git push origin --delete <branch> && git worktree remove ../<repo>-wt/<NN> && git branch -D <branch>
 ```
@@ -139,17 +145,22 @@ the orchestrator does next:
   still queued and `wait` starts the next `land` for it. A ticket stays
   `claimed` from `ready` until merged.
 - **refused** (+ `reason`, gh's stderr; `pr` when it exists): `gh pr
-  create` failed or `gh pr merge` refused the PR (not mergeable, a
-  required review, a ruleset). Final: fix the cause the reason names, then
-  `enqueue` again; the open PR is reused. Tickets stacked after it come
-  back `requeued`.
-- **closed** (+ `pr`, `url`): the user closed the branch's PR. Final: the
+  create` failed or `gh pr merge` refused the PR (a required review, a
+  ruleset, or a transient refusal that outlived 3 retries 5 s apart).
+  Final: fix the cause the reason names, then `enqueue` again; the open PR
+  is reused. Tickets stacked after it come back `requeued`.
+- **closed** (+ `pr`, `url`): the user closed the ticket's PR. Final: the
   lane never pushes to it or opens another. Ask the user, then drop the
-  ticket, or reopen the PR and `enqueue` again.
-- **stuck**: the entry was requeued 6 times already (`requeues` in the
-  queue entry); the 7th requeue ends it. Read the reason (the last
-  requeue's), fix what keeps it moving, then `enqueue` again (the count
-  starts over).
+  ticket, or reopen the PR and `enqueue` again. The ticket's PR is one
+  closed at or after the `enqueue`, or one whose head is the ticket's
+  head; an older CLOSED PR of a reused branch name is ignored and a new
+  PR is opened.
+- **stuck**: the ticket itself caused 6 requeues already (`requeues` in
+  the queue entry: main moved under its check, the head/base race on
+  GitHub, main red); the 7th ends it. A `stacked on …` requeue (a ticket
+  below it or batch A went red, conflicted or was refused) never counts.
+  Read the reason (the last requeue's), fix what keeps it moving, then
+  `enqueue` again (the count starts over).
 - **invalid**: the worktree is gone, holds uncommitted changes, or its HEAD
   moved after `enqueue` (a worker still running). Nothing touched; the
   worker finishes, then the ticket is enqueued again. Known risk: a `land`
@@ -228,7 +239,7 @@ stacks on a `--no-merge` A (it never merges), and on red main only the
 `merge_lane.py` appends one JSON line per event to
 `<git-common-dir>/agent-builds/lane-events.jsonl` (next to
 `main-health.jsonl`, shared by every worktree, never committed, written
-under a mkdir lock like main_health's ledger). It answers how often main
+under a flock on `lane-events.lock`). It answers how often main
 moving forces a rerun, how many tickets one suite covers, and which
 module's tests cost the suite time; `wait` reads its results from it.
 Logging never changes a decision or the exit code: an IO error prints

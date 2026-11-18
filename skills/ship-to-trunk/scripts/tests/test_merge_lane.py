@@ -25,6 +25,8 @@ from conftest import FIXTURES, SCRIPTS, git, init_repo
 
 SCRIPT = SCRIPTS / "merge_lane.py"
 PR_URL = "https://github.com/example/PuzzleBox/pull/42"
+PR7_URL = "https://github.com/example/PuzzleBox/pull/7"
+REVIEW_REQUIRED = "GraphQL: At least 1 approving review is required by reviewers with write access. (mergePullRequest)"
 
 
 def write_profile(wt, comment_line):
@@ -332,10 +334,19 @@ def test_refused_merge_is_final_and_requeues_the_ticket_stacked_on_it(lane, gh):
     r = lane.land()
     assert r.returncode == 1
     assert lane.results(r) == [
-        {"who": "test-run", "nn": "01", "result": "refused", "pr": 42, "reason": "Pull request is not mergeable"},
+        {"who": "test-run", "nn": "01", "result": "refused", "pr": 42, "reason": REVIEW_REQUIRED},
         {"who": "test-run", "nn": "02", "result": "requeued", "reason": "stacked on a refused ticket"}]
     assert lane.queue_nns() == ["02"]
     assert len([c for c in gh.calls() if c[:2] == ["pr", "merge"]]) == 1
+
+
+def test_transient_merge_refusal_is_retried_then_merges(lane, gh):
+    gh.set(merge_seq=["not_mergeable"])  # GitHub has not computed mergeability yet
+    lane.enqueue()
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert [(x["result"], x["pr"]) for x in lane.results(r)] == [("merged", 42)]
+    assert len([c for c in gh.calls() if c[:2] == ["pr", "merge"]]) == 2
 
 
 def test_failed_pr_create_is_refused(lane, gh):
@@ -349,17 +360,29 @@ def test_failed_pr_create_is_refused(lane, gh):
     assert lane.queue_nns() == [] and not any(c[:2] == ["pr", "merge"] for c in gh.calls())
 
 
-def test_closed_pr_is_final_and_never_pushed_or_recreated(lane, gh):
-    gh.set(prs={"7": {"number": 7, "url": "https://github.com/example/PuzzleBox/pull/7", "state": "CLOSED",
-                      "headRefName": "ticket/1"}})
+@pytest.mark.parametrize("closed_at, on_head", [(None, False), ("2020-01-01T00:00:00Z", True)],
+                         ids=["closed-after-enqueue", "older-but-on-its-head"])
+def test_own_closed_pr_is_final_and_never_pushed_or_recreated(lane, gh, closed_at, on_head):
     lane.enqueue()
+    gh.set(prs={"7": {"number": 7, "url": PR7_URL, "state": "CLOSED", "headRefName": "ticket/1",
+                      "closedAt": closed_at or time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                      "headRefOid": git("rev-parse", "HEAD", cwd=lane.wt) if on_head else "0" * 40}})
     r = lane.land()
     assert r.returncode == 1
-    assert lane.results(r) == [{"who": "test-run", "nn": "01", "result": "closed", "pr": 7,
-                                "url": "https://github.com/example/PuzzleBox/pull/7"}]
+    assert lane.results(r) == [{"who": "test-run", "nn": "01", "result": "closed", "pr": 7, "url": PR7_URL}]
     assert not any(c[:2] in (["pr", "create"], ["pr", "merge"]) for c in gh.calls())
     assert git("branch", "--list", "ticket/1", cwd=lane.origin) == ""  # never pushed
     assert lane.queue_nns() == []
+
+
+def test_older_closed_pr_of_a_reused_branch_name_gets_a_new_pr(lane, gh):
+    gh.set(prs={"7": {"number": 7, "url": PR7_URL, "state": "CLOSED", "headRefName": "ticket/1",
+                      "closedAt": "2020-01-01T00:00:00Z", "headRefOid": "0" * 40}})
+    lane.enqueue()
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert [(x["result"], x["pr"]) for x in lane.results(r)] == [("merged", 42)]
+    assert len([c for c in gh.calls() if c[:2] == ["pr", "create"]]) == 1
 
 
 def test_refused_red_fix_on_red_main_pauses_the_lane(lane, gh, real_runs):
@@ -413,6 +436,17 @@ def test_enqueue_replaces_same_who_and_nn_but_keeps_another_sessions_nn(lane):
     lane.enqueue("01", who="other-run")
     assert [(json.loads(l)["who"], json.loads(l)["nn"]) for l in lane.queue.read_text().splitlines()] == [
         ("test-run", "01"), ("other-run", "01")]
+
+
+def test_concurrent_enqueues_all_reach_the_queue_and_the_event_log(lane):
+    nns = [f"{n:02}" for n in range(1, 13)]
+    procs = [subprocess.Popen([sys.executable, str(SCRIPT), "enqueue", "--who", "test-run", "--nn", nn,
+                               "--worktree", str(lane.wt), "--title", "feat: one", "--body-file", str(lane.body)],
+                              cwd=lane.co, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for nn in nns]
+    outs = [p.communicate(timeout=60) for p in procs]
+    assert [p.returncode for p in procs] == [0] * len(nns), outs
+    assert sorted(lane.queue_nns()) == nns
+    assert sorted(e["nn"] for e in events(lane, "enqueue")) == nns
 
 
 def test_queue_flag_is_gone_and_says_what_replaced_it(lane):
@@ -530,6 +564,33 @@ def test_terminated_land_kills_its_running_suite_and_frees_the_lane(lane, gh):
         pytest.fail(f"suite pid {suite} outlived its land")
     assert ml.LaneLock(lane.dir).holder() is None
     assert lane.queue_nns() == ["01"]  # nothing decided
+    assert [(e["pipe"], e["result"]) for e in events(lane, "suite")] == [("A", "discarded")]
+    assert not (lane.dir / ml.CHECK_GROUPS).exists()
+
+
+def test_land_kills_the_checks_a_killed_land_left_running(lane, gh):
+    """SIGKILL runs no cleanup: the suite outlives its land until the next land takes the lock."""
+    (lane.wt / "suite.sh").write_text('#!/bin/sh\n[ -e "$GH_FAKE_DIR/suite.pid" ] && exit 0\n'
+                                      'echo $$ > "$GH_FAKE_DIR/suite.pid"\nsleep 60\n')
+    git("commit", "-q", "-am", "the first suite hangs", cwd=lane.wt)
+    lane.enqueue()
+    first = subprocess.Popen([sys.executable, str(SCRIPT), "land", "--who", "test-run"], cwd=lane.co,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    pid_file = gh.dir / "suite.pid"
+    deadline = time.time() + 20
+    while not (pid_file.exists() and pid_file.read_text().strip()) and time.time() < deadline:
+        time.sleep(0.05)
+    suite = int(pid_file.read_text())
+    first.kill()
+    first.wait()
+    os.kill(suite, 0)  # still running: nothing stopped it
+    assert (lane.dir / ml.CHECK_GROUPS).exists()
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert [x["result"] for x in lane.results(r)] == ["merged"]
+    with pytest.raises(ProcessLookupError):
+        os.kill(suite, 0)
+    assert not (lane.dir / ml.CHECK_GROUPS).exists()
 
 
 def test_scratch_worktree_gets_the_main_checkouts_local_properties(lane, gh):
@@ -928,6 +989,23 @@ def test_requeue_cap_ends_the_ticket_stuck(lane, gh):
         ("requeued", f"merge refused for PR #42: {HEAD_MOVED}"), ("stuck", f"merge refused for PR #42: {HEAD_MOVED}")]
     lane.idle()
     assert lane.queue_nns() == []
+
+
+def test_requeues_for_red_tickets_below_never_make_a_ticket_stuck(lane, gh):
+    """09 sits on seven red tickets (02-08), one leaving per land: requeued 7 times, never by its own doing."""
+    (lane.co / "suite.sh").write_text("#!/bin/sh\n[ ! -d red ]\n")
+    git("commit", "-q", "-am", "the suite fails on a red/ dir", cwd=lane.co)
+    git("push", "-q", "origin", "main", cwd=lane.co)
+    for n in range(2, 10):
+        lane.enqueue(f"0{n}", wt=lane.add_ticket(str(n), f"red/{n}" if n < 9 else "nine.txt"))
+    results = []
+    for _ in range(12):
+        if not lane.queue_nns():
+            break
+        results += lane.results(lane.land())
+    assert {x["nn"]: x["result"] for x in results} == {**{f"0{n}": "red" for n in range(2, 9)}, "09": "merged"}
+    assert [x["result"] for x in results if x["nn"] == "09"].count("requeued") > ml.REQUEUE_CAP
+    assert "stuck" not in [x["result"] for x in results]
 
 
 def test_wait_fails_when_its_ticket_left_the_queue_without_a_result(lane, gh):
