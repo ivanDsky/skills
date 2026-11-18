@@ -18,7 +18,7 @@ Repo-root GLOSSARY.md (T008: yes), format per term: one-line definition + `_Avoi
 | Frontier | Backlog tickets in `ready-for-agent` whose `blocked-by` tickets are all `done` (`backlog.py list --frontier`); claims take only from it. | queue, todo list |
 | Backlog | The one shared ticket store per repo, GitHub Issues or `<git-common-dir>/backlog/` (PROFILE `## Tracker`), read and written only through `work-tickets`' `backlog.py`; every worktree and session sees the same tickets. | tracker folder, `.scratch` tickets, issue list |
 | Feedback session | A `file-tickets` session: the user talks, the agent files deduplicated tickets and runs the check batch; it never implements. | triage session, inbox |
-| Worker session | A `work-tickets` session in a worktree: claims packs matching a filter and lands each ticket as its own PR; never asks the user. | ralph loop, AFK agent |
+| Worker session | A `work-tickets` session in a worktree: claims packs matching a filter and lands each ticket as its own PR; only its orchestrator asks the user, never its subagents. | ralph loop, AFK agent |
 | Claim | Atomic move of a frontier ticket to `claimed` with `claimed-by`, made only by `backlog.py claim` under the backlog lock; released by `unclaim` or a state change. | assign, grab, take |
 | Pack | Up to 5 tickets one `claim` call returns for a worker's filter; the next pack is claimed only when every ticket of the current one has an outcome. | batch (batch = the check batch), sprint |
 | Agent brief | The body of a ticket filed by `file-tickets`: the user's words, expected behavior, acceptance, out of scope; behavior and contracts only, never file paths (epic tickets from `write-tickets` keep their file scope and map). | description, spec |

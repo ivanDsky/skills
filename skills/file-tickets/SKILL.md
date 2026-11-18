@@ -72,9 +72,10 @@ B=~/.agents/skills/work-tickets/scripts/backlog.py   # in this repo: skills/work
 
 ## 3. Check batch
 
-Workers never ask the user. A merged ticket that needs the user's eyes waits
-in `needs-check`. When the user asks to check, or several tickets are waiting,
-build once and hand over one message covering all of them:
+Workers never ask the user for a check. A merged ticket that needs the
+user's eyes waits in `needs-check`. When the user asks to check, or several
+tickets are waiting, build once and hand over one message covering all of
+them:
 `python3 $B list --state needs-check`, build from fresh `origin/main` with
 every flag of those tickets forced on (`user-check` § 2), then list the verify
 steps per ticket. Replies route per [check-batch.md](references/check-batch.md):
