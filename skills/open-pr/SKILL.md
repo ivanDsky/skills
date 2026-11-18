@@ -57,8 +57,10 @@ everything else is short. Template and budgets:
 - **Screenshots** (UI diff only): pair each changed screen/state by capture
   name. Source is the screenshot test suite (`preview-compose`, Roborazzi / AGP
   captures) — never a device. *Before* = the committed golden at the base ref
-  (`git show <base>:<path>`) or, with no golden, a capture run in a base-ref
-  worktree. *After* = the capture at head. New screen → after only, labelled
+  (`git show <base>:<path>`) or, with untracked renders, a base-ref render
+  already on disk (render the touched screens before editing); never a
+  base-ref worktree built only for the PR body. *After* = the capture at head.
+  No before → after only. New screen → after only, labelled
   "new". Changed UI with no capture on either side → say so in one line
   and open as draft; do not substitute a device screenshot.
 - **Diagram**: only when modules, dependencies or a flow changed. One

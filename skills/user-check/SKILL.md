@@ -50,7 +50,7 @@ it merged.
 The change compiles, plus the touched module's existing tests. Do not run the
 full suite, a reviewer or `structure:` here; they run after the OK.
 
-**UI change** (any golden PNG changed): also run the visual gate, open its
+**UI change** (a UI module changed: goldens in the diff, or renders of the touched screens where captures are untracked): also run the visual gate, open its
 gallery yourself and fix every blocking finding before building, per
 [visual-gate.md](references/visual-gate.md). A UI change that fails the gate
 never ships an APK.

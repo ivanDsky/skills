@@ -1,6 +1,6 @@
 # Visual gate and feedback rounds
 
-Read when `user-check` step 1 meets a UI change (any golden PNG changed), and
+Read when `user-check` step 1 meets a UI change (a UI module changed), and
 when step 4 receives layout, spacing or motion feedback. The user's device is
 the slowest oracle in the chain; everything a script or the orchestrator's own
 eyes can see happens before the APK leaves.
@@ -10,15 +10,17 @@ eyes can see happens before the APK leaves.
 ```bash
 python3 skills/user-check/scripts/visual_gate.py --out .scratch/<slug>/gate \
   [--pairs .scratch/<slug>/gate/pairs.tsv] \
-  $(git diff --name-only --diff-filter=AM <base>...HEAD -- '*.png')
+  $(git diff --name-only --diff-filter=AM <base>...HEAD -- '*.png')   # or the fresh renders, see below
 ```
 
 (installed globally: the skill's installed script path.) Python stdlib only,
 offline, about a second. Inputs:
 
-- Changed goldens as arguments. Each golden's own directory is also scanned:
-  a changed golden that is byte-identical to an unchanged sibling is a
-  duplicate. `--existing <dir>` adds more directories.
+- Changed captures as arguments: the golden PNGs in the diff or, where
+  captures are untracked review renders, the fresh renders of the screens the
+  change touched. Each capture's own directory is also scanned: a changed
+  capture that is byte-identical to an unchanged sibling is a duplicate.
+  `--existing <dir>` adds more directories.
 - `--pairs`: two tab-separated columns, `golden_png`, `reference_png`
   (reference may be empty; a `golden_png` header row is skipped). With a
   contract (`.scratch/<slug>/contract/`), one row per UI ticket
