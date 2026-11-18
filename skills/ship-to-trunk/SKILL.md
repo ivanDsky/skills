@@ -132,8 +132,10 @@ merges but the fix (Red main below).
 - **Red main** (check fails after a merge): the next PR is the revert of
   the culprit, before any other merge. Fix forward only when the fix is
   one line and obvious. `pr-check: none`: `scripts/main_health.py` keeps
-  the verdict, the claim (one owner, 30-min takeover) and PRs held outside
-  the lane; the lane pauses on red and queued tickets wait
+  the verdict, each red run's cause and failing tests, the claim (one
+  owner, 30-min takeover) and PRs held outside the lane; the lane pauses on
+  red and queued tickets wait. A test that fails on main and passes on
+  rerun is quarantined in the same incident, for at most 48 h
   ([references/merge-loop.md](references/merge-loop.md) § Red main).
 - **No required PR check → no trunk.** Trunk mode needs CI as the judge:
   a workflow on `pull_request` that main's branch protection requires.
