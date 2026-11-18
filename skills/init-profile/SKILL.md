@@ -165,7 +165,7 @@ Send the batch and stop. Never a second batch.
 ## Deploy targets (in order; empty list = build-only)
 - local: <run command>
 # - firebase: <project id>
-# - tailscale: <host>
+# - tailscale: <host>   # host only; the test device (name, address) lives in the gitignored PROFILE.local.md, never here (skill://deploy-tailscale §2)
 
 ## Testing style
 - runner: <command>

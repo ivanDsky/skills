@@ -54,7 +54,7 @@ passed; this stage adds no code.
      [Build identity](references/build-identity.md): one command allocates
      the identity, builds with it, checks the APK's real versionCode,
      versionName and package with `aapt2 dump badging`, copies it to
-     `.scratch/<slug>/$APK_NAME`, Taildrops it to the PROFILE device
+     `.scratch/<slug>/$APK_NAME`, Taildrops it to the device in PROFILE.local.md
      (`--build-only` skips the send for adb, serve or Firebase) and appends
      sha256 and size to `.scratch/<slug>/ledger.md`. A manual
      allocate → gradlew → cp sequence is never shipped; the harness refuses

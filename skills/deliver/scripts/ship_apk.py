@@ -8,7 +8,7 @@ Run from the worktree root:
   3. verify    aapt2 dump badging: versionCode, versionName and package must
                match the allocation and PROFILE.md `- app-id:` (or app-id + `.suffix`)
   4. name      copy to .scratch/<slug>/<APK_NAME>
-  5. send      tailscale file cp to the PROFILE.md tailscale `- device:` (skipped
+  5. send      tailscale file cp to the `- device:` of PROFILE.local.md, else PROFILE.md (skipped
                with --build-only; then `adb install -r "$APK_PATH"` or serve)
   6. evidence  sha256 + bytes, one line in .scratch/<slug>/ledger.md
 Prints KEY=VALUE lines (shell-evalable). Progress goes to stderr.
@@ -136,8 +136,30 @@ def verify(app_id, ident, found):
         die("refusing to ship — " + "; ".join(problems) + hint)
 
 
+DEVICE_RE = r"-\s*device:\s*([^\s#@]+)(?:\s*@\s*([^\s#]+))?"
+
+
+def _device(m):
+    return (m.group(1), m.group(2)) if m and not m.group(1).startswith("<") else None
+
+
+def local_profiles(root):
+    """PROFILE.local.md of this worktree, then of the main checkout (a gitignored file is absent from new worktrees)."""
+    found = [root / "PROFILE.local.md"]
+    p = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=root, capture_output=True, text=True)
+    if p.returncode == 0:
+        found.append(Path(p.stdout.strip()).parent / "PROFILE.local.md")
+    return [f for f in found if f.exists()]
+
+
 def profile_device(root):
-    """(name, ip) from the PROFILE.md `- tailscale:` entry's `- device: <name> @ <ip>` line."""
+    """(name, ip) from the `- device: <name> @ <ip>` line: PROFILE.local.md first (gitignored home of
+    device data; top-level or under a `- tailscale:` entry), then the legacy PROFILE.md `- tailscale:` entry."""
+    for local in local_profiles(root):
+        for line in local.read_text().splitlines():
+            dev = _device(re.match(rf"^\s*{DEVICE_RE}", line))
+            if dev:
+                return dev
     profile = root / "PROFILE.md"
     if not profile.exists():
         return None
@@ -147,9 +169,9 @@ def profile_device(root):
             for sub in lines[i + 1:]:
                 if not sub.startswith((" ", "\t")):
                     break
-                m = re.match(r"^\s+-\s*device:\s*([^\s#@]+)(?:\s*@\s*([^\s#]+))?", sub)
-                if m and not m.group(1).startswith("<"):
-                    return m.group(1), m.group(2)
+                dev = _device(re.match(rf"^\s+{DEVICE_RE}", sub))
+                if dev:
+                    return dev
     return None
 
 
@@ -182,7 +204,7 @@ def ledger_record(root, apk_name):
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--slug", help="explicit build-identity slug (default: last branch segment)")
-    p.add_argument("--device", help="tailscale machine name or IP (default: PROFILE.md tailscale `- device:`)")
+    p.add_argument("--device", help="tailscale machine name or IP (default: `- device:` of PROFILE.local.md, else PROFILE.md)")
     p.add_argument("--variant", choices=["debug", "release"], help="default: release with --release, else debug")
     p.add_argument("--release", action="store_true", help="release build from main (plain semver versionName)")
     p.add_argument("--module", default="app", help="Gradle application module (default: app)")
@@ -203,7 +225,7 @@ def main():
         else:
             dev = profile_device(a.root)
             if not dev:
-                die("no --device and no `- device: <name> @ <ip>` under PROFILE.md `- tailscale:` — resolve it per deploy-tailscale §2")
+                die("no --device and no `- device: <name> @ <ip>` line in PROFILE.local.md (or, legacy, under PROFILE.md `- tailscale:`) — resolve it per deploy-tailscale §2")
             targets = [t for t in dev if t]
 
     if a.apk:

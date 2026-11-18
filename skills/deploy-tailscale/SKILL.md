@@ -2,7 +2,7 @@
 name: deploy-tailscale
 description: >-
   Ship the built APK to the user's registered tailnet test device — resolve the
-  device once, persist the name and IP mapping in PROFILE.md — over Taildrop
+  device once, persist it only in the gitignored PROFILE.local.md — over Taildrop
   (deliver's `ship_apk.py`) or a tailnet-only `tailscale serve` link, verified by
   size and checksum evidence; `funnel` only on explicit ask. Use when deliver
   dispatches on the PROFILE.md tailscale target, when user-check hands the
@@ -12,7 +12,7 @@ interaction: afk
 requires: [tailscale]
 ---
 
-> **TL;DR** Ships the built APK to the registered tailnet device via Taildrop or serve, checksum-verified; fires on the PROFILE.md tailscale target.
+> **TL;DR** Ships the built APK to the registered tailnet device via Taildrop or serve, checksum-verified; fires on the PROFILE.md tailscale target; device data stays in gitignored PROFILE.local.md.
 > **Related**: skill://deliver (dispatches targets), skill://user-check (pre-review hand-off build), skill://deploy-firebase (sibling target)
 
 # Deploy Tailscale
@@ -36,25 +36,38 @@ internet unless the user explicitly asks for funnel.
 2. Taildrop builds and sends in one step (§3.1). Serve needs the named APK
    from `ship_apk.py --build-only` (`$APK_PATH`); never a hand-built one.
 
-## 2. Resolve the device (persist once)
+## 2. Resolve the device (persist once, locally)
 
-1. PROFILE.md `tailscale:` entry already has a `device:` line → trust it and
-   skip discovery, but verify it still answers: `tailscale status | grep
-   <name>`. Gone or renamed → rediscover and rewrite the line.
-2. No `device:` line → run `tailscale status`. Columns: Tailscale IP, machine
+Device data — machine names, Tailscale addresses, adb ports, serials, tailnet
+names — never enters a tracked file: a public repo publishes it. It lives in
+`PROFILE.local.md` at the repo root, gitignored. PROFILE.md keeps only
+`- tailscale: <host>` and a note that device data lives in PROFILE.local.md.
+
+1. `git check-ignore -q PROFILE.local.md` fails → add `/PROFILE.local.md` to
+   `.gitignore` in the same change, before writing the file.
+2. Look for a `- device:` line in PROFILE.local.md first, then PROFILE.md
+   (legacy). Found → trust it, skip discovery, but verify it still answers:
+   `tailscale status | grep <name>`. Gone or renamed → rediscover and rewrite
+   the line. Found only in PROFILE.md → move it to PROFILE.local.md and delete
+   it from PROFILE.md in the same change; it is already in git history, so
+   tell the user if the repo is public.
+3. No `device:` line → run `tailscale status`. Columns: Tailscale IP, machine
    name, owner, OS, connection state. Pick the user's test device: Android OS,
    owner is this tailnet user. Exactly one candidate → take it. Two or more →
    one question to the user, then stop asking.
-3. Persist immediately after first discovery, under the `tailscale:` line:
+4. Persist immediately after first discovery, in PROFILE.local.md:
 
    ```markdown
-   - tailscale: <host>
-     - device: <machine-name> @ <tailscale-ip>  # verified YYYY-MM-DD
+   - device: <machine-name> @ <tailscale-ip>  # verified YYYY-MM-DD
    ```
 
-   Future runs skip discovery and only grep. Address forms: machine name
-   (MagicDNS) or `100.x.y.z` IP; `tailscale file cp --targets` lists valid
-   copy targets when in doubt.
+   Future runs skip discovery and only grep. A new worktree has no copy of the
+   gitignored file; `ship_apk.py` falls back to the main checkout's. Address
+   forms: machine name (MagicDNS) or `100.x.y.z` IP; `tailscale file cp
+   --targets` lists valid copy targets when in doubt.
+5. Never stage or commit such a line, nor `adb connect <ip>:<port>` strings,
+   in scripts or docs; the harness hook `tailnet-leak-guard` refuses a commit
+   or push that adds a `100.64.0.0/10` address or `*.ts.net` name.
 
 ## 3. Share the APK — pick one channel
 
