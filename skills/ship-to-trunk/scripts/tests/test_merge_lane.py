@@ -13,6 +13,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import time
@@ -385,6 +386,20 @@ def test_older_closed_pr_of_a_reused_branch_name_gets_a_new_pr(lane, gh):
     assert len([c for c in gh.calls() if c[:2] == ["pr", "create"]]) == 1
 
 
+def test_legacy_entry_without_enqueue_time_owns_any_closed_pr(lane, gh):
+    """An entry queued before `enqueued` existed: its branch's CLOSED PR is its own, never a crash."""
+    lane.enqueue()
+    entry = json.loads(lane.queue.read_text())
+    del entry["enqueued"]
+    lane.queue.write_text(json.dumps(entry) + "\n")
+    gh.set(prs={"7": {"number": 7, "url": PR7_URL, "state": "CLOSED", "headRefName": "ticket/1",
+                      "closedAt": "2020-01-01T00:00:00Z", "headRefOid": "0" * 40}})
+    r = lane.land()
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert lane.results(r) == [{"who": "test-run", "nn": "01", "result": "closed", "pr": 7, "url": PR7_URL}]
+    assert git("branch", "--list", "ticket/1", cwd=lane.origin) == ""  # never pushed
+
+
 def test_refused_red_fix_on_red_main_pauses_the_lane(lane, gh, real_runs):
     gh.set(runs=real_runs[4:], merge="refused")  # real window whose newest finished run is the failure
     lane.enqueue("01", "--red-fix", "abc1234")
@@ -591,6 +606,39 @@ def test_land_kills_the_checks_a_killed_land_left_running(lane, gh):
     with pytest.raises(ProcessLookupError):
         os.kill(suite, 0)
     assert not (lane.dir / ml.CHECK_GROUPS).exists()
+
+
+def test_kill_orphans_spares_a_recorded_pid_that_now_names_another_process(tmp_path):
+    other = subprocess.Popen(["sleep", "60"], start_new_session=True)  # its own group, as a check's
+    try:
+        (tmp_path / ml.CHECK_GROUPS).write_text(f"{other.pid} Thu Jan  1 00:00:00 1970\n")
+        ml.kill_orphans(tmp_path)
+        assert other.poll() is None
+        assert not (tmp_path / ml.CHECK_GROUPS).exists()
+    finally:
+        other.kill()
+        other.wait()
+
+
+def test_kill_orphans_counts_an_eperm_group_as_gone(tmp_path, monkeypatch):
+    """macOS answers EPERM for a group of zombies: no crash, no SIGKILL, the record cleared."""
+    check = subprocess.Popen(["sleep", "60"], start_new_session=True)
+    sent = []
+
+    def killpg(g, sig):
+        if sig == 0:
+            raise PermissionError(1, "Operation not permitted")
+        sent.append((g, sig))
+
+    try:
+        (tmp_path / ml.CHECK_GROUPS).write_text(f"{check.pid} {ml.proc_start(check.pid)}\n")
+        monkeypatch.setattr(ml.os, "killpg", killpg)
+        ml.kill_orphans(tmp_path)
+        assert sent == [(check.pid, signal.SIGTERM)]
+        assert not (tmp_path / ml.CHECK_GROUPS).exists()
+    finally:
+        check.kill()
+        check.wait()
 
 
 def test_scratch_worktree_gets_the_main_checkouts_local_properties(lane, gh):
@@ -963,10 +1011,11 @@ def wait_results(o):
 
 
 HEAD_MOVED = "GraphQL: Head branch was modified. Review and try the merge again. (mergePullRequest)"
+BASE_MOVED = "GraphQL: Base branch was modified. Review and try the merge again. (mergePullRequest)"
 
 
 def test_wait_lands_a_requeued_ticket_again_until_it_merges(lane, gh):
-    gh.set(merge_seq=["head_moved"])  # GitHub's head-sha race: transient
+    gh.set(merge_seq=["head_moved"])  # the PR head is not the pushed sha: requeued, never retried
     lane.enqueue()
     w = lane.wait("test-run", "01")
     o, e = w.communicate(timeout=120)
@@ -975,6 +1024,63 @@ def test_wait_lands_a_requeued_ticket_again_until_it_merges(lane, gh):
         ("requeued", f"merge refused for PR #42: {HEAD_MOVED}"), ("merged", None)]
     lane.idle()
     assert lane.queue_nns() == []
+    assert len([c for c in gh.calls() if c[:2] == ["pr", "merge"]]) == 2  # one per land
+
+
+def test_base_moved_by_the_batchs_own_squash_is_retried_and_the_whole_batch_lands(lane, gh):
+    """GitHub still settles main after 01's squash when 02's merge comes: the retry lands it."""
+    gh.set(land=True, merge_seq=["ok", "base_moved"])
+    lane.enqueue("01")
+    lane.enqueue("02", wt=lane.add_ticket("2", "two.txt"))
+    lane.enqueue("03", wt=lane.add_ticket("3", "three.txt"))
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    res = lane.results(r)
+    assert [(x["nn"], x["result"]) for x in res] == [("01", "merged"), ("02", "merged"), ("03", "merged")]
+    assert lane.queue_nns() == []
+    assert [(e["pipe"], e["result"]) for e in events(lane, "suite")] == [("A", "green")]  # one suite for all three
+    merges = [c[c.index("--match-head-commit") + 1] for c in gh.calls() if c[:2] == ["pr", "merge"]]
+    assert [m[:7] for m in merges] == [res[0]["sha"], res[1]["sha"], res[1]["sha"], res[2]["sha"]]  # retry: same head
+    # Every PR targets main, and 02 and 03 sit on the squash just before theirs: the pushed head the
+    # merge pins is the rebased one.
+    assert [c[c.index("--base") + 1] for c in gh.calls() if c[:2] == ["pr", "create"]] == ["main"] * 3
+    git("fetch", "-q", "origin", cwd=lane.co)
+    assert [git("rev-parse", f"{m}^", cwd=lane.co) for m in merges[1::2]] == [
+        git("rev-parse", f"origin/main~{k}", cwd=lane.co) for k in (2, 1)]
+
+
+def test_base_moved_past_its_retries_requeues_the_ticket(lane, gh):
+    gh.set(merge="base_moved")
+    lane.enqueue()
+    r = lane.land()
+    assert [(x["result"], x["reason"]) for x in lane.results(r)] == [
+        ("requeued", f"merge refused for PR #42: {BASE_MOVED}")]
+    assert len([c for c in gh.calls() if c[:2] == ["pr", "merge"]]) == ml.MERGE_RETRIES + 1
+    assert lane.queue_nns() == ["01"]
+
+
+@pytest.mark.parametrize("outside, result, line", [("docs/Other.md", "merged", "push (docs,feature)"),
+                                                   ("feature/Other.kt", "requeued", "rerun (feature)")])
+def test_base_moved_by_an_outside_push_runs_the_main_moved_step_again(make_lane, gh, outside, result, line):
+    """main moved for real between 02's push and its merge: rebase and decide again, never a blind retry."""
+    lane = make_lane(ticket_file="docs/D.md")
+    gh.set(land=True, merge_seq=["ok", "base_moved"])
+    lane.move_main(outside, hook="on_base_moved")
+    lane.enqueue("01")
+    lane.enqueue("02", wt=lane.add_ticket("2", "feature/F.kt"))
+    r = lane.land()
+    res = lane.results(r)
+    assert [(x["nn"], x["result"]) for x in res] == [("01", "merged"), ("02", result)]
+    assert f"merge: test-run/02 main moved 1 commits — {line}" in merge_lines(r)
+    merges = [c[c.index("--match-head-commit") + 1] for c in gh.calls() if c[:2] == ["pr", "merge"]]
+    if result == "requeued":
+        assert len(merges) == 2 and res[1]["reason"] == "main moved: related"
+        assert lane.queue_nns() == ["02"]
+        return
+    assert len(merges) == 3 and merges[2] != merges[1]  # 02 rebased onto the outside commit, pushed again
+    git("fetch", "-q", "origin", cwd=lane.co)
+    assert git("rev-parse", f"{merges[2]}^", cwd=lane.co) == git("rev-parse", "origin/main~1", cwd=lane.co)
+    assert git("log", "-1", "--format=%s", "origin/main~1", cwd=lane.co) == "outside 0"
 
 
 def test_requeue_cap_ends_the_ticket_stuck(lane, gh):

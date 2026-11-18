@@ -8,8 +8,10 @@ State lives in $GH_FAKE_DIR/state.json (written by the test):
          checked out in another worktree) | "checkout_error_open" (fails with
          the same message but the PR stays OPEN) | "refused" (a required
          review: final) | "not_mergeable" (mergeability not computed yet:
-         transient) | "head_moved" (GitHub's head-sha mismatch); these last
-         three fail and leave the PR OPEN
+         transient) | "base_moved" (GitHub's base race; runs the executable
+         $GH_FAKE_DIR/on_base_moved first when the test wrote one: main moves
+         for real) | "head_moved" (GitHub's head-sha mismatch); these last
+         four fail and leave the PR OPEN
   merge_seq    list of merge modes, one taken per `gh pr merge`; `merge` once empty
   create_url   URL printed by `gh pr create` (the PR is registered OPEN)
   create_error stderr of a failing `gh pr create` (exit 1, no PR)
@@ -101,8 +103,12 @@ elif args[:2] == ["pr", "merge"]:
     if mode == "not_mergeable":
         print("Pull request is not mergeable", file=sys.stderr)
         sys.exit(1)
-    if mode == "head_moved":
-        print("GraphQL: Head branch was modified. Review and try the merge again. (mergePullRequest)",
+    if mode in ("head_moved", "base_moved"):
+        hook = os.path.join(d, "on_base_moved")
+        if mode == "base_moved" and os.access(hook, os.X_OK):
+            subprocess.run([hook], check=True)
+        side = "Head" if mode == "head_moved" else "Base"
+        print(f"GraphQL: {side} branch was modified. Review and try the merge again. (mergePullRequest)",
               file=sys.stderr)
         sys.exit(1)
     if mode != "checkout_error_open":
