@@ -102,7 +102,7 @@ Results (one JSON line per ticket) and what the orchestrator does next:
 - **waiting_user** (`--no-merge`: unflaggable live change, flip PR): the PR
   is open after a green suite and is never merged by the lane. Ask the user
   through the ask tool (`start` § Waiting on the user). On approval:
-  `main_health.py status`; green → apply the rerun rule below and `gh pr
+  `main_health.py status`; green → apply the main-moved verdicts below, `gh pr
   merge <n> --squash --match-head-commit <sha>`; red →
   `main_health.py hold --pr <n> --who <id>` (Red main).
 - **claim_refused**: another orchestrator holds the red-main claim; report
@@ -129,46 +129,49 @@ Results (one JSON line per ticket) and what the orchestrator does next:
 - **Throughput.** One suite covers up to `--max` tickets; at a ~5 min suite
   and batches of 4 the ceiling is about 48 merges an hour per
   orchestrator, minus about log2(batch) extra suites per red batch.
-- Main moved during the suite or between merges → rerun only when it
-  matters, judged over the new commits `git diff --name-only
-  <base>..origin/main` (`<base>` = the main sha the suite ran on) against
-  the batch's own changes, mapped to build modules:
-  - **Rerun** (restack + suite again) when a module main changed and a
-    module the batch changed are the same, or either depends on the other
-    transitively (project dependencies in the build files;
-    `./gradlew <module>:dependencies` lists them as `project :x`) — this is
-    what catches an API break in a module the ticket never touched; or when
-    main touched the shared build setup (`build-logic/`, `gradle/`, root
-    build/settings/properties files, the `structure:` rules module).
-  - **Otherwise push the green head without rebasing.** Two modules that
-    only share a consumer (both feed `:app`) are unrelated.
-    The squash merge lands on the newer main; main's post-merge workflow is
-    the net, and a red main stops merges (Red main below).
-  - No module graph (single-module repo, build files unreadable) → rerun.
+- Main moved during the suite or between merges → judge `git diff
+  --name-only <base>..origin/main` (`<base>` = the main sha the suite ran
+  on) against the batch's changes, mapped to build modules
+  (`./gradlew <module>:dependencies` lists them as `project :x`):
+  - **rerun** (restack + suite again): main changed a module the batch
+    changed, the shared build setup (`build-logic/`, `gradle/`, root
+    build/settings/properties files) or the `structure:` rules module. No
+    module graph (single-module repo, build files unreadable) → rerun.
+  - **compile** (main changed a dependency or dependent of a batch module,
+    nothing else): restack, compile
+    `:<m>:compileDebugKotlin :<m>:compileDebugUnitTestKotlin` for each
+    batch module and each main-changed module depending on one. This
+    catches an API break in a module the ticket never touched. Green →
+    push; red → `red`, as a suite. No `./gradlew`, or `--dry-run` rejects a
+    task → rerun.
+  - **push** otherwise, without rebasing. Two modules that only share a
+    consumer (both feed `:app`) are unrelated. The squash merge lands on
+    the newer main; main's post-merge workflow is the net, and a red main
+    stops merges (Red main below).
   - A textual conflict at merge (`gh pr merge` refuses) → rebase,
     Conflicts below, suite again.
-  Ledger the call either way: `merge: <NN> main moved <k> commits —
-  rerun|push (<modules>)`.
+  Ledger the call: `merge: <NN> main moved <k> commits —
+  rerun|compile|push (<modules>)`.
 - Merging needs the authority table to let the agent do it (dark /
   non-behavioral slice + consent line). Otherwise the orchestrator
   enqueues with `--no-merge` and the ticket ends `waiting_user`.
-- `merge_lane.py` applies the rerun rule mechanically: modules come from
+- `merge_lane.py` applies this mechanically: modules come from
   `include(...)` in `settings.gradle.kts`, project dependencies from
-  `project(":x")` and `projects.x` in each module's build file; no readable
-  graph → rerun. After 3 rounds of main moving the batch is requeued
-  ("main keeps moving") and the lane exits 1.
+  `project(":x")` and `projects.x` in each module's build file. After 3
+  full reruns of main moving the batch is requeued ("main keeps moving")
+  and the lane exits 1; compile checks never count.
 - The PR body is written once by the worker, after the fast review
   (`open-pr` slice template). The lane fills its `**check:**` line:
-  `local suite green on batch top <sha7> (tickets <NN,NN>); no PR CI by
-  design`.
+  `local suite green on batch top <sha7> (tickets <NN,NN>)[, then compile
+  green after main moved]; no PR CI by design`.
 
 ## Main moved while the PR waits
 
 `gh pr update-branch <n> --rebase`, wait for the check again, then merge
 with the new head sha. `pr-check: none`: applies only to a `waiting_user`
-PR — same rerun rule (related → rebase and re-run the suite; unrelated →
-merge as is), done by the orchestrator by hand. Rebasing is the slice
-author's job (under `pr-check: none` the lane's), never the next ticket's.
+PR — same verdicts (rerun → rebase + suite; compile → rebase + compile;
+push → merge as is), by hand. Rebasing is the slice author's job (under
+`pr-check: none` the lane's), never the next ticket's.
 
 ## Conflicts
 
@@ -255,9 +258,8 @@ PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
   incident. The lane resumes by itself: the next `land` takes the queued
   tickets (nothing was held, so nothing to release). `main_health.py held`
   lists PRs still held outside the lane (`waiting_user` PRs held on red):
-  the orchestrator merges each after `status` is green, under the rerun
-  rule (main moved: related → rebase and re-run the suite; unrelated →
-  merge as is).
+  the orchestrator merges each after `status` is green, under the
+  main-moved verdicts.
 
 ## Release workflows on push
 

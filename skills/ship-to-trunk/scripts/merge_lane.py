@@ -54,39 +54,53 @@ Sequence:
     the next ticket stacks on k-1.
  4. One suite on the top worktree: the command in PROFILE's `pr-check: none`
     comment, else assemble debug + unit `runner:` + `structure:`; through
-    `build-slot` when on PATH; log `.scratch/<slug>/logs/lane-<NN-NN>-<sha7>.log`.
- 5. Red batch: binary search over prefix length (one suite per step on that
-    prefix's top head, no extra rebases). The first ticket that turns the
-    prefix red gets `red`; the green prefix proceeds; tickets after it are
-    requeued ("stacked on a red ticket"). About 1 + log2(batch) suites.
- 6. Rerun rule before merging (below). Related -> back to 3 on the new
-    origin/main, at most 3 rounds, then the batch is requeued ("main keeps
-    moving").
+    `build-slot` when on PATH; log `.scratch/<slug>/logs/lane-<NN-NN>-<sha7>.log`
+    (`...-compile.log` for a compile check, step 6).
+ 5. Red batch: binary search over prefix length (one suite or compile check
+    per step on that prefix's top head, no extra rebases). The first ticket
+    that turns the prefix red gets `red`; the green prefix proceeds; tickets
+    after it are requeued ("stacked on a red ticket"). About 1 + log2(batch)
+    runs.
+ 6. Rerun rule before merging (below). `rerun` -> back to 3 on the new
+    origin/main with the full suite, at most 3 such rounds, then the batch is
+    requeued ("main keeps moving"). `compile` -> back to 3 on the new
+    origin/main, but the check is the compile command (a red one bisects like
+    a red suite); compile rounds never count toward the 3.
  7. Merge in order, k = 1..n: 7.1 `main_health.py status`, red -> the rest
     requeued ("main red"). 7.2 `git fetch origin`,
     `git rebase --onto origin/main <tested head of k-1>`; the new head's tree
     must equal k's tested tree (the squash of k-1 left main at k-1's tested
     tree). 7.3 Tree differs -> main moved under the batch: rerun rule over
-    the outside commits against tickets k..n; related -> k..n requeued
-    ("main moved: related"). 7.4 push `--force-with-lease`; reuse the OPEN PR
+    the outside commits against tickets k..n; `rerun` -> k..n requeued
+    ("main moved: related"); `compile` -> compile check on k's rebased head,
+    red -> k gets `red` and k+1..n are requeued ("stacked on a red ticket").
+    7.4 push `--force-with-lease`; reuse the OPEN PR
     of the branch (`gh pr view`), else `gh pr create` (body check line:
-    `local suite green on batch top <sha7> (tickets <NN,NN>); no PR CI by
+    `local suite green on batch top <sha7> (tickets <NN,NN>)[, then compile
+    green after main moved]; no PR CI by
     design`). 7.5 `gh pr merge <n> --squash --match-head-commit <sha>`
     (always with the PR number, never `--delete-branch`: gh would check out
     main locally); non-zero exit -> `gh pr view <n>` decides: MERGED counts
     as merged, anything else is refused -> requeued. 7.6 delete the remote
     branch, `git worktree remove`, delete the local branch.
- 8. Ledger lines: `merge: batch <NN,NN> suite green @ <sha7> (<s> suites)`,
-    each rerun decision `merge: <NN..> main moved <k> commits - rerun|push
-    (<modules>)`, one `slice: <NN> PR #<n> merged @ <sha7>` per merge.
+ 8. Ledger lines: `merge: batch <NN,NN> suite green @ <sha7>[, compile green
+    @ <sha7>] (<s> suites[, <c> compiles])`, each rerun decision
+    `merge: <NN..> main moved <k> commits - rerun|compile|push (<modules>)`,
+    one `slice: <NN> PR #<n> merged @ <sha7>` per merge.
 
-Rerun rule (mechanical): main moved -> rerun when a module main changed and a
-module the batch changed are the same or depend on each other transitively
-(modules from `include(...)` in settings.gradle.kts, dependencies from
-`project(":x")` and `projects.x` in the build files), when main touched
-`build-logic/`, `gradle/`, root build/settings/properties files or the
-`structure:` rules module (any `:a:b` prefix of a `structure:` path that is a
-module), or when no module graph is readable. Otherwise carry on.
+Rerun rule (mechanical), judged over `git diff --name-only <base>..origin/main`
+mapped to modules (from `include(...)` in settings.gradle.kts, dependencies
+from `project(":x")` and `projects.x` in the build files):
+  rerun    main changed a module the batch changed, `build-logic/`, `gradle/`,
+           root build/settings/properties files or the `structure:` rules
+           module (any `:a:b` prefix of a `structure:` path that is a module),
+           or no module graph is readable.
+  compile  dependency-only overlap (one module depends on the other,
+           transitively): restack, then `./gradlew` `:<m>:compileDebugKotlin
+           :<m>:compileDebugUnitTestKotlin` for each batch module and each
+           main-changed module that depends on one. A missing `gradlew` or a
+           `--dry-run` that rejects a task (JVM-only module, flavors) -> rerun.
+  push     otherwise.
 
 The suite tests only the batch top. The intermediate main states (after the
 1st, 2nd, ... merge of a batch) are not tested on their own.
@@ -95,13 +109,15 @@ import argparse
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
 
-MAX_ROUNDS = 3
+MAX_ROUNDS = 3  # full-suite reruns per land; compile checks are not counted
+COMPILE_TASKS = ("compileDebugKotlin", "compileDebugUnitTestKotlin")
 HERE = Path(__file__).resolve().parent
 SHARED_ROOT_FILES = re.compile(
     r"^(build|settings)\.gradle(\.kts)?$|^gradle\.properties$|^gradle/|^build-logic/")
@@ -205,28 +221,48 @@ def to_modules(mods, files):
     return hit, shared
 
 
-def rerun_needed(wt, main_files, ticket_files):
-    """(rerun?, modules label) per the rerun rule."""
+def judge(wt, main_files, ticket_files):
+    """(kind, label, compile modules) per the rerun rule; kind is rerun | compile | push."""
     graph = module_graph(wt)
     if not graph:
-        return True, "no module graph"
+        return "rerun", "no module graph", []
     mods, deps = graph
     theirs, shared = to_modules(mods, main_files)
     mine, _ = to_modules(mods, ticket_files)
     label = ",".join(sorted(theirs | mine)) or "-"
     if shared:
-        return True, label + " +shared build setup"
+        return "rerun", label + " +shared build setup", []
     structure, _ = profile_line(wt, "structure")
     for m in re.findall(r":([A-Za-z0-9_.:-]+)", structure or ""):
         parts = m.split(":")
         if any(":".join(parts[:i]) in mods and ":".join(parts[:i]) in theirs
                for i in range(1, len(parts) + 1)):
-            return True, label + " +structure rules"
-    for t in mine:
-        for m in theirs:
-            if t == m or m in closure(deps, t) or t in closure(deps, m):
-                return True, label
-    return False, label
+            return "rerun", label + " +structure rules", []
+    if theirs & mine:
+        return "rerun", label, []
+    above = {m for m in theirs if mine & closure(deps, m)}  # main changed a dependent of the batch
+    below = any(m in closure(deps, t) for t in mine for m in theirs)  # ... or a dependency of it
+    if above or below:
+        return "compile", label, sorted(mine | above)
+    return "push", label, []
+
+
+def compile_command(wt, modules):
+    """`./gradlew` compile tasks for the modules, None when they cannot be resolved here."""
+    if not (Path(wt) / "gradlew").is_file():
+        return None
+    cmd = shlex.join(["./gradlew"] + [f":{m}:{t}" for m in modules for t in COMPILE_TASKS])
+    dry = subprocess.run(["bash", "-c", cmd + " --dry-run"], cwd=wt, capture_output=True)
+    return cmd if dry.returncode == 0 else None
+
+
+def decide(wt, main_files, ticket_files):
+    """(kind, label, compile command): `judge`, a compile verdict without a command -> rerun."""
+    kind, label, mods = judge(wt, main_files, ticket_files)
+    cmd = compile_command(wt, mods) if kind == "compile" else None
+    if kind == "compile" and not cmd:
+        return "rerun", label + " +no compile command", None
+    return kind, label, cmd
 
 
 def sha7(wt):
@@ -418,21 +454,25 @@ def land_batch(a):
     wt0 = cands[0]["worktree"]
     common = Path(out("git", "rev-parse", "--path-format=absolute", "--git-common-dir", cwd=wt0))
     logdir = q.path.resolve().parent.parent / "logs"
-    suites = [0]
-    cmd = suite_command(wt0)
-    cmd_run = (["build-slot"] if shutil.which("build-slot") else []) + ["bash", "-c", cmd]
+    suites, compiles = [0], [0]
+    suite_cmd = suite_command(wt0)
+    slot = ["build-slot"] if shutil.which("build-slot") else []
 
-    def suite(prefix):
+    def verify(prefix, cmd, tag):
+        """One build command (the suite or a compile check) on the prefix's top: (rc, log)."""
         top = prefix[-1]
-        suites[0] += 1
+        (suites if tag == "suite" else compiles)[0] += 1
         logdir.mkdir(parents=True, exist_ok=True)
-        log = logdir / f"lane-{'-'.join(e['nn'] for e in prefix)}-{top['head_t'][:7]}.log"
+        log = logdir / (f"lane-{'-'.join(e['nn'] for e in prefix)}-{top['head_t'][:7]}"
+                        f"{'' if tag == 'suite' else '-compile'}.log")
         with log.open("w") as f:
-            rc = subprocess.run(cmd_run, cwd=top["worktree"], stdout=f, stderr=subprocess.STDOUT).returncode
+            rc = subprocess.run(slot + ["bash", "-c", cmd], cwd=top["worktree"], stdout=f,
+                                stderr=subprocess.STDOUT).returncode
         return rc, str(log)
 
     green, base, pending = [], None, []
-    for rnd in range(1, MAX_ROUNDS + 1):
+    full, kind, cc, suite7 = 0, "rerun", None, ""
+    while True:
         run("git", "fetch", "origin", cwd=wt0)
         base = out("git", "rev-parse", "origin/main", cwd=wt0)
         stack, pending, prev = [], [], base
@@ -450,12 +490,15 @@ def land_batch(a):
             prev = e["head_t"]
         green = stack
         if stack:
-            rc, log = suite(stack)
+            cmd, tag = (suite_cmd, "suite") if kind == "rerun" else (cc, "compile")
+            if tag == "suite":
+                full += 1
+            rc, log = verify(stack, cmd, tag)
             if rc:
                 logs, lo, hi = {len(stack): log}, 0, len(stack)
                 while hi - lo > 1:
                     mid = (lo + hi) // 2
-                    rc2, log2 = suite(stack[:mid])
+                    rc2, log2 = verify(stack[:mid], cmd, tag)
                     if rc2:
                         hi, logs[mid] = mid, log2
                     else:
@@ -463,6 +506,8 @@ def land_batch(a):
                 pending.append((stack[hi - 1]["nn"], "red", {"log": logs[hi]}))
                 pending += [(e["nn"], "requeued", {"reason": "stacked on a red ticket"}) for e in stack[hi:]]
                 green = stack[:lo]
+            if tag == "suite" and green:
+                suite7 = green[-1]["head_t"][:7]
         if not green:
             break
         run("git", "fetch", "origin", cwd=wt0)
@@ -470,14 +515,14 @@ def land_batch(a):
         if moved == base:
             break
         top = green[-1]
-        again, label = rerun_needed(top["worktree"], names(wt0, f"{base}..{moved}"),
-                                    names(top["worktree"], base, top["head_t"]))
+        kind, label, cc = decide(top["worktree"], names(wt0, f"{base}..{moved}"),
+                                 names(top["worktree"], base, top["head_t"]))
         k = out("git", "rev-list", "--count", f"{base}..{moved}", cwd=wt0)
         print(f"merge: {','.join(e['nn'] for e in green)} main moved {k} commits — "
-              f"{'rerun' if again else 'push'} ({label})")
-        if not again:
+              f"{kind} ({label})")
+        if kind == "push":
             break
-        if rnd == MAX_ROUNDS:
+        if kind == "rerun" and full == MAX_ROUNDS:
             requeue(cands, "main keeps moving")
             return 1
     for nn, result, kw in pending:
@@ -487,11 +532,15 @@ def land_batch(a):
 
     nns = ",".join(e["nn"] for e in green)
     top7 = green[-1]["head_t"][:7]
-    print(f"merge: batch {nns} suite green @ {top7} ({suites[0]} suites)")
+    after_compile = tag == "compile"
+    then = f", compile green @ {top7}" if after_compile else ""
+    ran = f"{suites[0]} suites" + (f", {compiles[0]} compiles" if compiles[0] else "")
+    print(f"merge: batch {nns} suite green @ {suite7}{then} ({ran})")
     prev_t, merged = base, 0
     for i, e in enumerate(green):
         rest = green[i:]
         wt = e["worktree"]
+        compiled = after_compile
         if not e.get("red_fix") and status(wt).returncode == 3:
             requeue(rest, "main red")
             break
@@ -504,18 +553,26 @@ def land_batch(a):
                 break
         if out("git", "rev-parse", "HEAD^{tree}", cwd=wt) != e["tree"]:
             files = names(wt, prev_t, "origin/main")
-            again, label = (rerun_needed(wt, files, names(wt, prev_t, green[-1]["head_t"]))
-                            if files else (True, "tree differs"))
+            kind, label, cc = (decide(wt, files, names(wt, prev_t, green[-1]["head_t"]))
+                               if files else ("rerun", "tree differs", None))
             k = int(out("git", "rev-list", "--count", f"{base}..origin/main", cwd=wt)) - merged
             print(f"merge: {','.join(x['nn'] for x in rest)} main moved {k} commits — "
-                  f"{'rerun' if again else 'push'} ({label})")
-            if again:
+                  f"{kind} ({label})")
+            if kind == "rerun":
                 requeue(rest, "main moved: related")
                 break
+            if kind == "compile":
+                rc, log = verify([dict(e, head_t=out("git", "rev-parse", "HEAD", cwd=wt))], cc, "compile")
+                if rc:
+                    emit(e["nn"], "red", log=log)
+                    requeue(rest[1:], "stacked on a red ticket")
+                    break
+                compiled = True
         head = out("git", "rev-parse", "HEAD", cwd=wt)
         run("git", "push", "-u", "--force-with-lease", "origin", "HEAD", cwd=wt)
         body = Path(e["body_file"]).read_text()
-        check = f"**check:** local suite green on batch top {top7} (tickets {nns}); no PR CI by design"
+        note = ", then compile green after main moved" if compiled else ""
+        check = f"**check:** local suite green on batch top {suite7} (tickets {nns}){note}; no PR CI by design"
         if re.search(r"^\*\*check:\*\*.*$", body, re.M):
             body = re.sub(r"^\*\*check:\*\*.*$", lambda _: check, body, flags=re.M)
         else:

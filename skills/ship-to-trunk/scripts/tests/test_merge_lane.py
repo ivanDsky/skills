@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 import pytest
 
@@ -72,46 +73,112 @@ def test_profile_line_splits_value_and_comment(tmp_path, profile_text):
 
 # ----------------------------------------------------------------- rerun rule
 
-def gradle_project(root, edges):
-    """edges {module: [deps]} -> settings + per-module build files."""
-    (root / "settings.gradle.kts").write_text("".join(f'include(":{m}")\n' for m in edges))
+def graph_files(edges):
+    """edges {module: [deps]} -> settings + per-module build files as {path: text}."""
+    files = {"settings.gradle.kts": "".join(f'include(":{m}")\n' for m in edges)}
     for m, deps in edges.items():
-        (root / m).mkdir(exist_ok=True)
-        (root / m / "build.gradle.kts").write_text(
+        files[f"{m}/build.gradle.kts"] = (
             "dependencies {\n" + "".join(f'    implementation(project(":{d}"))\n' for d in deps) + "}\n")
+    return files
 
 
-def test_rerun_rule(tmp_path):
-    gradle_project(tmp_path, {"app": ["core"], "core": [], "feature": ["core"], "docs": []})
+def gradle_project(root, edges):
+    for name, text in graph_files(edges).items():
+        (root / name).parent.mkdir(parents=True, exist_ok=True)
+        (root / name).write_text(text)
+
+
+CHAIN = {"app": ["feature"], "feature": ["core"], "core": [], "docs": [], "konsist": []}
+
+
+@pytest.mark.parametrize("main_files,ticket_files,kind,modules", [
+    (["feature/F2.kt"], ["feature/F.kt"], "rerun", []),                # same module
+    (["core/C.kt"], ["feature/F.kt"], "compile", ["feature"]),         # main changed a dependency
+    (["core/C.kt"], ["app/A.kt"], "compile", ["app"]),                 # ... transitively
+    (["app/A.kt"], ["feature/F.kt"], "compile", ["app", "feature"]),   # main changed a dependent
+    (["app/A.kt"], ["core/C.kt"], "compile", ["app", "core"]),         # ... transitively
+    (["docs/a.md"], ["app/A.kt"], "push", []),                         # unrelated module
+    (["README.md"], ["feature/F.kt"], "push", []),                     # outside every module
+    (["feature/F.kt"], ["README.md"], "push", []),
+])
+def test_judge_same_module_reruns_dependency_only_compiles_unrelated_pushes(
+        tmp_path, main_files, ticket_files, kind, modules):
+    gradle_project(tmp_path, CHAIN)
+    got, _, mods = ml.judge(tmp_path, main_files, ticket_files)
+    assert (got, mods) == (kind, modules)
+
+
+def test_judge_siblings_sharing_a_dependency_push(tmp_path):
+    gradle_project(tmp_path, {"app": ["core"], "core": [], "feature": ["core"]})
+    assert ml.judge(tmp_path, ["feature/F.kt"], ["app/A.kt"])[0] == "push"
+
+
+@pytest.mark.parametrize("main_files,why", [
+    (["gradle/libs.versions.toml"], "shared build setup"),
+    (["build-logic/src/Conv.kt"], "shared build setup"),
+    (["settings.gradle.kts"], "shared build setup"),
+    (["konsist/K.kt"], "structure rules"),
+])
+def test_judge_shared_setup_and_structure_rules_rerun_even_for_an_unrelated_batch(tmp_path, main_files, why):
+    gradle_project(tmp_path, CHAIN)
     (tmp_path / "PROFILE.md").write_text("- structure: ./gradlew :konsist:test\n")
-    assert ml.rerun_needed(tmp_path, ["docs/a.md"], ["app/A.kt"])[0] is False
-    assert ml.rerun_needed(tmp_path, ["core/C.kt"], ["app/A.kt"])[0] is True       # dependency
-    assert ml.rerun_needed(tmp_path, ["feature/F.kt"], ["app/A.kt"])[0] is False   # siblings
-    again, label = ml.rerun_needed(tmp_path, ["gradle/libs.versions.toml"], ["app/A.kt"])
-    assert again and "shared build setup" in label
-    assert ml.rerun_needed(tmp_path / "missing", ["x"], ["y"]) == (True, "no module graph")
+    kind, label, mods = ml.judge(tmp_path, main_files, ["docs/a.md"])
+    assert kind == "rerun" and why in label and mods == []
+
+
+def test_judge_without_a_module_graph_reruns(tmp_path):
+    assert ml.judge(tmp_path / "missing", ["x"], ["y"]) == ("rerun", "no module graph", [])
+
+
+def stub_gradlew(root, body):
+    (root / "gradlew").write_text(f"#!/bin/sh\n{body}\n")
+    (root / "gradlew").chmod(0o755)
+
+
+def test_compile_command_derives_the_tasks_from_module_paths(tmp_path):
+    stub_gradlew(tmp_path, "exit 0")
+    assert ml.compile_command(tmp_path, ["app", "feature:play"]) == (
+        "./gradlew :app:compileDebugKotlin :app:compileDebugUnitTestKotlin "
+        ":feature:play:compileDebugKotlin :feature:play:compileDebugUnitTestKotlin")
+
+
+def test_compile_command_is_none_without_a_wrapper_or_when_a_task_does_not_resolve(tmp_path):
+    assert ml.compile_command(tmp_path, ["app"]) is None
+    stub_gradlew(tmp_path, "echo \"Task 'compileDebugKotlin' not found\" >&2\nexit 1")
+    assert ml.compile_command(tmp_path, ["app"]) is None
 
 
 # ----------------------------------------------------------- lane end to end
 
+GRAPH = {"app": ["feature"], "feature": ["core"], "core": [], "docs": []}
+# A build (the suite, a gradle run) calls the test's on_build script when there is one: main moves under it.
+HOOK = '[ -x "$GH_FAKE_DIR/on_build" ] && "$GH_FAKE_DIR/on_build"\n'
+SUITE_SH = "#!/bin/sh\n" + HOOK + "exit 0\n"
+# Fake wrapper: logs argv; --dry-run resolves unless no_tasks exists; a real run fails when compile_red exists.
+GRADLEW = ("#!/bin/sh\n"
+           'echo "$*" >> "$GH_FAKE_DIR/gradle.log"\n'
+           'case "$*" in *--dry-run*) [ -e "$GH_FAKE_DIR/no_tasks" ] && exit 1; exit 0;; esac\n'
+           + HOOK +
+           '[ -e "$GH_FAKE_DIR/compile_red" ] && { echo "e: compile error in :feature"; exit 1; }\n'
+           "exit 0\n")
+
+
 class Lane:
     """origin (bare) <- main checkout `co` <- ticket worktree `wt` on branch ticket/1."""
 
-    def __init__(self, tmp_path, profile_text):
+    def __init__(self, tmp_path, profile_text, graph=None, ticket_file="feature.txt"):
         self.root = tmp_path / "lane"
         self.origin = self.root / "origin.git"
         subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(self.origin)], check=True)
         self.co = init_repo(self.root / "co", {
             "PROFILE.md": profile_text.replace("./gradlew assembleDebug test", "./suite.sh"),
-            "suite.sh": "#!/bin/sh\nexit 0\n",
-        }, executable=("suite.sh",))
+            "suite.sh": SUITE_SH,
+            "gradlew": GRADLEW,
+            **(graph_files(graph) if graph else {}),
+        }, executable=("suite.sh", "gradlew"))
         git("remote", "add", "origin", str(self.origin), cwd=self.co)
         git("push", "-q", "-u", "origin", "main", cwd=self.co)
-        self.wt = self.root / "wt1"
-        git("worktree", "add", "-q", "-b", "ticket/1", str(self.wt), "origin/main", cwd=self.co)
-        (self.wt / "feature.txt").write_text("hello\n")
-        git("add", "feature.txt", cwd=self.wt)
-        git("commit", "-q", "-m", "feat: one", cwd=self.wt)
+        self.wt = self.add_ticket("1", ticket_file)
         self.queue = self.root / ".scratch" / "run" / "lane" / "queue.jsonl"
         self.body = self.root / "body.md"
         self.body.write_text("## Summary\nthing\n")
@@ -119,8 +186,8 @@ class Lane:
     def lane(self, *args, **kw):
         return subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True, timeout=60, **kw)
 
-    def enqueue(self, nn="01", *extra):
-        r = self.lane("enqueue", "--queue", str(self.queue), "--nn", nn, "--worktree", str(self.wt),
+    def enqueue(self, nn="01", *extra, wt=None):
+        r = self.lane("enqueue", "--queue", str(self.queue), "--nn", nn, "--worktree", str(wt or self.wt),
                       "--title", "feat: one", "--body-file", str(self.body), *extra)
         assert r.returncode == 0, r.stderr
         return r
@@ -135,11 +202,61 @@ class Lane:
     def results(r):
         return [json.loads(l) for l in r.stdout.splitlines() if l.startswith("{")]
 
+    def add_ticket(self, nn, rel):
+        """Worktree wt<nn> on branch ticket/<nn> off origin/main with one commit adding `rel`."""
+        wt = self.root / f"wt{nn}"
+        git("worktree", "add", "-q", "-b", f"ticket/{nn}", str(wt), "origin/main", cwd=self.co)
+        (wt / rel).parent.mkdir(parents=True, exist_ok=True)
+        (wt / rel).write_text(f"hello {nn}\n")
+        git("add", rel, cwd=wt)
+        git("commit", "-q", "-m", f"feat: ticket {nn}", cwd=wt)
+        return wt
+
+    def move_main(self, *files, times=1, hook="on_build"):
+        """Land up to `times` outside commits touching `files` on origin/main, one per call of the
+        $GH_FAKE_DIR/<hook> script: `on_build` runs in every suite/gradle run, `after_merge` in every merge."""
+        script = Path(os.environ["GH_FAKE_DIR"]) / hook
+        quoted = " ".join(f"'{f}'" for f in files)
+        script.write_text(f"""#!/bin/sh
+n=$(cat "$0.n" 2>/dev/null || echo 0)
+[ "$n" -ge {times} ] && exit 0
+echo $((n + 1)) > "$0.n"
+cd '{self.co}' && git pull -q --ff-only origin main || exit 1
+for f in {quoted}; do mkdir -p "$(dirname "$f")"; echo "$n" > "$f"; done
+git add -A && git commit -q -m "outside $n" && git push -q origin main
+""")
+        script.chmod(0o755)
+
 
 @pytest.fixture
 def lane(tmp_path, gh, profile_text, real_runs):
     gh.set(runs=real_runs, create_url=PR_URL, create_branch="ticket/1")
     return Lane(tmp_path, profile_text)
+
+
+@pytest.fixture
+def make_lane(tmp_path, gh, profile_text, real_runs):
+    """Lane factory over a Gradle-shaped repo (app -> feature -> core, docs); ticket 01 adds `ticket_file`."""
+    gh.set(runs=real_runs, create_url=PR_URL, create_branch="ticket/1")
+    return lambda **kw: Lane(tmp_path, profile_text, graph=GRAPH, **kw)
+
+
+@pytest.fixture
+def glane(make_lane):
+    return make_lane(ticket_file="feature/F.kt")
+
+
+def merge_lines(r):
+    return [l for l in r.stdout.splitlines() if l.startswith("merge:")]
+
+
+def gradle_log(gh):
+    p = gh.dir / "gradle.log"
+    return p.read_text().splitlines() if p.exists() else []
+
+
+def compile_tasks(*modules):
+    return " ".join(f":{m}:{t}" for m in modules for t in ml.COMPILE_TASKS)
 
 
 def test_land_merges_without_main_checked_out_locally(lane, gh):
@@ -272,3 +389,147 @@ def test_stale_lane_lock_with_dead_owner_is_reclaimed(tmp_path):
     with ml.LaneLock(q) as lock:
         assert (lock.path / "pid").read_text() == str(os.getpid())
     assert not lock.path.exists()
+
+
+# ------------------------------------------- main moves: rerun | compile | push
+
+def test_main_moving_in_the_same_module_reruns_the_suite(glane, gh):
+    glane.move_main("feature/Other.kt")
+    glane.enqueue()
+    r = glane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "merge: 01 main moved 1 commits — rerun (feature)" in merge_lines(r)
+    assert re.search(r"^merge: batch 01 suite green @ \w{7} \(2 suites\)$", r.stdout, re.M)
+    assert gradle_log(gh) == []  # no compile check
+    assert glane.results(r)[0]["result"] == "merged"
+
+
+@pytest.mark.parametrize("moved,modules,label", [
+    ("core/C.kt", ["feature"], "core,feature"),       # main changed a dependency of the batch
+    ("app/A.kt", ["app", "feature"], "app,feature"),  # main changed a dependent of the batch
+])
+def test_dependency_only_overlap_restacks_and_compiles_without_the_suite(glane, gh, moved, modules, label):
+    glane.move_main(moved)
+    glane.enqueue()
+    r = glane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert f"merge: 01 main moved 1 commits — compile ({label})" in merge_lines(r)
+    m = re.search(r"^merge: batch 01 suite green @ (\w{7}), compile green @ (\w{7}) \(1 suites, 1 compiles\)$",
+                  r.stdout, re.M)
+    assert m and m.group(1) != m.group(2)  # the compile ran on the restacked head, the suite on the old one
+    assert gradle_log(gh) == [compile_tasks(*modules) + " --dry-run", compile_tasks(*modules)]
+    check = [l for l in (glane.queue.parent / "body-01.md").read_text().splitlines() if l.startswith("**check:**")]
+    assert check == [f"**check:** local suite green on batch top {m.group(1)} (tickets 01), then compile green "
+                     "after main moved; no PR CI by design"]
+    assert glane.results(r)[0]["result"] == "merged"
+
+
+def test_compile_rounds_never_count_toward_main_keeps_moving(glane, gh):
+    glane.move_main("core/C.kt", times=5)  # the suite and the first four compile checks each land a commit
+    glane.enqueue()
+    r = glane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert len([l for l in merge_lines(r) if "— compile (core,feature)" in l]) == 5
+    assert "(1 suites, 5 compiles)" in r.stdout
+    assert glane.results(r)[0]["result"] == "merged" and "main keeps moving" not in r.stdout
+
+
+def test_full_reruns_still_stop_after_three_rounds(glane, gh):
+    glane.move_main("feature/Other.kt", times=9)
+    glane.enqueue()
+    r = glane.land()
+    assert r.returncode == 1
+    assert glane.results(r) == [{"nn": "01", "result": "requeued", "reason": "main keeps moving"}]
+    assert len([l for l in merge_lines(r) if l.endswith("— rerun (feature)")]) == 3
+    assert glane.queue_nns() == ["01"]
+    assert not any(c[:2] == ["pr", "merge"] for c in gh.calls())
+
+
+def test_unrelated_move_pushes_the_green_head_without_a_second_run(glane, gh):
+    glane.move_main("docs/D.md")
+    glane.enqueue()
+    r = glane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "merge: 01 main moved 1 commits — push (docs,feature)" in merge_lines(r)
+    assert re.search(r"^merge: batch 01 suite green @ \w{7} \(1 suites\)$", r.stdout, re.M)
+    assert gradle_log(gh) == []
+    assert glane.results(r)[0]["result"] == "merged"
+
+
+def test_shared_build_setup_change_reruns_the_suite(glane, gh):
+    glane.move_main("gradle/libs.versions.toml")
+    glane.enqueue()
+    r = glane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "merge: 01 main moved 1 commits — rerun (feature +shared build setup)" in merge_lines(r)
+    assert "(2 suites)" in r.stdout and gradle_log(gh) == []
+
+
+def test_compile_tasks_that_do_not_resolve_fall_back_to_a_rerun(glane, gh):
+    (gh.dir / "no_tasks").write_text("")
+    glane.move_main("core/C.kt")
+    glane.enqueue()
+    r = glane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "merge: 01 main moved 1 commits — rerun (core,feature +no compile command)" in merge_lines(r)
+    assert "(2 suites)" in r.stdout
+    assert gradle_log(gh) == [compile_tasks("feature") + " --dry-run"]  # only the resolve probe ran
+
+
+def test_red_compile_check_blocks_the_merge_like_a_red_suite(glane, gh):
+    (gh.dir / "compile_red").write_text("")
+    glane.move_main("core/C.kt")
+    glane.enqueue()
+    r = glane.land()
+    res = glane.results(r)
+    assert r.returncode == 1 and [(x["nn"], x["result"]) for x in res] == [("01", "red")]
+    assert res[0]["log"].endswith("-compile.log") and "compile error" in open(res[0]["log"]).read()
+    assert not any(c[:2] in (["pr", "create"], ["pr", "merge"]) for c in gh.calls())
+    assert not any(l.startswith("slice:") for l in r.stdout.splitlines())
+    assert glane.queue_nns() == []  # a red ticket leaves the queue until its fix is enqueued again
+
+
+def stack_batch(make_lane, gh, outside, third=False):
+    """Batch 01 (docs), 02 (feature)[, 03 (docs)]; the merge of 01 lands an `outside` commit on main."""
+    lane = make_lane(ticket_file="docs/D.md")
+    gh.set(land=True)
+    lane.move_main(outside, hook="after_merge")
+    lane.enqueue("01")
+    lane.enqueue("02", wt=lane.add_ticket("2", "feature/F.kt"))
+    if third:
+        lane.enqueue("03", wt=lane.add_ticket("3", "docs/E.md"))
+    return lane
+
+
+def test_main_moving_between_merges_compiles_the_next_ticket_then_merges_it(make_lane, gh):
+    lane = stack_batch(make_lane, gh, "core/C.kt")
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert [(x["nn"], x["result"]) for x in lane.results(r)] == [("01", "merged"), ("02", "merged")]
+    assert "merge: 02 main moved 1 commits — compile (core,feature)" in merge_lines(r)
+    assert gradle_log(gh) == [compile_tasks("feature") + " --dry-run", compile_tasks("feature")]
+    assert "then compile green after main moved" in (lane.queue.parent / "body-02.md").read_text()
+    assert "then compile" not in (lane.queue.parent / "body-01.md").read_text()
+
+
+def test_red_compile_between_merges_reds_that_ticket_and_requeues_the_rest(make_lane, gh):
+    lane = stack_batch(make_lane, gh, "core/C.kt", third=True)
+    (gh.dir / "compile_red").write_text("")
+    r = lane.land()
+    res = lane.results(r)
+    assert r.returncode == 1
+    assert [(x["nn"], x["result"]) for x in res] == [("01", "merged"), ("02", "red"), ("03", "requeued")]
+    assert res[1]["log"].endswith("-compile.log") and res[2]["reason"] == "stacked on a red ticket"
+    assert [l for l in r.stdout.splitlines() if l.startswith("slice:")] == [f"slice: 01 PR #42 merged @ {res[0]['sha']}"]
+    assert lane.queue_nns() == ["03"]
+
+
+def test_same_module_move_between_merges_requeues_the_next_ticket(make_lane, gh):
+    lane = stack_batch(make_lane, gh, "feature/Other.kt")
+    r = lane.land()
+    res = lane.results(r)
+    assert r.returncode == 1
+    assert [(x["nn"], x["result"]) for x in res] == [("01", "merged"), ("02", "requeued")]
+    assert res[1]["reason"] == "main moved: related"
+    assert "merge: 02 main moved 1 commits — rerun (feature)" in merge_lines(r)
+    assert gradle_log(gh) == [] and lane.queue_nns() == ["02"]
