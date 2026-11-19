@@ -56,10 +56,12 @@ B=~/.agents/skills/work-tickets/scripts/backlog.py   # in this repo: skills/work
      brief "feature: needs the /start chain". A session that runs `/start`
      on it publishes the real slices with `--epic`.
 4. File: `python3 $B new --title … --type bug|enhancement|task --area …
-   [--priority p1] [--hands-on] [--blocked-by …] [--state …] --body-file -
-   [--attach <png> …]`. The brief template and the field rules are in
-   [filing.md](references/filing.md). Hands-on = only the user can judge the
-   result (look, motion, feel, copy).
+   [--priority p1] [--hands-on] [--series …] [--blocked-by …] [--state …]
+   --body-file - [--attach <png> …]`. The brief template and the field rules
+   are in [filing.md](references/filing.md). Hands-on = only the user can
+   judge the result (look, motion, feel, copy). Series = one name for every
+   ticket of a move or refactor series in one area; it holds that area's
+   other tickets while the series is claimed (`work-tickets` § 2).
 5. State: `ready-for-agent` when a worker can act on the brief alone;
    `needs-info` when the expected behaviour is unknown; `ready-for-human`
    when the work needs credentials, a device or a decision only the user

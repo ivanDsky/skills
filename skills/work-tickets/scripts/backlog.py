@@ -114,8 +114,11 @@ class Lock:
         shutil.rmtree(self.path, ignore_errors=True)
 
 
+SERIES_RE = re.compile(r"[a-z0-9]+(-[a-z0-9]+)*")
+
+
 def new_ticket(**kw):
-    t = {"id": "", "title": "", "type": "task", "area": "", "epic": "",
+    t = {"id": "", "title": "", "type": "task", "area": "", "epic": "", "series": "",
          "priority": "p2", "state": "ready-for-agent", "hands_on": False,
          "blocked_by": [], "claimed_by": "", "claimed_at": "", "created": now(),
          "closed_at": "", "body": ""}
@@ -128,7 +131,7 @@ def new_ticket(**kw):
 class Local:
     """One markdown file per ticket under <git-common-dir>/backlog/tickets/."""
 
-    FIELDS = ["id", "title", "type", "area", "epic", "priority", "state", "hands-on",
+    FIELDS = ["id", "title", "type", "area", "epic", "series", "priority", "state", "hands-on",
               "blocked-by", "claimed-by", "claimed-at", "created", "closed-at"]
 
     def __init__(self, root):
@@ -267,7 +270,7 @@ class GitHub:
         state = pick("state:") or ("done" if i.get("state") == "CLOSED" else "ready-for-agent")
         return new_ticket(
             id=f"#{i['number']}", title=i["title"], type=pick("type:") or "task",
-            area=pick("area:"), epic=pick("epic:"),
+            area=pick("area:"), epic=pick("epic:"), series=pick("series:"),
             priority=next((l for l in labels if l in PRIORITIES), "p2"), state=state,
             hands_on="hands-on" in labels, blocked_by=blocked,
             claimed_by=meta.get("claimed-by", ""), claimed_at=meta.get("claimed-at", ""),
@@ -296,12 +299,13 @@ class GitHub:
         ls = [f"state:{t['state']}", f"type:{t['type']}", t["priority"]]
         ls += [f"area:{t['area']}"] if t["area"] else []
         ls += [f"epic:{t['epic']}"] if t["epic"] else []
+        ls += [f"series:{t['series']}"] if t["series"] else []
         ls += ["hands-on"] if t["hands_on"] else []
         return ls
 
     def create(self, t):
         for l in self.want_labels(t):
-            if l.startswith(("area:", "epic:")):
+            if l.startswith(("area:", "epic:", "series:")):
                 self.label(l)
         url = self.gh("issue", "create", "--title", t["title"], "--body-file", "-",
                       *sum((["--label", l] for l in self.want_labels(t)), []),
@@ -316,10 +320,10 @@ class GitHub:
         n = t["id"][1:]
         old = self.get(t["id"])
         have, want = set(old["labels"]), set(self.want_labels(t))
-        managed = lambda l: l.startswith(("state:", "type:", "area:", "epic:")) or l in PRIORITIES or l == "hands-on"
+        managed = lambda l: l.startswith(("state:", "type:", "area:", "epic:", "series:")) or l in PRIORITIES or l == "hands-on"
         args = []
         for l in sorted(want - have):
-            if l.startswith(("area:", "epic:")):
+            if l.startswith(("area:", "epic:", "series:")):
                 self.label(l)
             args += ["--add-label", l]
         for l in sorted(l for l in have - want if managed(l)):
@@ -363,7 +367,9 @@ def assets_dir(tid):
     return base / "assets" / tid.lstrip("#")
 
 
-def frontier(tickets, area="", type_="", epic="", ids=None):
+def frontier(tickets, area="", type_="", epic="", ids=None, skipped=None):
+    """Ready, unblocked tickets. A ticket whose area has a claimed ticket of another
+    series is held back; each hold is appended to `skipped` as a stderr line."""
     state = {t["id"]: t["state"] for t in tickets}
     out = []
     for t in tickets:
@@ -375,12 +381,24 @@ def frontier(tickets, area="", type_="", epic="", ids=None):
             continue
         if (area and t["area"] != area) or (type_ and t["type"] != type_) or (epic and t["epic"] != epic):
             continue
+        holders = [h for h in tickets if h["state"] == "claimed" and h["series"]
+                   and h["area"] == t["area"] and h["series"] != t["series"]]
+        if holders:
+            if skipped is not None:
+                names = ",".join(sorted({h["series"] for h in holders}))
+                skipped.append(f"skipped {t['id']}: area {t['area']} held by series {names} "
+                               f"({','.join(h['id'] for h in holders)})")
+            continue
         out.append(t)
     return sorted(out, key=lambda t: (t["priority"], t["created"], t["id"]))
 
 
 def line(t):
     extra = []
+    if t["epic"]:
+        extra.append(f"epic {t['epic']}")
+    if t["series"]:
+        extra.append(f"series {t['series']}")
     if t["blocked_by"]:
         extra.append("blocked-by " + ",".join(t["blocked_by"]))
     if t["claimed_by"]:
@@ -402,7 +420,9 @@ def cmd_init(b, a):
 def cmd_new(b, a):
     body = sys.stdin.read() if a.body_file == "-" else Path(a.body_file).read_text()
     blocked = [b.norm(x) for x in a.blocked_by.split(",") if x.strip()] if a.blocked_by else []
-    t = new_ticket(title=a.title, type=a.type, area=a.area, epic=a.epic or "",
+    if a.series and not SERIES_RE.fullmatch(a.series):
+        raise Fail(f"bad series {a.series!r} (want kebab-case)")
+    t = new_ticket(title=a.title, type=a.type, area=a.area, epic=a.epic or "", series=a.series or "",
                    priority=a.priority, state=a.state, hands_on=a.hands_on,
                    blocked_by=blocked, body=body)
     with Lock(lock_path()):
@@ -444,7 +464,10 @@ def cmd_show(b, a):
 def cmd_list(b, a):
     ts = b.load_all()
     if a.frontier:
-        ts = frontier(ts, a.area, a.type, a.epic)
+        skipped = []
+        ts = frontier(ts, a.area, a.type, a.epic, skipped=skipped)
+        for s in skipped:
+            print(s, file=sys.stderr)
     else:
         if a.state:
             ts = [t for t in ts if t["state"] == a.state]
@@ -468,7 +491,19 @@ def cmd_claim(b, a):
     ids = {b.norm(x) for x in a.ids.split(",") if x.strip()} if a.ids else None
     claimed = []
     with Lock(lock_path()):
-        for t in frontier(b.load_all(), a.area, a.type, a.epic, ids)[:a.max]:
+        skipped = []
+        for t in frontier(b.load_all(), a.area, a.type, a.epic, ids, skipped):
+            if len(claimed) >= a.max:
+                break
+            # a series and a non-series ticket of one area are never claimed in the same call
+            mixed = [c for c in claimed if c["area"] == t["area"] and c["series"] != t["series"]]
+            if mixed:
+                held = ",".join(c["id"] for c in mixed)
+                names = ",".join(sorted({c["series"] for c in mixed} - {""}))
+                skipped.append(f"skipped {t['id']}: area {t['area']} held by series {names} ({held})"
+                               if names else
+                               f"skipped {t['id']}: series {t['series']} waits for area {t['area']} work ({held})")
+                continue
             t.update(state="claimed", claimed_by=a.who, claimed_at=now())
             b.save(t, f"claimed by {a.who}", a.who)
             claimed.append(t)
@@ -477,6 +512,8 @@ def cmd_claim(b, a):
     else:
         for t in claimed:
             print(f"{t['id']}\t{t['title']}")
+    for s in skipped:
+        print(s, file=sys.stderr)
     if not claimed:
         print("nothing to claim", file=sys.stderr)
         return 3
@@ -495,17 +532,26 @@ def cmd_unclaim(b, a):
 def cmd_set(b, a):
     if a.state == "claimed":
         raise Fail("use `claim` to claim")
+    if a.state is None and a.series is None:
+        raise Fail("set needs --state or --series")
+    if a.state and not a.note:
+        raise Fail("--state needs --note")
+    if a.series and not SERIES_RE.fullmatch(a.series):
+        raise Fail(f"bad series {a.series!r} (want kebab-case)")
     with Lock(lock_path()):
         t = b.get(a.id)
-        t["state"] = a.state
-        if a.state in ("needs-info", "ready-for-agent", "ready-for-human"):
-            t.update(claimed_by="", claimed_at="")  # back in the pool; needs-check/done keep who did it
-        if a.state in CLOSED and not t["closed_at"]:
-            t["closed_at"] = now()
-        elif a.state not in CLOSED:
-            t["closed_at"] = ""
-        b.save(t, f"{a.state}: {a.note}", a.who)
-    print(f"{t['id']} {a.state}")
+        if a.series is not None:
+            t["series"] = a.series
+        if a.state:
+            t["state"] = a.state
+            if a.state in ("needs-info", "ready-for-agent", "ready-for-human"):
+                t.update(claimed_by="", claimed_at="")  # back in the pool; needs-check/done keep who did it
+            if a.state in CLOSED and not t["closed_at"]:
+                t["closed_at"] = now()
+            elif a.state not in CLOSED:
+                t["closed_at"] = ""
+        b.save(t, f"{a.state}: {a.note}" if a.state else a.note, a.who)
+    print(f"{t['id']} {a.state or 'series ' + (t['series'] or 'cleared')}")
 
 
 def cmd_comment(b, a):
@@ -531,6 +577,7 @@ def main(argv=None):
     n.add_argument("--type", choices=TYPES, required=True)
     n.add_argument("--area", required=True)
     n.add_argument("--epic")
+    n.add_argument("--series", help="refactor or move series name (kebab-case)")
     n.add_argument("--priority", choices=PRIORITIES, default="p2")
     n.add_argument("--state", choices=[s for s in STATES if s not in ("claimed",) + tuple(CLOSED)],
                    default="ready-for-agent")
@@ -566,10 +613,11 @@ def main(argv=None):
     u.add_argument("id")
     u.add_argument("--note", required=True)
 
-    st = add("set", help="move a ticket to another state")
+    st = add("set", help="move a ticket to another state, or change its series")
     st.add_argument("id")
-    st.add_argument("--state", choices=STATES, required=True)
-    st.add_argument("--note", required=True)
+    st.add_argument("--state", choices=STATES)
+    st.add_argument("--series", help="series name; empty clears it")
+    st.add_argument("--note", help="required with --state")
 
     cm = add("comment")
     cm.add_argument("id")

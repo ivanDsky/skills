@@ -193,3 +193,88 @@ def test_real_gh_issue_json_parses():
     assert ts[0]["id"] == "#15066" and ts[0]["state"] == "ready-for-agent"
     closed = [t for t in ts if t["closed_at"]]
     assert closed and all(t["state"] == "done" for t in closed)
+
+
+# ---------------------------------------------------------------- series hold
+
+def test_series_claim_holds_same_area_feature_tickets(local):
+    s1 = local.new("Move packages 1", "core", "task", "--series", "move-core")
+    feat = local.new("Feature in core", "core", "enhancement")
+    other = local.new("Feature elsewhere", "sync", "enhancement")
+    got, _ = claim_ids(local, "--ids", s1)
+    assert got == [s1]
+    p = local.run("claim", "--as", "w", check=False)
+    assert [l.split("\t")[0] for l in p.stdout.splitlines()] == [other]
+    assert f"skipped {feat}: area core held by series move-core ({s1})" in p.stderr
+    p = local.run("list", "--frontier", "--json")
+    assert [t["id"] for t in json.loads(p.stdout)] == []
+    assert f"skipped {feat}: area core held by series move-core ({s1})" in p.stderr
+
+
+def test_series_done_releases_the_hold(local):
+    s1 = local.new("Move packages 1", "core", "task", "--series", "move-core")
+    feat = local.new("Feature in core", "core", "enhancement")
+    claim_ids(local, "--ids", s1)
+    local.run("set", s1, "--state", "done", "--note", "merged")
+    got, rc = claim_ids(local)
+    assert (got, rc) == ([feat], 0)
+
+
+def test_same_series_ticket_is_not_held(local):
+    s1 = local.new("Move 1", "core", "task", "--series", "move-core")
+    s2 = local.new("Move 2", "core", "task", "--series", "move-core")
+    claim_ids(local, "--ids", s1)
+    got, rc = claim_ids(local)
+    assert (got, rc) == ([s2], 0)
+
+
+def test_ids_on_held_ticket_exits_3_with_skip_line(local):
+    s1 = local.new("Move 1", "core", "task", "--series", "move-core")
+    feat = local.new("Feature in core", "core", "enhancement")
+    claim_ids(local, "--ids", s1)
+    p = local.run("claim", "--as", "w", "--ids", feat, check=False)
+    assert p.returncode == 3 and p.stdout == ""
+    assert f"skipped {feat}: area core held by series move-core ({s1})" in p.stderr
+
+
+def test_set_series_changes_and_clears_it(local):
+    a = local.new("A", "core")
+    local.run("set", a, "--series", "move-core")
+    t = local.json("show", a)
+    assert (t["series"], t["state"]) == ("move-core", "ready-for-agent")
+    assert "series move-core" in local.out("show", a)
+    local.run("set", a, "--series", "")
+    assert local.json("show", a)["series"] == ""
+    assert local.run("set", a, "--series", "Bad Name", check=False).returncode == 1
+
+
+def test_github_series_label_round_trip(github, gh):
+    a = github.new("Move 1", "core", "task", "--series", "move-core")
+    assert "series:move-core" in gh.labels(1)
+    assert github.json("show", a)["series"] == "move-core"
+    github.run("set", a, "--series", "move-pkgs")
+    assert "series:move-pkgs" in gh.labels(1) and "series:move-core" not in gh.labels(1)
+    github.run("set", a, "--series", "")
+    assert not [l for l in gh.labels(1) if l.startswith("series:")]
+    b = github.new("Move 2", "core", "task", "--series", "move-core")
+    feat = github.new("Feature", "core", "enhancement")
+    claim_ids(github, "--ids", b)
+    p = github.run("claim", "--as", "w", check=False)
+    assert p.returncode == 3
+    assert f"skipped {feat}: area core held by series move-core ({b})" in p.stderr
+
+
+def test_series_claimed_first_holds_later_feature_in_same_call(local):
+    s1 = local.new("Move 1", "core", "task", "--series", "move-core", "--priority", "p1")
+    feat = local.new("Feature", "core", "enhancement")
+    p = local.run("claim", "--as", "w")
+    assert [l.split("\t")[0] for l in p.stdout.splitlines()] == [s1]
+    assert f"skipped {feat}: area core held by series move-core ({s1})" in p.stderr
+
+
+def test_feature_claimed_first_holds_later_series_in_same_call(local):
+    feat = local.new("Feature", "core", "enhancement", "--priority", "p1")
+    s1 = local.new("Move 1", "core", "task", "--series", "move-core")
+    p = local.run("claim", "--as", "w")
+    assert [l.split("\t")[0] for l in p.stdout.splitlines()] == [feat]
+    assert f"skipped {s1}: series move-core waits for area core work ({feat})" in p.stderr

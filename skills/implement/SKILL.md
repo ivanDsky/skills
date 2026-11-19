@@ -46,7 +46,11 @@ recollection.
    `merge_lane.py wait --who <slug> --nn <NN>` background bash job for
    that ticket (the lane is shared by every session: batches of up to 5,
    one suite per batch top, two batches pipelined, then PR + merge per
-   ticket). It handles each result line per merge-loop.md (red → fix
+   ticket). A series of independent slices (no slice needs another merged
+   first, e.g. mechanical moves of different packages) is built in
+   parallel or back to back and enqueued together, so one batch tests them
+   with one suite; never enqueue a series one ticket at a time as each
+   finishes. It handles each result line per merge-loop.md (red → fix
    worker, conflict → rebase worker, refused/closed/stuck → the reason
    first, waiting_user → ask tool). The orchestrator also runs one
    `main_health.py watch --who <slug>`
@@ -144,7 +148,9 @@ recollection.
      `device: used because <reason>`, and the installed build comes from
      `deliver`'s `ship_apk.py` (`deliver`/references/build-identity.md):
      a unique versionCode from the ledger shared by all worktrees, so
-     parallel agents never downgrade or overwrite each other.
+     parallel agents never downgrade or overwrite each other. The one
+     planned device use is the device-tuned bug: one check APK per round
+     for the user, before any PR (`work-tickets` § 3).
      Environment/build friction (missing adb, SDK, suspicious Gradle red)
      goes through `android-env`'s checklist before being believed or
      re-derived.

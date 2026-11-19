@@ -139,6 +139,11 @@ main stops all merges but the fix (Red main below).
 - **Parallel agents**: tickets that touch the same file never run at the
   same time; a shared registry/`when`/DI module edit is its own tiny
   ticket merged first (`micro-architecture`).
+- **Independent series enqueue together**: slices that need none of each
+  other merged first (mechanical moves of different packages) are built
+  in parallel or back to back and enqueued at once, so one lane batch
+  tests them with one suite. A move or refactor series also holds feature
+  tickets in its module until it lands (`work-tickets` claim skips them).
 - **Conflict on rebase** > ~50 lines, or in a file another in-flight ticket
   owns → the slicing was wrong: stop, re-slice, report. Never resolve by
   dropping the other side.

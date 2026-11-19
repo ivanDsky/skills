@@ -31,7 +31,7 @@ the backlog directory for the local backend.
 |---|---|---|
 | Ticket | one issue, id `#123` | one file `tickets/T0001-<slug>.md`, id `T0001` |
 | Where | GitHub, visible from the web and phone | `<git-common-dir>/backlog/`, visible to every worktree of the clone on this machine, never committed |
-| Fields | labels (`state:*`, `type:*`, `area:*`, `epic:*`, `p1`–`p3`, `hands-on`) plus a `Blocked by:` body line | YAML frontmatter |
+| Fields | labels (`state:*`, `type:*`, `area:*`, `epic:*`, `series:*`, `p1`–`p3`, `hands-on`) plus a `Blocked by:` body line | YAML frontmatter |
 | Screenshots | copied to `<git-common-dir>/backlog/assets/<id>/` and linked by path (gh cannot upload images) | same directory |
 | Claims | a local lock, then the `state:claimed` label and a `claimed-by` comment | a local lock, then the frontmatter |
 
@@ -46,6 +46,7 @@ setup. Two machines claiming from one GitHub backlog can race.
 | `type` | `bug`, `enhancement`, `task` | filer |
 | `area` | kebab-case product area (`leaderboard`, `sync`, `strands-editor`) | filer; workers filter on it |
 | `epic` | the feature slug when the ticket comes from a spec, else empty | `write-tickets` |
+| `series` | optional kebab-case name of a refactor or move series that spans several tickets, else empty; see Frontier | filer; `set ID --series S` changes it, `--series ''` clears it |
 | `priority` | `p1` (broken for users), `p2` (default), `p3` (polish) | filer |
 | `state` | see below; exactly one | lifecycle |
 | `hands-on` | yes when only the user can judge the result (UI, motion, feel) | filer |
@@ -73,7 +74,18 @@ ready-for-human: judgment, credentials or device access no agent has.   wontfix:
 ```
 
 - **Frontier**: `ready-for-agent`, every `blocked-by` id `done`, sorted by
-  priority and then age.
+  priority and then age. A ticket is held back while a `claimed` ticket
+  with a different `series` (or none) and the same `area` exists: a series
+  is a refactor or move spread over several tickets, and `claimed` lasts
+  until the ticket merges, so feature tickets in that module wait for the
+  series to land. `area` is the module proxy. Tickets of the held area's own
+  series are not held. `claim` (also with `--ids`) and `list --frontier`
+  both apply the hold and print one line per held ticket on stderr:
+  `skipped ID: area A held by series S (claimed ids)`.
+  The hold also applies inside one `claim` call: once a ticket is claimed, a
+  later candidate of the same area whose series differs is skipped, in either
+  order, so a series never starts while a feature ticket in its area is being
+  claimed alongside it.
 - **`needs-check`**: the change is merged (dark or live) and waits for the
   user's hands-on check. The feedback session batches these into one build
   (`file-tickets` § Check batch). Workers never ask the user for a check.
@@ -84,12 +96,13 @@ ready-for-human: judgment, credentials or device access no agent has.   wontfix:
 
 | Need | Command |
 |---|---|
-| File | `new --title T --type bug --area A [--priority p1] [--hands-on] [--epic S] [--blocked-by ID,ID] [--state needs-info] --body-file F [--attach PNG ...]` → prints the id |
+| File | `new --title T --type bug --area A [--priority p1] [--hands-on] [--epic S] [--series S] [--blocked-by ID,ID] [--state needs-info] --body-file F [--attach PNG ...]` → prints the id |
 | Look for duplicates before filing | `list --search "words" --all` |
 | Read | `show ID` |
 | Frontier, filtered | `list --frontier [--area A] [--type T] [--epic S] [--json]` |
 | Claim a pack | `claim --as NAME [--area A] [--type T] [--epic S] [--ids ID,ID] [--max 5]` → the claimed ids, possibly none |
 | Give one back | `unclaim ID --note "why"` |
+| Set or clear the series | `set ID --series S` (`--series ''` clears; no `--note` needed) |
 | Move state | `set ID --state needs-check --note "PR #N merged @ sha"` (`done`, `wontfix`, `needs-info`, `ready-for-agent`, …) |
 | Comment | `comment ID --note "…"` |
 | Attach | `attach ID PATH ...` |
