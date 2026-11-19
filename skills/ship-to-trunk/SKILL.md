@@ -118,9 +118,18 @@ main stops all merges but the fix (Red main below).
    flip, never per slice.
 5. **Flip PR**: release default on + version bump + changelog. This is the
    release; `deliver` ships it.
-6. **Cleanup ticket**: remove the flag and the dead branch once the flip is
-   released; written at ticket time, scheduled right after the flip. Stale
-   flags are debt (`ponytail-debt` lists them).
+6. **Flag removal, batched**: a flag is shipped-on once its flip is
+   released. One open "Remove the shipped-on flags" ticket at a time
+   removes every shipped-on flag on fresh `origin/main` (flag, dead branch,
+   debug override): one PR, one commit per flag, one suite. Never one PR per
+   flag: removals are behavior-neutral, so they are the cheapest PRs to
+   batch. A red suite drops the failing flag's commit (under
+   `pr-check: none`, the fix worker on the lane's `red` result), and that
+   flag waits for the next batch; no fixes inside the removal PR. A
+   feature's own cleanup ticket, written up front, is never worked alone:
+   once its flags ship on it folds into the open batch ticket (or becomes
+   it) and closes with a pointer. Stale flags are debt (`ponytail-debt`
+   lists them).
 
 ## Decision rules
 

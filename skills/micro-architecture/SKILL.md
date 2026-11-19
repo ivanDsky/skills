@@ -118,7 +118,7 @@ agents; (c) testable without scaffolding for unrelated concerns.
   switch in a later slice behind the flag.
 - **Replacements**: branch by abstraction (seam over the old
   implementation → new implementation behind it → flag selects → old one
-  deleted in the cleanup ticket); expand/contract for data and APIs.
+  deleted in the batched flag removal); expand/contract for data and APIs.
 - **Gate at the entry** (route, menu item, DI choice), never scattered
   checks. Rules: `ship-to-trunk`/references/slicing.md.
 

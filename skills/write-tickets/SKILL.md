@@ -35,7 +35,10 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
    release) and the walking skeleton follows behind it; then slices; a
    shared-file edit (registry, DI module, nav graph, `when` entry) is its
    own ticket merged first; the flip ticket and the cleanup ticket are
-   written up front, last. Rules: `ship-to-trunk`/references/slicing.md.
+   written up front, last. The cleanup ticket is never worked alone: once
+   its flags ship on it folds into the batched flag-removal ticket
+   (`ship-to-trunk` lifecycle step 6). Rules:
+   `ship-to-trunk`/references/slicing.md.
 3. Size: one ticket = one fresh subagent context, one sitting, and by default
    one user-visible capability end to end (data → domain → ViewModel → UI),
    never one layer. Merge mechanical pieces (DI/nav registration, strings,

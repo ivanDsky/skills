@@ -51,6 +51,11 @@ and `git log` show how far each got).
 go to § 5. The claim is atomic between sessions on this machine. Never edit a
 ticket's state by hand to claim it.
 
+A flag-removal ticket (`ship-to-trunk` lifecycle step 6) is claimed as the
+whole batch: re-check fresh `origin/main` for every other shipped-on flag,
+add them to the ticket, and close any per-feature cleanup ticket it absorbs
+with a pointer. Never land one flag's removal alone.
+
 Then read every ticket of the pack and collect what only the user can
 answer: a product or design choice, scope, a behavior the ticket leaves
 open. Ask them all in one form before dispatch, at most 5 questions, each
