@@ -153,7 +153,7 @@ main stops all merges but the fix (Red main below).
 ## Ledger
 
 One line per event in `.scratch/<slug>/ledger.md`:
-`slice: <NN> PR #<n> merged @ <sha>` ·
+`slice: <NN> PR #<n> merged @ <sha>` (the squash commit on main) ·
 `flag: <Key> added | flipped | removed (PR #<n>)` ·
 `live: <NN> <what> approved by user` ·
 `held: <NN> PR #<n> (main red)` ·

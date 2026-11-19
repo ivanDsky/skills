@@ -120,9 +120,12 @@ waiting room.
 Results (one JSON line per ticket, `{"who", "nn", "result", …}`) and what
 the orchestrator does next:
 
-- **merged** (`slice: <NN> PR #<n> merged @ <sha7>`, plus the `merge: …`
-  ledger lines): close the ticket, start the `main_health.py watch` job
-  when none is running.
+- **merged** (`slice: <NN> PR #<n> merged @ <sha7>` with the squash commit
+  on main, or `merged (main sha unresolved; tested @ <sha7>)` when gh
+  reports no merge commit; plus the `merge: … suite green tested @ <sha7>`
+  ledger lines, which name the tested stack, never a main commit; the result
+  line carries both as `sha` (null when unresolved) and `tested`): close the
+  ticket, start the `main_health.py watch` job when none is running.
 - **red** (log path in the line): the ticket turned the batch suite red;
   dispatch a fix worker into the same worktree with the log path (prompt as
   `implement`/references/dispatch.md, hard-rules block included), then

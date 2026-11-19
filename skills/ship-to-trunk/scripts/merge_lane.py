@@ -53,7 +53,9 @@ the wait (exit 1, one stderr line).
 `land` output: one JSON line per ticket touched, {"who","nn","result",...},
 plus plain ledger lines (`merge: ...`, `slice: ...`; lines not starting with
 `{`). result is one of
-  merged        (+ pr, sha)
+  merged        (+ pr, sha, tested): sha is the squash commit on main (sha7;
+                null when gh reports no merge commit), tested the PR head
+                the lane pushed and merged (sha7)
   conflict      (+ files): rebase conflict, rebase aborted
   red           (+ log): the ticket turned the suite red
   waiting_user  (+ url): `no_merge` ticket, PR open, suite green
@@ -154,10 +156,13 @@ Sequence:
     with k+1..n requeued ("stacked on a refused ticket"). 7.6 delete the remote
     branch, `git worktree remove`, delete the local branch.
  8. Ledger lines, tickets named <who>/<NN>: `merge: batch <labels> suite
-    green @ <sha7>[, compile green @ <sha7>] (<s> suites[, <c> compiles])`,
-    each rerun decision `merge: <labels> main moved <k> commits - rerun|
-    compile|push (<modules>)` (k counts outside commits only), and one
-    `slice: <NN> PR #<n> merged @ <sha7>` per merge, before its result line.
+    green tested @ <sha7>[, compile green tested @ <sha7>] (<s> suites[,
+    <c> compiles])` (the tested stack, not main), each rerun decision
+    `merge: <labels> main moved <k> commits - rerun|compile|push (<modules>)`
+    (k counts outside commits only), and one `slice: <NN> PR #<n> merged @
+    <sha7>` per merge (the squash commit on main, from `gh pr view <n> --json
+    mergeCommit`; `slice: <NN> PR #<n> merged (main sha unresolved; tested @
+    <sha7>)` when gh reports none), before its result line.
  9. Lane events (`EventLog`): one JSON line per enqueue, suite or compile
     check, ticket result, main-moved decision and ledger line, appended to
     `<git-common-dir>/agent-builds/lane-events.jsonl` (main_health's ledger
@@ -734,6 +739,12 @@ def pr_merged(wt, pr):
     return v.returncode == 0 and v.stdout.strip() == "MERGED"
 
 
+def merge_commit(wt, pr):
+    """The squash commit GitHub put on main for merged PR `pr`, or None when gh reports none."""
+    v = run("gh", "pr", "view", pr, "--json", "mergeCommit", "-q", ".mergeCommit.oid", cwd=wt, check=False)
+    return (v.stdout.strip() if v.returncode == 0 else "") or None
+
+
 def gh_merge(wt, pr, head, main):
     """Squash-merge PR `pr` at `head`, checked on origin/main `main`: (None, False) once
     merged, else (gh's error, main moved). A transient refusal (MERGE_TRANSIENT) is
@@ -1061,9 +1072,9 @@ class Batch:
         L, green = self.land, self.green
         top7 = green[-1]["head_t"][:7]
         after_compile = self.tag == "compile"
-        then = f", compile green @ {top7}" if after_compile else ""
+        then = f", compile green tested @ {top7}" if after_compile else ""
         ran = f"{self.suites} suites" + (f", {self.compiles} compiles" if self.compiles else "")
-        L.ledger(f"merge: batch {labels(green)} suite green @ {self.suite7}{then} ({ran})", green)
+        L.ledger(f"merge: batch {labels(green)} suite green tested @ {self.suite7}{then} ({ran})", green)
         prev_t = self.base
         for i, e in enumerate(green):
             if not self.merge_one(e, green[i:], prev_t, after_compile):
@@ -1160,13 +1171,16 @@ class Batch:
                 L.emit(e, "refused", self.pipe, pr=int(pr), reason=err)
                 L.requeue(rest[1:], "stacked on a refused ticket", self.pipe)
             return False
+        squash = merge_commit(wt, pr)  # gh runs in wt: resolve before the worktree goes
         run("git", "push", "origin", "--delete", e["branch"], cwd=wt, check=False)
         run("git", "worktree", "remove", wt, cwd=L.repo, check=False)
         run("git", "branch", "-D", e["branch"], cwd=L.repo, check=False)
         self.merged += 1
+        sha = squash and squash[:7]
+        where = f"@ {sha}" if sha else f"(main sha unresolved; tested @ {head[:7]})"
         # The slice line before the result: a `wait` stops reading at the last result.
-        L.ledger(f"slice: {e['nn']} PR #{pr} merged @ {head[:7]}", [e])
-        L.emit(e, "merged", self.pipe, pr=int(pr), sha=head[:7])
+        L.ledger(f"slice: {e['nn']} PR #{pr} merged {where}", [e])
+        L.emit(e, "merged", self.pipe, pr=int(pr), sha=sha, tested=head[:7])
         return True
 
 

@@ -16,8 +16,10 @@ State lives in $GH_FAKE_DIR/state.json (written by the test):
   create_url   URL printed by `gh pr create` (the PR is registered OPEN)
   create_error stderr of a failing `gh pr create` (exit 1, no PR)
   land   true: a merge also squashes the PR head onto origin's main (one new
-         commit on main, like GitHub's squash), then runs the executable
-         $GH_FAKE_DIR/after_merge when the test wrote one (main moves under the lane)
+         commit on main, like GitHub's squash) and records it as the PR's
+         mergeCommit, then runs the executable $GH_FAKE_DIR/after_merge when
+         the test wrote one (main moves under the lane); without land a merged
+         PR's mergeCommit stays null, as gh reports a PR without one
   logs   {"<run id>": `gh run view --log-failed` text}; a run absent here
          fails like an expired log
   jobs   {"<run id>": `gh run view --json jobs` list}; absent → gh error
@@ -77,8 +79,11 @@ elif args[:2] == ["pr", "view"]:
     if pr is None:
         print("no pull requests found", file=sys.stderr)
         sys.exit(1)
-    if opt("-q") == ".state":
-        print(pr["state"])
+    if opt("-q"):  # a dotted path like `.state` or `.mergeCommit.oid`; null prints an empty line, like gh
+        v = pr
+        for k in opt("-q").lstrip(".").split("."):
+            v = v.get(k) if isinstance(v, dict) else None
+        print("" if v is None else v)
     else:
         print(json.dumps(project(pr, opt("--json"))))
 elif args[:2] == ["pr", "create"]:
@@ -122,6 +127,8 @@ elif args[:2] == ["pr", "merge"]:
             tree = git("merge-tree", "--write-tree", main, opt("--match-head-commit")).splitlines()[0]
             squash = git("commit-tree", tree, "-p", main, "-m", f"squash of #{args[2]}").strip()
             git("push", "-q", "origin", squash + ":refs/heads/main")
+            pr["mergeCommit"] = {"oid": squash}
+            save()
             hook = os.path.join(d, "after_merge")
             if os.access(hook, os.X_OK):
                 subprocess.run([hook], check=True)
