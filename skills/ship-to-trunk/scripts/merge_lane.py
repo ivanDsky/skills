@@ -100,12 +100,14 @@ Sequence:
     command in PROFILE's `pr-check: none` comment, else debug + unit
     `runner:` + `structure:`; log `lane/logs/lane-<NN-NN>-<sha7>.log`
     (`...-compile.log` for a compile check, step 6). PROFILE `- e2e: <cmd>
-    # when: <module globs>` (e.g. `app, feature:*:api`): when the batch's
-    commits touch a matching module (no `when:`, or no module graph: every
-    suite), the check is `<suite> && <cmd>` in the same run and slot, with
-    the marker lines `merge_lane: e2e start` and `merge_lane: e2e rc=<n>
-    wall_s=<s>` in the log. A red e2e is a red suite (bisect included);
-    compile checks never run it.
+    # when: <module globs>` (a comma-separated list, e.g. `app,
+    feature:*:api`; `none`/`off` = no key): when the batch's commits touch a
+    matching module directly (no dependency closure) or the shared build
+    setup (no `when:`, or no module graph: every suite), the check is
+    `<suite> && <cmd>` in the same run and slot, with the marker lines
+    `merge_lane: e2e start` and `merge_lane: e2e rc=<n> wall_s=<s>` in the
+    log. A red e2e is a red suite (bisect included); compile checks never
+    run it.
  5. Red batch: binary search over prefix length (one suite or compile check
     per step on that prefix's top head, no extra rebases). The first ticket
     that turns the prefix red gets `red`; the green prefix proceeds; tickets
@@ -256,25 +258,36 @@ def suite_command(wt):
 
 E2E_START = re.compile(r"^merge_lane: e2e start$", re.M)
 E2E_END = re.compile(r"^merge_lane: e2e rc=\d+ wall_s=(\d+)$", re.M)
+# `when: <glob>, <glob>, ...`: a comma-separated list, each glob optionally backticked; prose after it is ignored.
+E2E_WHEN = re.compile(r"\bwhen:\s*(`?[\w:*?\[\]-]+`?(?:\s*,\s*`?[\w:*?\[\]-]+`?)*)")
+SHARED_SETUP = "shared build setup"  # e2e trigger entry for a batch that touched SHARED_ROOT_FILES
+
+
+def e2e_globs(comment):
+    """Module globs of an `e2e:` comment's `when:` list (a leading `:` dropped), [] without one."""
+    m = E2E_WHEN.search(comment or "")
+    return [g.strip("` ").lstrip(":") for g in m.group(1).split(",")] if m else []
 
 
 def e2e_plan(wt, base, head):
     """PROFILE `e2e:` step for a suite on base..head: (command or None, trigger), or
-    (None, None) without the key. `when: <globs>` in its comment names the modules
-    whose change makes it due (fnmatch on `feature:play` style names, a leading `:`
-    ignored); trigger = the batch modules that matched (no `when:`: all of them).
-    No `when:` or no module graph -> due on every suite."""
+    (None, None) without the key (or with `none`/`off`). The `when:` globs name the
+    modules whose change makes it due (fnmatch on `feature:play` style names); only
+    modules the batch touches count, not their dependents (`app` depends on
+    everything). trigger = the batch modules that matched (no `when:`: all of them),
+    plus SHARED_SETUP when the batch touched the shared build setup, which makes it
+    due too. No `when:` or no module graph -> due on every suite."""
     cmd, comment = profile_line(wt, "e2e")
-    if not cmd:
+    if not cmd or cmd.lower() in ("none", "off"):
         return None, None
-    m = re.search(r"\bwhen:\s*([^;]*)", comment or "")
-    globs = [g.lstrip(":") for g in re.split(r"[,\s]+", m.group(1)) if g] if m else []
+    globs = e2e_globs(comment)
     graph = module_graph(wt)
-    mods = sorted(to_modules(graph[0], names(wt, base, head))[0]) if graph else []
-    if not globs or not graph:
-        return cmd, mods
-    hit = [x for x in mods if any(fnmatch.fnmatchcase(x, g) for g in globs)]
-    return (cmd if hit else None), hit
+    if not graph:
+        return cmd, []
+    mods, shared = to_modules(graph[0], names(wt, base, head))
+    hit = [x for x in sorted(mods) if not globs or any(fnmatch.fnmatchcase(x, g) for g in globs)]
+    hit += [SHARED_SETUP] if shared else []
+    return (cmd if hit or not globs else None), hit
 
 
 def with_e2e(suite, e2e):

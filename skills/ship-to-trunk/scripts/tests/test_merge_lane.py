@@ -184,29 +184,55 @@ def commit_files(repo, *files):
     return base, git("rev-parse", "HEAD", cwd=repo)
 
 
+@pytest.mark.parametrize("comment,globs", [
+    ("when: app, :feature:*:api; main CI runs it on every push", ["app", "feature:*:api"]),
+    ("when: app,feature:*:api", ["app", "feature:*:api"]),
+    ("when: feature:*:api. User ruling 2026-11-19: the e2e tier boots the app", ["feature:*:api"]),  # prose tail
+    ("when: feature:*:api — e2e boots the app", ["feature:*:api"]),  # prose tail, no stop sign
+    ("when: `app`, `:core:navigation`", ["app", "core:navigation"]),  # backticks
+    ("when: app, core:navigation.", ["app", "core:navigation"]),  # trailing dot
+    ("JVM end-to-end tier, no filter", []),
+])
+def test_e2e_globs_read_only_the_comma_separated_when_list(comment, globs):
+    assert ml.e2e_globs(comment) == globs
+
+
 @pytest.mark.parametrize("comment,files,trigger", [
     ("when: app, :feature:*:api; main CI runs it on every push", ["feature/home/api/A.kt"], ["feature:home:api"]),
     ("when: app,feature:*:api", ["app/A.kt", "docs/a.md"], ["app"]),
+    ("when: `feature:*:api`. The e2e tier boots the app", ["feature/home/api/A.kt"], ["feature:home:api"]),
     ("JVM end-to-end tier, no filter", ["docs/a.md"], ["docs"]),
+    ("when: app, feature:*:api", ["gradle/libs.versions.toml"], [ml.SHARED_SETUP]),  # shared build setup alone
+    ("when: app", ["build-logic/src/C.kt", "docs/a.md"], [ml.SHARED_SETUP]),
+    ("when: docs", ["build.gradle.kts", "docs/a.md"], ["docs", ml.SHARED_SETUP]),
 ])
 def test_e2e_plan_is_due_when_the_batch_touches_a_when_module(tmp_path, comment, files, trigger):
     repo = nested_repo(tmp_path / "r", E2E_KEY + comment + "\n")
     assert ml.e2e_plan(repo, *commit_files(repo, *files)) == ("./gradlew :app:e2eTest", trigger)
 
 
-@pytest.mark.parametrize("files", [
-    ["feature/home/impl/B.kt", "docs/a.md"],  # no module matches
-    ["gradle/libs.versions.toml"],            # shared build setup alone
-    ["README.md"],                            # outside every module
+@pytest.mark.parametrize("comment,files", [
+    ("when: app, feature:*:api", ["feature/home/impl/B.kt", "docs/a.md"]),  # no module matches
+    ("when: app, feature:*:api", ["README.md"]),                            # outside every module
+    ("when: app", ["feature/home/api/A.kt"]),  # a dependency of app: direct touches only, no closure
+    ("when: feature:*:api — e2e boots the app", ["app/A.kt"]),  # prose after the list is no glob
 ])
-def test_e2e_plan_is_not_due_when_no_batch_module_matches(tmp_path, files):
-    repo = nested_repo(tmp_path / "r", E2E_KEY + "when: app, feature:*:api\n")
+def test_e2e_plan_is_not_due_when_no_batch_module_matches(tmp_path, comment, files):
+    repo = nested_repo(tmp_path / "r", E2E_KEY + comment + "\n")
     assert ml.e2e_plan(repo, *commit_files(repo, *files)) == (None, [])
 
 
-def test_e2e_plan_without_the_key_is_none_and_without_a_module_graph_is_due(tmp_path):
-    repo = nested_repo(tmp_path / "r", "- runner: ./gradlew test\n")
+@pytest.mark.parametrize("profile", [
+    "- runner: ./gradlew test\n",
+    "- e2e: none   # when: app\n",
+    "- e2e: OFF\n",
+])
+def test_e2e_plan_without_the_key_or_turned_off_is_none(tmp_path, profile):
+    repo = nested_repo(tmp_path / "r", profile)
     assert ml.e2e_plan(repo, *commit_files(repo, "app/A.kt")) == (None, None)
+
+
+def test_e2e_plan_without_a_module_graph_is_due(tmp_path):
     flat = nested_repo(tmp_path / "flat", E2E_KEY + "when: app\n", edges=None)
     assert ml.e2e_plan(flat, *commit_files(flat, "x.kt")) == ("./gradlew :app:e2eTest", [])
 
@@ -293,10 +319,11 @@ class Lane:
         git("commit", "-q", "-m", f"feat: ticket {nn}", cwd=wt)
         return wt
 
-    def move_main(self, *files, times=1, hook="on_build", only=None):
+    def move_main(self, *files, times=1, hook="on_build", only=None, also=""):
         """Land up to `times` outside commits touching `files` on origin/main, one per call of the
         $GH_FAKE_DIR/<hook> script: `on_build` runs in every suite/gradle run, `after_merge` in every merge.
-        `only`: a shell pattern the calling directory must match ("*/wt/0": batch A's checks only)."""
+        `only`: a shell pattern the calling directory must match ("*/wt/0": batch A's checks only).
+        `also`: a shell line run in the main checkout before the commit (an edit beyond `files`)."""
         script = Path(os.environ["GH_FAKE_DIR"]) / hook
         quoted = " ".join(f"'{f}'" for f in files)
         guard = f'case "$(pwd)" in {only}) ;; *) exit 0;; esac\n' if only else ""
@@ -306,6 +333,7 @@ class Lane:
 echo $((n + 1)) > "$0.n"
 cd '{self.co}' && git pull -q --ff-only origin main || exit 1
 for f in {quoted}; do mkdir -p "$(dirname "$f")"; echo "$n" > "$f"; done
+{also}
 git add -A && git commit -q -m "outside $n" && git push -q origin main
 """)
         script.chmod(0o755)
@@ -993,6 +1021,33 @@ def test_red_e2e_step_is_a_red_suite_and_the_bisect_runs_it_too(e2e_lane, gh):
     assert [(e["phase"], e["batch_size"], e["result"], e["e2e"]["ran"]) for e in events(lane, "suite")] == [
         ("stack", 2, "red", True), ("bisect", 1, "green", True)]
     assert e2e_runs(gh) == 2
+
+
+def test_compile_check_after_main_moved_never_runs_the_e2e_step(e2e_lane, gh):
+    lane = e2e_lane("feature")
+    lane.move_main("core/C.kt")
+    lane.enqueue()
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "merge: test-run/01 main moved 1 commits — compile (core,feature)" in merge_lines(r)
+    assert e2e_runs(gh) == 1  # the suite's only
+    (suite,), (check,) = events(lane, "suite"), events(lane, "compile")
+    assert suite["e2e"]["due"] and check["e2e"] is None
+
+
+def test_rerun_after_main_moved_recomputes_whether_the_e2e_step_is_due(e2e_lane, gh):
+    lane = e2e_lane("app")
+    # main moves the batch's module and widens `when:` to it: the rerun's suite now runs the step
+    lane.move_main("feature/Other.kt", also="sed -i.bak 's/# when: app$/# when: app, feature/' PROFILE.md && "
+                                             "rm PROFILE.md.bak")
+    lane.enqueue()
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "merge: test-run/01 main moved 1 commits — rerun (feature)" in merge_lines(r)
+    assert e2e_runs(gh) == 1
+    first, rerun = events(lane, "suite")
+    assert first["e2e"] == {"due": False, "trigger": [], "ran": False, "wall_s": None}
+    assert (rerun["e2e"]["due"], rerun["e2e"]["trigger"], rerun["e2e"]["ran"]) == (True, ["feature"], True)
 
 
 def test_event_fields_that_raise_during_a_bisect_change_no_outcome(lane, gh, monkeypatch, capsys):
