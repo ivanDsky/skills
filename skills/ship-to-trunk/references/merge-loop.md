@@ -94,6 +94,12 @@ time differs (a reused pid names another process).
 `--queue` is gone: it exits 2 with the commands above and asks to
 re-enqueue anything left in the old `.scratch/<slug>/lane/queue.jsonl`.
 
+A series of independent slices (none needs another merged first, e.g.
+mechanical moves of different packages) is built in parallel or back to
+back and enqueued together, so one `land --max` batch tests them with one
+suite. Never enqueue them one at a time as each finishes: every one would
+pay a suite of its own.
+
 One `land` run takes two batches off the queue, oldest first: A (up to
 `--max` tickets, default 5) and B (the next up to 5). A stacks on
 `origin/main` (ticket 1 on main, ticket k on the rebased head of k-1; a
@@ -194,6 +200,18 @@ stacks on a `--no-merge` A (it never merges), and on red main only the
 - `<suite>`: the first backticked command in the `pr-check: none` comment
   that starts with a script in the repo (`./gradlew …`); none written →
   assemble debug + unit `runner:` + `structure:` (when set).
+- **Docs-only batches skip the suite.** When every file the batch's
+  commits touch (both paths of a rename, deletions included) matches
+  PROFILE `- lane docs-only: <glob>, <glob>` (default `docs/**, *.md,
+  PROFILE*.md`; a glob without `/` matches the file name at any depth,
+  `**` spans directories; an empty value or `none` turns skipping off), no
+  suite runs. Tickets are still stacked and rebased (conflicts still give
+  `conflict`), the per-merge tree check still runs, the ledger line is
+  `merge: batch <labels> suite skipped (docs only) @ <sha7>` and the PR
+  check line says `local suite skipped (docs only)`. Main moving under such
+  a batch is always `push`: docs cannot break main's code. A `--no-merge`
+  ticket follows the rule; a batch holding a `--red-fix` ticket never
+  skips, since a fix of red main must be proved green.
 - `<e2e>` (optional): PROFILE `- e2e: <command>   # when: <module
   globs>`, for a slow end-to-end tier the user took off the every-merge
   path. `when:` is a comma-separated list (`app, feature:*:api`; globs may

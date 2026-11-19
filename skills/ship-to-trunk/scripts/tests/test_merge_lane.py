@@ -347,9 +347,10 @@ def lane(tmp_path, gh, profile_text, real_runs):
 
 @pytest.fixture
 def make_lane(tmp_path, gh, profile_text, real_runs):
-    """Lane factory over a Gradle-shaped repo (app -> feature -> core, docs); ticket 01 adds `ticket_file`."""
+    """Lane factory over a Gradle-shaped repo (app -> feature -> core, docs); ticket 01 adds `ticket_file`.
+    `docs` is a module here, so the docs-only skip is off (those tests cover the suite and compile paths)."""
     gh.set(runs=real_runs, create_url=PR_URL, create_branch="ticket/1")
-    return lambda **kw: Lane(tmp_path, profile_text, graph=GRAPH, **kw)
+    return lambda **kw: Lane(tmp_path, profile_text + "- lane docs-only: none\n", graph=GRAPH, **kw)
 
 
 @pytest.fixture
@@ -1437,3 +1438,124 @@ def test_b_on_a_restacked_a_merges_through_the_tree_compare(make_lane, gh):
     assert b["base"] == a[0]["top"] != a[1]["top"]  # B ran on A's first top, never on the merged one
     assert [(e["pipe"], e["phase"], e["decision"]) for e in events(lane, "main_moved")] == [
         ("A", "stack", "rerun"), ("B", "stack", "push"), ("B", "merge", "push")]
+
+
+# ------------------------------------------------------------ docs-only batches
+
+def suite_runs(gh):
+    p = gh.dir / "slot.log"
+    return p.read_text().splitlines() if p.exists() else []
+
+
+def push_main(lane, files=(), profile=None):
+    """One outside commit on origin/main: `files` added, PROFILE.md replaced when `profile` is given."""
+    git("pull", "-q", "--ff-only", "origin", "main", cwd=lane.co)
+    for f in files:
+        (lane.co / f).parent.mkdir(parents=True, exist_ok=True)
+        (lane.co / f).write_text("x\n")
+    if profile is not None:
+        (lane.co / "PROFILE.md").write_text(profile)
+    git("add", "-A", cwd=lane.co)
+    git("commit", "-q", "-m", "setup", cwd=lane.co)
+    git("push", "-q", "origin", "main", cwd=lane.co)
+
+
+@pytest.mark.parametrize("path,docs", [
+    ("docs/a/b.txt", True), ("README.md", True), ("docs/x/y.md", True), ("PROFILE.md", True),
+    ("src/Main.kt", False), ("notes.txt", False), ("src/docs/a.txt", False)])
+def test_docs_only_default_globs(tmp_path, path, docs):
+    repo = init_repo(tmp_path / "r", {"a": "1\n"})
+    base, head = commit_files(repo, path)
+    assert ml.docs_only(repo, [{}], base, head) is docs
+
+
+def test_docs_only_check_covers_both_paths_of_a_rename(tmp_path):
+    repo = init_repo(tmp_path / "r", {"src/a.txt": "same text\n" * 5})
+    base = git("rev-parse", "HEAD", cwd=repo)
+    (repo / "docs").mkdir()
+    git("mv", "src/a.txt", "docs/a.txt", cwd=repo)
+    git("commit", "-q", "-m", "move", cwd=repo)
+    assert ml.docs_only(repo, [{}], base, git("rev-parse", "HEAD", cwd=repo)) is False
+
+
+def test_docs_only_never_skips_a_red_fix_ticket(tmp_path):
+    repo = init_repo(tmp_path / "r", {"a": "1\n"})
+    base, head = commit_files(repo, "docs/a.md")
+    assert ml.docs_only(repo, [{"red_fix": "abc1234"}], base, head) is False
+
+
+@pytest.mark.parametrize("line,globs", [
+    ("- lane docs-only: docs/**, *.md   # why\n", ["docs/**", "*.md"]),
+    ("- lane docs-only: none\n", []),
+    ("- lane docs-only:\n", []),
+    ("- lane docs-only:   # off\n", []),
+    ("- runner: x\n", ml.DOCS_ONLY_DEFAULT)])
+def test_docs_globs_read_the_profile_key(tmp_path, line, globs):
+    (tmp_path / "PROFILE.md").write_text(line)
+    assert ml.docs_globs(tmp_path) == globs
+
+
+def test_docs_only_batch_of_two_merges_without_running_the_suite(lane, gh):
+    gh.set(land=True)
+    wt1 = lane.add_ticket("2", "docs/one.md")
+    wt2 = lane.add_ticket("3", "README.md")
+    lane.enqueue("02", wt=wt1)
+    lane.enqueue("03", wt=wt2)
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert [(x["nn"], x["result"]) for x in lane.results(r)] == [("02", "merged"), ("03", "merged")]
+    assert suite_runs(gh) == []
+    assert re.search(r"^merge: batch test-run/02,test-run/03 suite skipped \(docs only\) @ \w{7}$", r.stdout, re.M)
+    assert "suite green" not in r.stdout
+    assert "local suite skipped (docs only) on batch top" in lane.pr_body("02").read_text()
+    assert events(lane, "suite") == []
+
+
+def test_docs_only_batch_still_conflicts_and_survives_main_moving(lane, gh):
+    gh.set(land=True)
+    a, b = lane.add_ticket("2", "docs/same.md"), lane.add_ticket("3", "docs/same.md")
+    (b / "docs/same.md").write_text("other\n")
+    git("commit", "-qam", "clash", cwd=b)
+    push_main(lane, ["src/Code.kt"])  # main moves with code: a docs-only batch needs no rerun for it
+    lane.enqueue("02", wt=a)
+    lane.enqueue("03", wt=b)
+    r = lane.land()
+    assert [(x["nn"], x["result"]) for x in lane.results(r)] == [("03", "conflict"), ("02", "merged")]
+    assert suite_runs(gh) == []
+
+
+def test_batch_with_a_docs_file_and_a_code_file_runs_the_suite(lane, gh):
+    gh.set(land=True)
+    lane.enqueue("02", wt=lane.add_ticket("2", "docs/one.md"))
+    lane.enqueue("03", wt=lane.add_ticket("3", "src/Code.kt"))
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert len(suite_runs(gh)) == 1
+    assert re.search(r"^merge: batch test-run/02,test-run/03 suite green tested @ \w{7} \(1 suites\)$", r.stdout, re.M)
+    assert "skipped" not in r.stdout
+    assert "local suite green on batch top" in lane.pr_body("02").read_text()
+
+
+def test_profile_none_runs_the_suite_for_a_docs_only_batch(lane, gh, profile_text):
+    gh.set(land=True)
+    push_main(lane, profile=lane.co.joinpath("PROFILE.md").read_text() + "- lane docs-only: none\n")
+    lane.enqueue("02", wt=lane.add_ticket("2", "docs/one.md"))
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert len(suite_runs(gh)) == 1
+    assert "skipped" not in r.stdout
+
+
+def test_rename_from_src_to_docs_runs_the_suite(lane, gh):
+    gh.set(land=True)
+    push_main(lane, ["src/moved.txt"])
+    wt = lane.root / "wt2"
+    git("worktree", "add", "-q", "-b", "ticket/2", str(wt), "origin/main", cwd=lane.co)
+    (wt / "docs").mkdir()
+    git("mv", "src/moved.txt", "docs/moved.txt", cwd=wt)
+    git("commit", "-q", "-m", "chore: move", cwd=wt)
+    lane.enqueue("02", wt=wt)
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert len(suite_runs(gh)) == 1
+    assert "skipped" not in r.stdout

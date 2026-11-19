@@ -172,6 +172,21 @@ Sequence:
     `merge_lane: event log: ...` line on stderr (`wait` reads this log, so a
     wait on a broken log ends in "left the queue without a result").
 
+Docs-only batches skip the suite. When every file of a suite round's diff
+(`git diff --name-only --no-renames <stacked-on> <batch top>`: both paths of
+a rename, deletions included) matches PROFILE `- lane docs-only: <glob>, ...`
+(default `docs/**, *.md, PROFILE*.md`; a glob without `/` matches the file
+name at any depth, `**` spans directories; an empty value or `none` turns
+skipping off), no suite runs: the tickets are still stacked and rebased
+(conflicts still give `conflict`) and the per-merge tree check still runs, and
+the ledger line is `merge: batch <labels> suite skipped (docs only) @ <sha7>`.
+The PR check line then says `local suite skipped (docs only)`. A `no_merge`
+ticket follows the rule (its PR opens untested, which only the user merges
+anyway); a batch holding a `red_fix` ticket never skips (a fix of red main
+must be proved green). Main moving under a docs-only batch (steps 6 and 7.3)
+is always `push`: docs cannot break main's code, and nothing of the batch
+needs a suite or compile check to be re-proved.
+
 Rerun rule (mechanical), judged over the files that differ between main and
 the commit the batch was stacked on, mapped to modules (from `include(...)` in
 settings.gradle.kts, dependencies from `project(":x")` and `projects.x` in
@@ -242,6 +257,47 @@ def profile_line(wt, key):
     if not m or m.group(1).startswith("<"):
         return None, None
     return m.group(1) or None, m.group(2)
+
+
+DOCS_ONLY_DEFAULT = ["docs/**", "*.md", "PROFILE*.md"]
+
+
+def docs_globs(wt):
+    """Globs of the files that are not build inputs (PROFILE `- lane docs-only:`); [] = skipping off."""
+    v, _ = profile_line(wt, "lane docs-only")
+    if v is None:
+        profile = Path(wt) / "PROFILE.md"
+        if profile.exists() and re.search(r"^-\s*lane docs-only:[ \t]*(?:#.*)?$", profile.read_text(), re.M):
+            return []  # the key is there with an explicit empty value
+        return DOCS_ONLY_DEFAULT
+    if v.lower() == "none":
+        return []
+    return [g.strip("` ") for g in v.split(",") if g.strip("` ")]
+
+
+def glob_re(g):
+    """Regex of a docs glob: `**` spans directories, `*` and `?` stay inside one."""
+    r, i = "", 0
+    while i < len(g):
+        if g.startswith("**/", i):
+            r, i = r + "(?:.*/)?", i + 3
+        elif g.startswith("**", i):
+            r, i = r + ".*", i + 2
+        else:
+            r += "[^/]*" if g[i] == "*" else "[^/]" if g[i] == "?" else re.escape(g[i])
+            i += 1
+    return re.compile(r + r"\Z")
+
+
+def docs_only(wt, tickets, base, head):
+    """True when the suite can be skipped: no `red_fix` ticket, and every path base..head
+    touches (both sides of a rename) matches the docs globs."""
+    globs = [(glob_re(g), "/" not in g) for g in docs_globs(wt)]
+    if not globs or any(t.get("red_fix") for t in tickets):
+        return False
+    files = out("git", "diff", "--name-only", "--no-renames", base, head, cwd=wt).splitlines()
+    return bool(files) and all(
+        any(rx.match(f.rsplit("/", 1)[-1] if flat else f) for rx, flat in globs) for f in files)
 
 
 def suite_command(wt):
@@ -916,7 +972,7 @@ class Batch:
         self.kind, self.cc, self.tag, self.cmd, self.e2e = "rerun", None, "suite", None, None
         self.stack, self.green, self.pending, self.check = [], list(cands), [], None
         self.base = self.main0 = self.under = None
-        self.suite7, self.red, self.live = "", False, True
+        self.suite7, self.red, self.live, self.docs = "", False, True, False
         self.git = land.git
         self.suite_cmd = suite_command(cands[0]["worktree"])
 
@@ -949,12 +1005,14 @@ class Batch:
             if self.tag == "suite":
                 self.full += 1
                 top = self.stack[-1]
-                e2e, trigger = e2e_plan(top["worktree"], base, top["head_t"])
+                self.docs = docs_only(top["worktree"], self.stack, base, top["head_t"])
+                e2e, trigger = (None, None) if self.docs else e2e_plan(top["worktree"], base, top["head_t"])
                 if trigger is not None:
                     self.e2e = {"due": bool(e2e), "trigger": trigger}
                 if e2e:
                     self.cmd = with_e2e(self.suite_cmd, e2e)
-            self.check = self.start(self.stack, self.cmd, self.tag, base, "stack")
+            if not self.docs:
+                self.check = self.start(self.stack, self.cmd, self.tag, base, "stack")
 
     def start(self, prefix, cmd, tag, base, phase):
         """Start one build command (the suite or a compile check) on the prefix's top in
@@ -1018,7 +1076,7 @@ class Batch:
         """Finish the check (bisect a red one), then the main check of step 6,
         restacking until main holds still or the batch is requeued."""
         while self.stack:
-            rc, log = self.finish(self.check)
+            rc, log = self.finish(self.check) if self.check else (0, None)  # no check: docs only
             self.check = None
             if rc:
                 self.red = True
@@ -1044,8 +1102,10 @@ class Batch:
             if moved == self.base or tree(self.git, moved) == tree(self.git, self.base):
                 break
             top = self.green[-1]
-            self.kind, why, self.cc = decide(top["worktree"], names(self.git, self.base, moved),
-                                             names(top["worktree"], self.base, top["head_t"]))
+            self.kind, why, self.cc = (
+                ("push", "docs only", None) if self.docs else
+                decide(top["worktree"], names(self.git, self.base, moved),
+                       names(top["worktree"], self.base, top["head_t"])))
             k = self.outside(moved)
             self.land.ledger(f"merge: {labels(self.green)} main moved {k} commits — {self.kind} ({why})",
                              self.green)
@@ -1074,7 +1134,10 @@ class Batch:
         after_compile = self.tag == "compile"
         then = f", compile green tested @ {top7}" if after_compile else ""
         ran = f"{self.suites} suites" + (f", {self.compiles} compiles" if self.compiles else "")
-        L.ledger(f"merge: batch {labels(green)} suite green tested @ {self.suite7}{then} ({ran})", green)
+        if self.docs:
+            L.ledger(f"merge: batch {labels(green)} suite skipped (docs only) @ {self.suite7}", green)
+        else:
+            L.ledger(f"merge: batch {labels(green)} suite green tested @ {self.suite7}{then} ({ran})", green)
         prev_t = self.base
         for i, e in enumerate(green):
             if not self.merge_one(e, green[i:], prev_t, after_compile):
@@ -1106,7 +1169,8 @@ class Batch:
                     return False
             if tree(wt, "HEAD") != e["tree"]:
                 files = names(wt, prev_t, "origin/main")
-                kind, why, cc = (decide(wt, files, names(wt, prev_t, green[-1]["head_t"]))
+                kind, why, cc = (("push", "docs only", None) if self.docs else
+                                 decide(wt, files, names(wt, prev_t, green[-1]["head_t"]))
                                  if files else ("rerun", "tree differs", None))
                 k = self.outside(main)
                 L.ledger(f"merge: {labels(rest)} main moved {k} commits — {kind} ({why})", rest)
@@ -1129,7 +1193,8 @@ class Batch:
             run("git", "push", "-u", "--force-with-lease", "origin", "HEAD", cwd=wt)
             body = Path(e["body_file"]).read_text()
             note = ", then compile green after main moved" if compiled else ""
-            check = (f"**check:** local suite green on batch top {self.suite7} (tickets {labels(green)}){note}; "
+            what = "skipped (docs only)" if self.docs else "green"
+            check = (f"**check:** local suite {what} on batch top {self.suite7} (tickets {labels(green)}){note}; "
                      "no PR CI by design")
             if re.search(r"^\*\*check:\*\*.*$", body, re.M):
                 body = re.sub(r"^\*\*check:\*\*.*$", lambda _: check, body, flags=re.M)

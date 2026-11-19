@@ -89,7 +89,10 @@ than ten shell commands. Only reproduce what remains unexplained.
    acceptance test) and the evidence channel for verifying it
    (Crashlytics clean / logcat clean / user reproduces once more).
 3. Confirm the fix through the same channel that reported it - user
-   reproduces on their phone, not on the emulator.
+   reproduces on their phone, not on the emulator. A fix that depends on
+   how it feels or looks on one device iterates on the branch with check
+   APKs until the user confirms, then lands as one PR (`work-tickets`
+   § 3, Device-tuned bugs).
 
 Footer: authored for ivanDsky/skills; adb wireless debugging per
 developer.android.com/studio/command-line/adb and

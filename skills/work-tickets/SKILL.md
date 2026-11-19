@@ -49,7 +49,13 @@ and `git log` show how far each got).
 
 `python3 $B claim --as $ME --max 5 <filter>`. Exit 3 means nothing is left:
 go to § 5. The claim is atomic between sessions on this machine. Never edit a
-ticket's state by hand to claim it.
+ticket's state by hand to claim it. A move or refactor series (tickets that
+share `--series`) holds its area: while one of its tickets is claimed,
+`claim` skips other tickets in that area and prints why on stderr
+(`skipped <id>: area <A> held by series <S> (<ids>)`), so feature work
+waits until the series lands instead of conflicting with it. The tickets
+of one series are claimed and enqueued together (`ship-to-trunk` §
+Decision rules).
 
 A flag-removal ticket (`ship-to-trunk` lifecycle step 6) is claimed as the
 whole batch: re-check fresh `origin/main` for every other shipped-on flag,
@@ -87,6 +93,23 @@ Per ticket, before dispatch, write the brief from the ticket
 A `bug` ticket starts with `diagnose-bug`'s evidence ladder in the worker,
 minus its question batch: the brief's repro steps stand in for the answers.
 
+**Device-tuned bugs** (the fix depends on how it feels or looks on one
+particular device: haptics, timing, rendering on a given model) iterate on
+the branch before any PR, because each merged guess costs a PR and a lane
+suite:
+1. The worker fixes on its branch, builds one check APK with `deliver`'s
+   `ship_apk.py` (slug = ticket id), reports `device-check` with the build
+   and the one thing to feel or look at, and stops. It opens no PR and
+   enqueues nothing.
+2. The session asks the user through the ask tool (`start` § Waiting on
+   the user). The ask blocks only the session's turn; the pack's other
+   workers keep running.
+3. Not right yet: the same worker takes another round on the same branch
+   with the user's words. Confirmed: the worker finishes the fast review
+   and pushes, and the ticket enters the lane as usual.
+One ticket gives one PR. A further round after the merge needs a new user
+report, which becomes a new ticket.
+
 Tickets in one pack run in parallel when their file scopes are disjoint
 (`implement` § 2).
 
@@ -98,6 +121,7 @@ No ticket stays `claimed` once its outcome is known.
 |---|---|
 | merged, logic proven by evidence | `set ID --state done --note "PR #N merged @ <sha>; <evidence>"` |
 | merged, `hands-on` | `set ID --state needs-check --note "PR #N merged @ <sha>; flag: <Key\|none>; verify: <one line>"` |
+| merged, device-tuned and confirmed on its check APK | `set ID --state done --note "PR #N merged @ <sha>; confirmed by the user on check APK <identity>"` |
 | PR waits for the user (no consent line, or a live change) | `set ID --state needs-check --note "PR #N awaits your merge: <why>"` |
 | worker NEEDS_CONTEXT the user left unanswered, or the user is away | `set ID --state needs-info --note "<the question, with a recommended answer>"` |
 | needs credentials, a device or a product decision | `set ID --state ready-for-human --note "<what and why>"` |
