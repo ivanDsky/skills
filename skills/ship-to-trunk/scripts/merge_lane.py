@@ -99,7 +99,15 @@ Sequence:
     in when it has one, through `build-slot` when on PATH. The suite is the
     command in PROFILE's `pr-check: none` comment, else debug + unit
     `runner:` + `structure:`; log `lane/logs/lane-<NN-NN>-<sha7>.log`
-    (`...-compile.log` for a compile check, step 6).
+    (`...-compile.log` for a compile check, step 6). PROFILE `- e2e: <cmd>
+    # when: <module globs>` (a comma-separated list, e.g. `app,
+    feature:*:api`; `none`/`off` = no key): when the batch's commits touch a
+    matching module directly (no dependency closure) or the shared build
+    setup (no `when:`, or no module graph: every suite), the check is
+    `<suite> && <cmd>` in the same run and slot, with the marker lines
+    `merge_lane: e2e start` and `merge_lane: e2e rc=<n> wall_s=<s>` in the
+    log. A red e2e is a red suite (bisect included); compile checks never
+    run it.
  5. Red batch: binary search over prefix length (one suite or compile check
     per step on that prefix's top head, no extra rebases). The first ticket
     that turns the prefix red gets `red`; the green prefix proceeds; tickets
@@ -181,6 +189,7 @@ still merge: tickets are independent by construction.
 """
 import argparse
 import fcntl
+import fnmatch
 import json
 import os
 import re
@@ -245,6 +254,57 @@ def suite_command(wt):
         if v:
             parts.append(v)
     return " && ".join(parts)
+
+
+E2E_START = re.compile(r"^merge_lane: e2e start$", re.M)
+E2E_END = re.compile(r"^merge_lane: e2e rc=\d+ wall_s=(\d+)$", re.M)
+# `when: <glob>, <glob>, ...`: a comma-separated list, each glob optionally backticked; prose after it is ignored.
+E2E_WHEN = re.compile(r"\bwhen:\s*(`?[\w:*?\[\]-]+`?(?:\s*,\s*`?[\w:*?\[\]-]+`?)*)")
+SHARED_SETUP = "shared build setup"  # e2e trigger entry for a batch that touched SHARED_ROOT_FILES
+
+
+def e2e_globs(comment):
+    """Module globs of an `e2e:` comment's `when:` list (a leading `:` dropped), [] without one."""
+    m = E2E_WHEN.search(comment or "")
+    return [g.strip("` ").lstrip(":") for g in m.group(1).split(",")] if m else []
+
+
+def e2e_plan(wt, base, head):
+    """PROFILE `e2e:` step for a suite on base..head: (command or None, trigger), or
+    (None, None) without the key (or with `none`/`off`). The `when:` globs name the
+    modules whose change makes it due (fnmatch on `feature:play` style names); only
+    modules the batch touches count, not their dependents (`app` depends on
+    everything). trigger = the batch modules that matched (no `when:`: all of them),
+    plus SHARED_SETUP when the batch touched the shared build setup, which makes it
+    due too. No `when:` or no module graph -> due on every suite."""
+    cmd, comment = profile_line(wt, "e2e")
+    if not cmd or cmd.lower() in ("none", "off"):
+        return None, None
+    globs = e2e_globs(comment)
+    graph = module_graph(wt)
+    if not graph:
+        return cmd, []
+    mods, shared = to_modules(graph[0], names(wt, base, head))
+    hit = [x for x in sorted(mods) if not globs or any(fnmatch.fnmatchcase(x, g) for g in globs)]
+    hit += [SHARED_SETUP] if shared else []
+    return (cmd if hit or not globs else None), hit
+
+
+def with_e2e(suite, e2e):
+    """The suite, then the e2e step between log markers (build-slot may run it
+    remotely, so the log is the only way its timing comes back)."""
+    return (f"{suite} && {{ echo 'merge_lane: e2e start'; s=$SECONDS; {e2e}; r=$?; "
+            f'echo "merge_lane: e2e rc=$r wall_s=$((SECONDS - s))"; exit $r; }}')
+
+
+def e2e_event(plan, log):
+    """The suite event's `e2e` field: null without an e2e plan, else the plan plus
+    `ran` (start marker in the log) and `wall_s` (from the end marker, else null)."""
+    if plan is None:
+        return None
+    text = Path(log).read_text(errors="replace") if plan["due"] else ""
+    end = E2E_END.search(text)
+    return dict(plan, ran=bool(E2E_START.search(text)), wall_s=int(end.group(1)) if end else None)
 
 
 def norm(s):
@@ -842,7 +902,7 @@ class Batch:
     def __init__(self, land, pipe, cands, k):
         self.land, self.pipe, self.cands, self.k = land, pipe, cands, k
         self.rounds = self.full = self.suites = self.compiles = self.merged = 0
-        self.kind, self.cc, self.tag, self.cmd = "rerun", None, "suite", None
+        self.kind, self.cc, self.tag, self.cmd, self.e2e = "rerun", None, "suite", None, None
         self.stack, self.green, self.pending, self.check = [], list(cands), [], None
         self.base = self.main0 = self.under = None
         self.suite7, self.red, self.live = "", False, True
@@ -874,8 +934,15 @@ class Batch:
         self.green = self.stack
         if self.stack:
             self.cmd, self.tag = (self.suite_cmd, "suite") if self.kind == "rerun" else (self.cc, "compile")
+            self.e2e = None
             if self.tag == "suite":
                 self.full += 1
+                top = self.stack[-1]
+                e2e, trigger = e2e_plan(top["worktree"], base, top["head_t"])
+                if trigger is not None:
+                    self.e2e = {"due": bool(e2e), "trigger": trigger}
+                if e2e:
+                    self.cmd = with_e2e(self.suite_cmd, e2e)
             self.check = self.start(self.stack, self.cmd, self.tag, base, "stack")
 
     def start(self, prefix, cmd, tag, base, phase):
@@ -897,7 +964,8 @@ class Batch:
             p = subprocess.Popen(self.land.slot + ["bash", "-c", cmd], cwd=wt, stdin=subprocess.DEVNULL,
                                  stdout=f, stderr=subprocess.STDOUT, start_new_session=True)
         c = {"p": p, "lstart": proc_start(p.pid), "t0": t0, "log": str(log), "prefix": prefix, "tag": tag,
-             "phase": phase, "base": base, "wt": wt, "round": self.rounds}
+             "phase": phase, "base": base, "wt": wt, "round": self.rounds,
+             "e2e": self.e2e if tag == "suite" else None}
         self.land.checks.append((self, c))
         self.land.track()
         return c
@@ -918,7 +986,8 @@ class Batch:
             "base": c["base"][:7], "top": top["head_t"][:7],
             "result": "discarded" if discard else "red" if rc else "green", "wall_s": round(wall, 1),
             # whole seconds: a coarse mtime clock must not hide a file this run wrote
-            "module_test_s": module_test_seconds(c["wt"], int(c["t0"]))})
+            "module_test_s": module_test_seconds(c["wt"], int(c["t0"])),
+            "e2e": e2e_event(c["e2e"], c["log"])})
         return rc, c["log"]
 
     def outside(self, main):

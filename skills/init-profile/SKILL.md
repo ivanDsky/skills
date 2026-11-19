@@ -144,6 +144,7 @@ Send the batch and stop. Never a second batch.
 - changes: pr               # from question 9 (development style): pr (= default) | trunk (small PRs into main, ship-to-trunk) | main | ask (start asks each run)
 # - pr-check: none   # written only on a `trunk-local` answer: merge gate is local: `<suite>` green on the PR branch rebased onto fresh origin/main; CI on main only. Absent (default) → trunk waits on main's required PR check
 # - main-check: <workflow file>   # optional, `pr-check: none` only: main's post-merge workflow watched by ship-to-trunk's main_health.py; absent → the `release:` workflow
+# - e2e: <command>   # when: <module globs, comma-separated>; optional, `pr-check: none` only: a slow end-to-end tier the ship-to-trunk lane appends to a batch's suite only when the batch touches a matching module or the shared build setup; `none`/`off` or absent → never
 
 ## Tracker                   # shared backlog: file-tickets files, work-tickets claims
 - backend: github            # from question 5: github (GitHub Issues) | local (<git-common-dir>/backlog/)

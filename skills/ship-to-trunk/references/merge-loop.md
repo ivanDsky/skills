@@ -189,6 +189,22 @@ stacks on a `--no-merge` A (it never merges), and on red main only the
 - `<suite>`: the first backticked command in the `pr-check: none` comment
   that starts with a script in the repo (`./gradlew …`); none written →
   assemble debug + unit `runner:` + `structure:` (when set).
+- `<e2e>` (optional): PROFILE `- e2e: <command>   # when: <module
+  globs>`, for a slow end-to-end tier the user took off the every-merge
+  path. `when:` is a comma-separated list (`app, feature:*:api`; globs may
+  be backticked, prose after the list is ignored); `none` or `off` as the
+  command means no key. When the batch's commits touch a module that
+  matches a glob (`fnmatch` on names like `feature:play`), or the shared
+  build setup (root build and settings scripts, `gradle.properties`,
+  `gradle/`, `build-logic/`), the lane runs `<suite> && <e2e>` as one check
+  in the same build slot: a red e2e is a red suite, bisect included (each
+  half reuses the batch's `due` and `trigger`). Only modules the batch
+  touches directly count, not their dependents: the module that runs the
+  tier depends on everything. No `when:` or no module graph → every suite.
+  Each suite round recomputes it on its own stack (a rerun after main moved
+  may differ); compile checks never run it. Main's post-merge workflow
+  keeps running the tier on every push, so it still covers the batches
+  that skip it.
 - **Batch guarantee.** Each suite tests only its batch top; B's tests A's
   top plus B. The intermediate main states (after the 1st, 2nd, … merge)
   are never tested on their own. Accepted, because tickets in the queue
@@ -263,7 +279,14 @@ Every line has `ts` (UTC), `who` (the run slug of the `land` or
   (`green`|`red`|`discarded`: B dropped because A went red), `wall_s`,
   `module_test_s` (`{module: seconds}`: JUnit `testsuite@time` summed per
   module from `<module>/build/test-results/**/*.xml` written since the
-  run started, so earlier runs' files are ignored; `{}` when none).
+  run started, so earlier runs' files are ignored; `{}` when none; on a
+  run where e2e is due, the tier's module includes the e2e XML), `e2e`
+  (null without an `e2e:` key and on compile checks; else `due` (the step
+  was appended to this round's suite), `trigger` (the batch modules that
+  matched `when:`, all of them without one, plus `shared build setup` when
+  the batch touched it), `ran` (the log has the `merge_lane: e2e start`
+  marker; false when the suite went red first) and `wall_s` (from the
+  `merge_lane: e2e rc=<n> wall_s=<s>` marker, else null)).
 - `ticket`: one per result line. `nn`, `id`, `pipe` (null for `invalid`),
   `result` (the names above), `reason` (the requeued, refused, stuck or
   invalid reason verbatim, else null), `pr` (null before a PR exists), `line` (the

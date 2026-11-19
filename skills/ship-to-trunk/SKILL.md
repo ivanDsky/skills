@@ -46,8 +46,9 @@ start's `ask`); never switch a project to trunk on your own.
    right before the suite, run by the repository's one merge lane after the
    worker's fast review; every session enqueues into that lane, which
    stacks up to 5 ready tickets per batch, runs one suite on each batch top
-   (two batches at once, the second stacked on the first) and opens and
-   merges each PR in order).
+   (plus PROFILE's `e2e:` tier when the batch touches one of its `when:`
+   modules or the shared build setup; two batches at once, the second
+   stacked on the first) and opens and merges each PR in order).
    Never branch off another unmerged ticket by default.
 5. **Dark until flipped**: a ticket whose behavior is not finished lands
    behind a **release flag** that is off in release builds
