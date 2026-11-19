@@ -155,7 +155,7 @@ Sequence:
     requeues k..n; anything else, or the last retry's error, is `refused`
     with k+1..n requeued ("stacked on a refused ticket"). 7.6 delete the remote
     branch, `git worktree remove`, delete the local branch.
-8. Ledger lines, tickets named <who>/<NN>: `merge: batch <labels> suite
+ 8. Ledger lines, tickets named <who>/<NN>: `merge: batch <labels> suite
     green tested @ <sha7>[, compile green tested @ <sha7>] (<s> suites[,
     <c> compiles])` (the tested stack, not main), each rerun decision
     `merge: <labels> main moved <k> commits - rerun|compile|push (<modules>)`
