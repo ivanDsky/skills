@@ -43,9 +43,11 @@ start's `ask`); never switch a project to trunk on your own.
 4. **Fresh base**: each ticket starts in its own worktree from
    `origin/main` fetched at dispatch, and rebases onto `origin/main` right
    before the PR and again before merge (`pr-check: none`: one rebase,
-   right before the suite, run by the orchestrator's merge lane after the
-   worker's fast review; the lane stacks ready tickets, runs one suite on
-   the top, and opens and merges each PR in order).
+   right before the suite, run by the repository's one merge lane after the
+   worker's fast review; every session enqueues into that lane, which
+   stacks up to 5 ready tickets per batch, runs one suite on each batch top
+   (two batches at once, the second stacked on the first) and opens and
+   merges each PR in order).
    Never branch off another unmerged ticket by default.
 5. **Dark until flipped**: a ticket whose behavior is not finished lands
    behind a **release flag** that is off in release builds
@@ -93,10 +95,11 @@ links, what changed, why each is theirs) and agent merges are ledgered —
 `start` § Waiting on the user. With
 `pr-check: none`, main's post-merge workflow is the safety net: workers
 never wait on it, and never merge: they push the branch, report ready and
-stop; the orchestrator's merge lane lands ready tickets in batches
-(`scripts/merge_lane.py`). The orchestrator's background watcher records
-its verdict in a shared main-health ledger, and a red main stops all
-merges but the fix (Red main below).
+stop; the repository's one merge lane, shared by every session, lands
+ready tickets in batches of up to 5, two batches pipelined across the
+build slots (`scripts/merge_lane.py`). The orchestrator's background
+watcher records its verdict in a shared main-health ledger, and a red
+main stops all merges but the fix (Red main below).
 
 ## Feature lifecycle
 

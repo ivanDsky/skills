@@ -111,8 +111,9 @@ three times), so user statements persist the same turn, before acting:
   .scratch/<slug>/ledger.md` first; each spawn brief carries the
   `Decision:` lines whose scope its ticket touches, verbatim.
 - Never poll workers, CI or PRs (`gh run watch`, `sleep` loops, status
-  reads): workers report when done and `merge_lane.py`/`main_health.py`
-  background jobs push their result lines. Idle → harness wait.
+  reads): workers report when done and the `merge_lane.py wait` and
+  `main_health.py watch` background jobs push their result lines. Idle →
+  harness wait.
 
 ## Orchestrator lifecycle
 

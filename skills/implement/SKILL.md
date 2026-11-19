@@ -40,19 +40,22 @@ recollection.
    tickets whose parents' PRs are MERGED. Stacks only under
    `ship-to-trunk`'s exception. `pr-check: none`: a worker ends at "branch
    pushed, ready" (fast review done, no suite, no rebase, no PR, no merge,
-   no polling); the orchestrator owns the merge lane
+   no polling); the orchestrator feeds the repository's one merge lane
    (`ship-to-trunk`/references/merge-loop.md): on each `ready` report it
-   runs `merge_lane.py enqueue`, and whenever the queue is non-empty and
-   no lane job runs it starts `merge_lane.py land` as one background bash
-   job (batches of up to 4: one suite on the batch top, then PR + merge
-   per ticket). It handles each result line per merge-loop.md (red → fix
-   worker, conflict → rebase worker, waiting_user → ask tool). The
-   orchestrator also runs one `main_health.py watch --who <slug>`
+   runs `merge_lane.py enqueue --who <slug> --nn <NN> ...` and starts one
+   `merge_lane.py wait --who <slug> --nn <NN>` background bash job for
+   that ticket (the lane is shared by every session: batches of up to 5,
+   one suite per batch top, two batches pipelined, then PR + merge per
+   ticket). It handles each result line per merge-loop.md (red → fix
+   worker, conflict → rebase worker, refused/closed/stuck → the reason
+   first, waiting_user → ask tool). The orchestrator also runs one
+   `main_health.py watch --who <slug>`
    background bash job, started after the run's first merge and after a
    later merge when none is running; on red it attributes the culprit and
    claims and fixes it when the culprit is its own merge (`enqueue
-   --red-fix`); the lane pauses while main is red and resumes by itself
-   on green. Flow: `ship-to-trunk`/references/merge-loop.md § Red main.
+   --red-fix`); the lane pauses while main is red (`wait` exits 3) and
+   resumes when the orchestrator starts `wait` again after green. Flow:
+   `ship-to-trunk`/references/merge-loop.md § Red main.
 2. Claim through the script before any work: `backlog.py claim --as <slug>
    --epic <slug> --ids <id>` (atomic across sessions; exit 3 = someone else
    holds it, take the next). A pack from `work-tickets` arrives claimed.
