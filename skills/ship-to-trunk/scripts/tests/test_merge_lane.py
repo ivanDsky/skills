@@ -374,21 +374,37 @@ def test_land_merges_without_main_checked_out_locally(lane, gh):
     # No local main anywhere: the checkout is detached and the branch is gone.
     git("checkout", "-q", "--detach", cwd=lane.co)
     git("branch", "-q", "-D", "main", cwd=lane.co)
+    gh.set(land=True)
     lane.enqueue()
     r = lane.land()
     assert r.returncode == 0, r.stdout + r.stderr
-    assert lane.results(r) == [{"who": "test-run", "nn": "01", "result": "merged", "pr": 42,
-                                "sha": lane.results(r)[0]["sha"]}]
-    assert re.search(r"^merge: batch test-run/01 suite green @ \w{7} \(1 suites\)$", r.stdout, re.M)
-    assert re.search(r"^slice: 01 PR #42 merged @ \w{7}$", r.stdout, re.M)
     merge = [c for c in gh.calls() if c[:2] == ["pr", "merge"]]
     assert merge and "--delete-branch" not in merge[0] and merge[0][2] == "42"
+    tested = merge[0][merge[0].index("--match-head-commit") + 1][:7]
+    squash = git("rev-parse", "main", cwd=lane.origin)[:7]  # GitHub's squash on main, not the tested head
+    assert squash != tested
+    assert lane.results(r) == [{"who": "test-run", "nn": "01", "result": "merged", "pr": 42,
+                                "sha": squash, "tested": tested}]
+    assert re.search(r"^merge: batch test-run/01 suite green tested @ \w{7} \(1 suites\)$", r.stdout, re.M)
+    assert re.search(rf"^slice: 01 PR #42 merged @ {squash}$", r.stdout, re.M)
     assert not lane.wt.exists()
     assert git("branch", "--list", "main", cwd=lane.co) == ""      # lane never recreated it
     assert lane.queue_nns() == []
     assert (gh.dir / "slot.log").read_text().strip() == "bash -c ./suite.sh"  # suite goes through build-slot
     # branch pushed then deleted on origin
     assert git("branch", "--list", "ticket/1", cwd=lane.origin) == ""
+
+
+def test_merge_without_a_merge_commit_from_gh_says_so_and_names_the_tested_head(lane, gh):
+    lane.enqueue()  # no land: gh reports the merged PR's mergeCommit as null
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    (merge,) = [c for c in gh.calls() if c[:2] == ["pr", "merge"]]
+    tested = merge[merge.index("--match-head-commit") + 1][:7]
+    assert lane.results(r) == [{"who": "test-run", "nn": "01", "result": "merged", "pr": 42,
+                                "sha": None, "tested": tested}]
+    assert f"slice: 01 PR #42 merged (main sha unresolved; tested @ {tested})" in r.stdout.splitlines()
+    assert ["pr", "view", "42", "--json", "mergeCommit", "-q", ".mergeCommit.oid"] in gh.calls()
 
 
 def test_already_checked_out_error_but_pr_merged_counts_as_merged(lane, gh):
@@ -743,7 +759,7 @@ def test_main_moving_in_the_same_module_reruns_the_suite(glane, gh):
     r = glane.land()
     assert r.returncode == 0, r.stdout + r.stderr
     assert "merge: test-run/01 main moved 1 commits — rerun (feature)" in merge_lines(r)
-    assert re.search(r"^merge: batch test-run/01 suite green @ \w{7} \(2 suites\)$", r.stdout, re.M)
+    assert re.search(r"^merge: batch test-run/01 suite green tested @ \w{7} \(2 suites\)$", r.stdout, re.M)
     assert gradle_log(gh) == []  # no compile check
     assert glane.results(r)[0]["result"] == "merged"
 
@@ -758,7 +774,7 @@ def test_dependency_only_overlap_restacks_and_compiles_without_the_suite(glane, 
     r = glane.land()
     assert r.returncode == 0, r.stdout + r.stderr
     assert f"merge: test-run/01 main moved 1 commits — compile ({label})" in merge_lines(r)
-    m = re.search(r"^merge: batch test-run/01 suite green @ (\w{7}), compile green @ (\w{7}) "
+    m = re.search(r"^merge: batch test-run/01 suite green tested @ (\w{7}), compile green tested @ (\w{7}) "
                   r"\(1 suites, 1 compiles\)$", r.stdout, re.M)
     assert m and m.group(1) != m.group(2)  # the compile ran on the restacked head, the suite on the old one
     assert gradle_log(gh) == [compile_tasks(*modules) + " --dry-run", compile_tasks(*modules)]
@@ -796,7 +812,7 @@ def test_unrelated_move_pushes_the_green_head_without_a_second_run(glane, gh):
     r = glane.land()
     assert r.returncode == 0, r.stdout + r.stderr
     assert "merge: test-run/01 main moved 1 commits — push (docs,feature)" in merge_lines(r)
-    assert re.search(r"^merge: batch test-run/01 suite green @ \w{7} \(1 suites\)$", r.stdout, re.M)
+    assert re.search(r"^merge: batch test-run/01 suite green tested @ \w{7} \(1 suites\)$", r.stdout, re.M)
     assert gradle_log(gh) == []
     assert glane.results(r)[0]["result"] == "merged"
 
@@ -932,7 +948,7 @@ def test_green_batch_logs_the_suite_with_module_test_time_and_the_merge(glane, g
     glane.enqueue()
     r = glane.land()
     assert r.returncode == 0, r.stdout + r.stderr
-    sha = glane.results(r)[0]["sha"]
+    sha = glane.results(r)[0]["tested"]
     (suite,) = events(glane, "suite")
     assert TS.match(suite.pop("ts")) and isinstance(suite.pop("wall_s"), float)
     assert suite == {"who": "test-run", "event": "suite", "pipe": "A", "batch": ["test-run/01"], "batch_size": 1,
@@ -1138,7 +1154,7 @@ def test_two_sessions_share_one_batch_and_each_wait_prints_only_its_own(lane, gh
     for who, (o, e) in outs.items():
         assert waits[who].returncode == 0, o + e
         lines = o.splitlines()
-        assert lines[0] == f"merge: batch run-a/01,run-b/01 suite green @ {suite['top']} (1 suites)"
+        assert lines[0] == f"merge: batch run-a/01,run-b/01 suite green tested @ {suite['top']} (1 suites)"
         assert re.fullmatch(r"slice: 01 PR #42 merged @ \w{7}", lines[1])
         assert [(x["who"], x["nn"], x["result"]) for x in map(json.loads, lines[2:])] == [(who, "01", "merged")]
     assert lane.queue_nns() == []
@@ -1203,13 +1219,14 @@ def test_base_moved_by_the_batchs_own_squash_is_retried_and_the_whole_batch_land
     assert lane.queue_nns() == []
     assert [(e["pipe"], e["result"]) for e in events(lane, "suite")] == [("A", "green")]  # one suite for all three
     merges = [c[c.index("--match-head-commit") + 1] for c in gh.calls() if c[:2] == ["pr", "merge"]]
-    assert [m[:7] for m in merges] == [res[0]["sha"], res[1]["sha"], res[1]["sha"], res[2]["sha"]]  # retry: same head
+    assert [m[:7] for m in merges] == [x["tested"] for x in (res[0], res[1], res[1], res[2])]  # retry: same head
     # Every PR targets main, and 02 and 03 sit on the squash just before theirs: the pushed head the
     # merge pins is the rebased one.
     assert [c[c.index("--base") + 1] for c in gh.calls() if c[:2] == ["pr", "create"]] == ["main"] * 3
     git("fetch", "-q", "origin", cwd=lane.co)
     assert [git("rev-parse", f"{m}^", cwd=lane.co) for m in merges[1::2]] == [
         git("rev-parse", f"origin/main~{k}", cwd=lane.co) for k in (2, 1)]
+    assert [x["sha"] for x in res] == [git("rev-parse", f"origin/main~{k}", cwd=lane.co)[:7] for k in (2, 1, 0)]
 
 
 def test_base_moved_past_its_retries_requeues_the_ticket(lane, gh):
@@ -1324,7 +1341,7 @@ def test_batch_b_runs_its_suite_on_a_top_while_a_runs_and_merges_after_a(lane, g
     assert b["base"] == a["top"]  # B tested on A's top, and main after A's merges is that tree
     assert events(lane, "main_moved") == []
     assert [e["pipe"] for e in events(lane, "ticket")] == ["A", "A", "B", "B"]
-    assert re.search(r"^merge: batch test-run/03,test-run/04 suite green @ \w{7} \(1 suites\)$", r.stdout, re.M)
+    assert re.search(r"^merge: batch test-run/03,test-run/04 suite green tested @ \w{7} \(1 suites\)$", r.stdout, re.M)
 
 
 def test_red_batch_a_kills_and_requeues_batch_b_stacked_on_it(lane, gh):
@@ -1364,7 +1381,7 @@ def test_outside_merge_after_a_applies_the_rerun_rule_to_b(make_lane, gh, outsid
     moved = events(lane, "main_moved")
     assert (moved[0]["pipe"], moved[0]["phase"], moved[0]["commits"]) == ("B", "stack", 1)
     assert [e["round"] for e in events(lane, "suite") if e["pipe"] == "B"] == list(range(1, suites + 1))
-    assert re.search(rf"^merge: batch test-run/02 suite green @ \w{{7}} \({suites} suites\)$", r.stdout, re.M)
+    assert re.search(rf"^merge: batch test-run/02 suite green tested @ \w{{7}} \({suites} suites\)$", r.stdout, re.M)
 
 
 def test_batches_cap_at_five_tickets(lane, gh):
