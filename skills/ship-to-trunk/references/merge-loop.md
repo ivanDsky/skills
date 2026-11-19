@@ -130,7 +130,9 @@ the orchestrator does next:
   dispatch a fix worker into the same worktree with the log path (prompt as
   `implement`/references/dispatch.md, hard-rules block included), then
   `enqueue` again when it reports ready. Tickets stacked after it come
-  back `requeued`.
+  back `requeued`. A flag-removal batch (SKILL lifecycle step 6) is not
+  fixed: the worker drops the failing flag's commit, notes the flag for the
+  next batch on the ticket, and enqueues again.
 - **conflict**: a worker rebases onto `origin/main` and resolves per
   Conflicts below, with the fast review of the resolution diff, then the
   ticket is enqueued again. Two tickets of one batch conflicting means they

@@ -12,7 +12,7 @@ one PR, or when a change cannot hide behind a flag.
 | shared-file edits | registry / DI module / nav graph / `when` entry, alone and first | gated or inert |
 | hardening (after user-check) | fixes plus regression tests for the bug each fixes (`tdd` § What to test, what not to) | gated |
 | flip | release default on, version bump, changelog | flips `<Key>` |
-| cleanup | remove flag, dead branch, override | removes `<Key>` |
+| flag removal (batched, lifecycle step 6) | every shipped-on flag on main: flag, dead branch, override; one commit per flag, one PR, one suite | removes each `<Key>` |
 
 Every ticket names `flag: <Key> | none` and, for invariant-7 changes,
 `live: <what> — <why it is backward compatible>`.
@@ -27,7 +27,7 @@ Every ticket names `flag: <Key> | none` and, for invariant-7 changes,
 - **Branch by abstraction** for replacements: introduce the seam (interface
   over the old implementation, no behavior change) → add the new
   implementation behind the seam → flag selects → flip → delete the old
-  implementation in the cleanup ticket.
+  implementation in the batched flag removal (its commit for that flag).
 - **Tests travel with the slice**: both flag states are covered where
   behavior differs (JVM test per state; screenshot per state for UI).
 - **Inert wiring is fine**: an unused API, an empty screen behind a gated
@@ -37,7 +37,7 @@ Every ticket names `flag: <Key> | none` and, for invariant-7 changes,
 
 | Change | Rule |
 |---|---|
-| Room/SQL schema | expand/contract: additive migration (new table/column, nullable or defaulted) ships first; the code stops reading the old shape only after the flip; destructive migration only in the cleanup ticket. Migration test per version. |
+| Room/SQL schema | expand/contract: additive migration (new table/column, nullable or defaulted) ships first; the code stops reading the old shape only after the flip; the destructive migration is its own live-change ticket after the flip ships, never inside the flag-removal batch. Migration test per version. |
 | Persisted formats (DataStore, files, Firestore docs) | readers accept old and new before any writer writes new; new fields optional; never rename in place. |
 | Manifest, permissions, exported components | own ticket, user approves; a new permission prompt is user-visible even if the feature is dark. |
 | Dependency / SDK / Gradle bumps | own ticket, no feature code in the same PR. |

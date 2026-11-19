@@ -25,7 +25,8 @@ chosen per flag - never one blob:
    constant `false` (per-build-type source set or a `BuildConfig` field) so R8
    strips the gated code; debug reads a local override, with a forced-on
    toggle in the dev settings screen. NEVER remote-enabled before its flip PR.
-   Added by ticket 01, flipped by the flip PR, removed by the cleanup ticket.
+   Added by ticket 01, flipped by the flip PR, removed by the batched
+   flag-removal ticket once the flip ships (`ship-to-trunk` lifecycle).
 2. **Ops/rollout flag (Firebase Remote Config)** - for a FINISHED feature
    that must change AFTER install: kill switches, gradual rollouts, per-user
    targeting. Update lands live from the console; the running app reacts.
