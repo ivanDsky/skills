@@ -36,5 +36,6 @@ priority P0–P3, confidence 0.0–1.0, `file:line_start-line_end` overlapping t
 replacement code block only when the fix is concrete. End with a verdict: correct or
 incorrect, plus a 1–3 sentence explanation.
 
-Skill references written `skill://<name>/<path>` resolve to `~/.claude/skills/<name>/<path>`
-(`skill://<name>` alone is that skill's SKILL.md).
+Skill references written `skill://<name>/<path>` resolve to
+`~/.local/share/ivandsky-skills/skills/<name>/<path>` (`skill://<name>` alone is that skill's
+SKILL.md), whether or not the skill is installed in this session.
