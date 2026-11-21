@@ -123,10 +123,14 @@ skills/<name>/          # one directory per skill
     └── tests/          # pytest suites + fixtures from real inputs; lint runs them
 evals/<name>.json       # routing trigger cases (>=3 positive, >=2 near-miss)
 hooks/pre/*.ts          # versioned omp guard hooks (install: § Hooks)
+hooks/claude/*.ts       # Claude Code PreToolUse entries running the same hooks (§ Claude Code)
 hooks/test/             # bun tests for the hooks
+claude/agents/*.md      # Claude Code subagents: reviewer, goldfish, scout, security-reviewer, sonic
+claude/CLAUDE.md        # omp → Claude Code term map, installed into ~/.claude/CLAUDE.md
 docs/skill-template/    # copy to skills/<name>/ to start a new skill
 scripts/lint_skills.py  # ported from awesome-llm-apps (Apache-2.0); no argument = every skill
 scripts/test_skills.py  # runs every skills/*/scripts/tests with pytest (lint calls it)
+scripts/claude_install.py # installs the Claude Code pieces into ~/.claude (tests: scripts/tests/)
 ```
 
 ## Writing a skill
@@ -182,6 +186,39 @@ bun test hooks/
 
 Re-run the `cp` after every change under `hooks/pre/`; the installed copy is
 not a symlink. Limits are listed at the top of each hook.
+
+## Claude Code (Orca bots)
+
+The skills are written for omp; the same checkout also runs under plain
+Claude Code. `scripts/claude_install.py` touches only `~/.claude` (omp never
+reads it, and `~/.agents/skills` stays the omp install):
+
+- Settings: one `PreToolUse` group (matcher `Bash`) in `~/.claude/settings.json`
+  runs `hooks/claude/<hook>.ts` with bun. Each entry imports the omp hook from
+  `hooks/pre/` unchanged through `hooks/claude/adapter.ts`: a block becomes
+  `permissionDecision: "deny"`, a rewrite becomes `updatedInput`. Other hook
+  groups (Orca, Superset) are left as they are, and every write backs the file
+  up to `settings.json.pre-bots-<timestamp>`.
+- Subagents: `claude/agents/*.md` symlinked into `~/.claude/agents/`.
+- Skills: the `~/.claude/skills/<name>` symlinks of this repo's skills point at
+  this checkout; the original targets are kept in
+  `~/.claude/.skills-bots-install.json` for uninstall.
+- Note: `claude/CLAUDE.md` goes into a marked block of `~/.claude/CLAUDE.md`. It
+  maps `skill://` paths and the omp tools (`task`, `todo`, `ask`, `eval`,
+  `local://`, …) to their Claude Code equivalents, so the skill text keeps one
+  wording for both harnesses.
+
+```bash
+python3 scripts/claude_install.py install     # idempotent
+python3 scripts/claude_install.py status
+python3 scripts/claude_install.py uninstall   # restores settings, links and CLAUDE.md
+python3 -m pytest scripts/tests/test_claude_install.py
+```
+
+The hooks run from the checkout, so a change under `hooks/pre/` reaches Claude
+Code without reinstalling; moving the checkout needs `install` again. Limits:
+the hooks see Bash calls only, and a subagent always gets Claude Code's git
+status snapshot (goldfish lenses are told not to use it).
 
 ## Planning
 

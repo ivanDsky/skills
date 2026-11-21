@@ -52,7 +52,7 @@ recollection.
    with one suite; never enqueue a series one ticket at a time as each
    finishes. It handles each result line per merge-loop.md (red → fix
    worker, conflict → rebase worker, refused/closed/stuck → the reason
-   first, waiting_user → ask tool). The orchestrator also runs one
+   first, waiting_user → ask tool, Claude Code: `AskUserQuestion`). The orchestrator also runs one
    `main_health.py watch --who <slug>`
    background bash job, started after the run's first merge and after a
    later merge when none is running; on red it attributes the culprit and
@@ -69,7 +69,7 @@ recollection.
    fallback): fast = none (research only when a ticket is
    blocked), standard = cap 3, thorough = full parallel. Agent per
    `start`/references/effort-mapping.md's reviewer/research table: `scout`
-   for code/repo questions, `task` for web/primary sources.
+   for code/repo questions, `task` (Claude Code: `Agent`, `general-purpose`) for web/primary sources.
 
 ## 2. Dispatch
 
@@ -94,7 +94,7 @@ recollection.
    to review-change.
 5. Knobs, enforced at dispatch: dispatch per the ticket's `tier:` using
    `start`/references/effort-mapping.md's *Tier → agent and model* table
-   (agent, model and spawn `effort`); never pass `model` to scout/sonic
+   (agent, model and spawn `effort`; Claude Code: the `Agent` tool, `agent` → `subagent_type`, `task` → `general-purpose`, model family only, no `effort`); never pass `model` to scout/sonic
    (config-pinned); escalation per the same section. Missing `tier:` → the
    table's defaults. Missing `effort:` → fall back to the run default.
 
@@ -172,7 +172,7 @@ recollection.
 
 - DONE_WITH_CONCERNS: concerns go to the ledger as deferred findings for
   review-change. DONE: nothing extra.
-- NEEDS_CONTEXT: answer as a brief addendum file, resume the same worker.
+- NEEDS_CONTEXT: answer as a brief addendum file, resume the same worker (Claude Code: `SendMessage` to its agent id).
   Only the user can answer → the orchestrator asks through the ask tool
   first (`start` § Waiting on the user); workers never ask the user.
 - Review findings (slice review or `review-change`): the worker that wrote

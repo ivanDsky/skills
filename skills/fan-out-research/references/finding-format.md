@@ -30,7 +30,7 @@ Hard rules (a guard hook blocks the bash ones):
 - Never delete caches (~/.gradle, ~/Library, ~/.android); disk full means BLOCKED.
 - Run `df -h ~` before a build; under 15 GB free, report BLOCKED.
 - Never merge or enable auto-merge; report ready.
-- Never call the ask tool; questions go in the report as NEEDS_CONTEXT.
+- Never call the ask tool (`AskUserQuestion`); questions go in the report as NEEDS_CONTEXT.
 <finding template>
 ```
 

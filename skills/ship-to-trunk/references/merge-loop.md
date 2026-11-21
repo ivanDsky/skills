@@ -145,7 +145,7 @@ the orchestrator does next:
   touch the same lines: the >~50 lines re-slice rule applies.
 - **waiting_user** (`--no-merge`: unflaggable live change, flip PR): the PR
   is open after a green suite and is never merged by the lane. Ask the user
-  through the ask tool (`start` § Waiting on the user). On approval:
+  through the ask tool (Claude Code: `AskUserQuestion`; `start` § Waiting on the user). On approval:
   `main_health.py status`; green → apply the main-moved verdicts below, `gh pr
   merge <n> --squash --match-head-commit <sha>`; red →
   `main_health.py hold --pr <n> --who <id>` (Red main).

@@ -101,7 +101,7 @@ suite:
    `ship_apk.py` (slug = ticket id), reports `device-check` with the build
    and the one thing to feel or look at, and stops. It opens no PR and
    enqueues nothing.
-2. The session asks the user through the ask tool (`start` § Waiting on
+2. The session asks the user through the ask tool (Claude Code: `AskUserQuestion`; `start` § Waiting on
    the user). The ask blocks only the session's turn; the pack's other
    workers keep running.
 3. Not right yet: the same worker takes another round on the same branch

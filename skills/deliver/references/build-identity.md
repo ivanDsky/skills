@@ -45,7 +45,8 @@ ledger record; no new code is burned.
 
 A manual build is never shipped. The harness hook
 `~/.omp/agent/hooks/pre/apk-ship-guard.ts` enforces this for agent
-`bash`/`eval` calls:
+`bash`/`eval` calls (Claude Code: the same hook through the skills repo's
+`hooks/claude/apk-ship-guard.ts`, Bash calls only):
 
 1. Raw `tailscale file cp` is refused (`--targets` is allowed) once
    `~/.agents/skills/deliver/scripts/ship_apk.py` is installed. The script

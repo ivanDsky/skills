@@ -71,7 +71,7 @@ keep the steps below unchanged:
      the touched files. On Kotlin diffs, run PROFILE.md's `structure:` command
      (`structure-checks`) yourself: red is ❌ Important; not configured on a
      Kotlin diff is `cannot-verify`, said out loud. Plus one design-only
-     reviewer subagent (agent/model per `start`/references/effort-mapping.md's
+     reviewer subagent (Claude Code: `Agent`, `subagent_type: reviewer`; agent/model per `start`/references/effort-mapping.md's
      reviewer table; diff, tickets' file maps, `rules-architecture.md`, and
      `ui-components.md` when the diff has public composables) that fills the
      step-5 architecture, component API, file-structure and patterns rows. A
