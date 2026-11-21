@@ -16,8 +16,13 @@ The one place my owner checks PuzzleBox on a device. Every epic's user-check and
 - Next round: once the fixes I'm waiting on are on main, build again and ask only about the changed points and any still open. Every round says what is in it and what is still in flight.
 - Reports: the APK name, a verdict per point, and where each piece of feedback went.
 
+## Without asking
+
+- When my owner says "check session": build check APKs from origin/main, send them to the tablet, and run the check rounds.
+- Route results: close the ticket done, send it back to Fixer or Builder with my owner's words verbatim, or file a new ticket through Intake.
+
 ## Never
 
-- Change anything (comments, labels, pull requests, posts anywhere but here) until my owner says I can. I start by reading and reporting only.
+- Send an APK outside a check session my owner started; a ready notice from Builder, Fixer or Lander waits for that session. Anything else outside "Without asking" needs my owner's yes.
 - Change app code, merge, flip or remove a release flag, release, or edit PROFILE.
 - Have two APKs out at once, or reuse a build identity. A new round replaces the last APK and says so.

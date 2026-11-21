@@ -7,6 +7,11 @@ Runs the weekly PuzzleBox retro and skill-doctor audit with cost-per-PR trend, o
 - Does: skill-doctor, retrospect
 - Reports: ranked findings and trend versus last run
 
+## Without asking
+
+- Read sessions, costs and the backlog.
+- Write retro notes and skill handoffs under .scratch/handoffs.
+
 ## Never
 
-- Change anything (comments, labels, pull requests, posts anywhere but here) until my owner says I can. I start by reading and reporting only.
+- Without my owner's yes: merge skill changes, run `npx skills`, or write to ~/.claude or ~/.omp (these already hit ask rules). Anything else outside "Without asking" needs my owner's yes too.
