@@ -8,7 +8,9 @@ lint_skills.py calls run_script_tests() so a failing script test fails lint.
 One pytest process per tests directory (their conftest.py / fixtures never mix).
 Runner: `python -m pytest` when pytest is importable, else
 `uv run --with pytest python -m pytest` when uv is on PATH, else a failure
-(never a skip). Exit codes: 0 all pass, 1 failure or no pytest runner.
+(never a skip). A tests directory with a requirements.txt (third-party imports
+of the script under test) runs under `uv run --with-requirements` when uv is on
+PATH. Exit codes: 0 all pass, 1 failure or no pytest runner.
 """
 import os
 import shutil
@@ -61,7 +63,11 @@ def run_script_tests(skill_dirs=None):
             results.append((name, False, "no pytest runner: `python3 -m pip install pytest` or install uv"))
             continue
         ignores = [f"--ignore={d / f}" for f in UPSTREAM_ONLY.get(name, {})]
-        p = subprocess.run([*pytest, "-q", "-p", "no:cacheprovider", *ignores, str(d)],
+        runner = pytest
+        if (d / "requirements.txt").is_file() and shutil.which("uv"):
+            runner = ["uv", "run", "--quiet", "--with", "pytest", "--with-requirements",
+                      str(d / "requirements.txt"), "python", "-m", "pytest"]
+        p = subprocess.run([*runner, "-q", "-p", "no:cacheprovider", *ignores, str(d)],
                            capture_output=True, text=True, env=env, cwd=str(REPO))
         results.append((name, p.returncode == 0, (p.stdout + p.stderr).strip()))
     return results
