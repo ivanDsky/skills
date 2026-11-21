@@ -16,6 +16,9 @@ const BLOCKED: Array<[string, string]> = [
 	["kill -9 $(pgrep -f gradle)", "kill"],
 	["jps | awk '{print $1}' | xargs kill", "kill"],
 	["ps aux | grep -i gradle | awk '{print $2}' | xargs kill -9", "kill"],
+	['pkill -f "build-slot" ; sleep 1; echo ok', "kill"],
+	["killall build-slot", "kill"],
+	["kill $(pgrep -f build-slot)", "kill"],
 	["./gradlew --stop", "gradle-stop"],
 	["gradle --stop", "gradle-stop"],
 	["cd app && ../gradlew --stop", "gradle-stop"],
@@ -82,6 +85,8 @@ const ALLOWED: string[] = [
 	"pkill -f my-dev-server",
 	"killall Finder",
 	"pgrep -f gradle",
+	"pgrep -f build-slot",
+	"~/.local/bin/build-slot ./gradlew :app:testDebugUnitTest",
 	"ps aux | grep gradle",
 	"echo java; kill 4242",
 	// deleting inside the worktree or non-protected home paths

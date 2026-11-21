@@ -164,12 +164,16 @@ Rules an agent broke twice in prose are enforced by a hook, and the hook is
 versioned here instead of living only in `~/.omp`. `hooks/pre/worker-guard.ts`
 blocks the mechanically detectable worker hard rules in bash commands
 (`skills/implement/references/hard-rules.md`): `pkill`/`killall` of
-Gradle/Java, `gradlew --stop`, `git add -A`/`--all`/`.`, and `rm` of
+Gradle/Java/build-slot, `gradlew --stop`, `git add -A`/`--all`/`.`, and `rm` of
 `~/.gradle`, `~/Library` or `~/.android`. `hooks/pre/tailnet-leak-guard.ts`
 refuses a `git commit` or `git push` whose added lines carry a Tailscale
 address (100.64.0.0/10) or a `*.ts.net` name; device data belongs in the
-gitignored `PROFILE.local.md` (deploy-tailscale § 2). Install (omp loads every `.ts` in
-that directory) and test:
+gitignored `PROFILE.local.md` (deploy-tailscale § 2). `hooks/pre/build-queue.ts`
+prefixes agent `gradlew` and `ship_apk.py` calls, and `bash <abs path>.sh` scripts
+that run gradlew, with `~/.local/bin/build-slot` (a machine-wide build queue that
+lives outside this repo; without it the hook does nothing). `hooks/pre/apk-ship-guard.ts`
+refuses raw Taildrop copies and `adb install` of APKs without a canonical
+build-identity name (deliver). Install (omp loads every `.ts` in that directory) and test:
 
 ```bash
 mkdir -p ~/.omp/agent/hooks/pre && cp hooks/pre/*.ts ~/.omp/agent/hooks/pre/

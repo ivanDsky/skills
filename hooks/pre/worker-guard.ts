@@ -1,7 +1,7 @@
 // Worker guard: the mechanically detectable rules of skills/implement/references/hard-rules.md.
 // Agents broke these in prose more than once (audit F6), so the bash tool refuses them:
-//  1. pkill / killall of gradle, java or kotlin, `kill` of a pgrep'd gradle/java, `gradlew --stop`
-//     (kills the daemons of every other lane on the machine).
+//  1. pkill / killall of gradle, java, kotlin or build-slot, `kill` of a pgrep'd gradle/java, `gradlew --stop`
+//     (kills the daemons and queued builds of every other lane on the machine).
 //  2. `git add -A`, `git add --all`, `git add .` (blind staging reverts other work).
 //  3. `rm` (or `find -delete`) of ~/.gradle, ~/Library, ~/.android or an ancestor such as ~
 //     (shared caches; a full disk is reported BLOCKED, never cleaned by a worker).
@@ -16,7 +16,7 @@ import { homedir } from "node:os";
 import { posix } from "node:path";
 
 const MAX_DEPTH = 5;
-const TARGET = /gradle|java|kotlin/i;
+const TARGET = /gradle|java|kotlin|build-slot/i;
 const WRAPPERS = new Set([
 	"sudo", "command", "builtin", "exec", "nohup", "time", "nice", "env", "xargs", "stdbuf", "timeout",
 	"then", "do", "else", "if", "while", "until", "elif", "!", "{",
@@ -233,9 +233,10 @@ export interface Violation {
 
 const REASONS: Record<Violation["rule"], string> = {
 	kill:
-		"worker-guard: killing Gradle/Java processes by name also kills every other lane's builds on this machine. " +
-		"Wait for your own build (the build-slot queue runs them in turn); if one hangs, report BLOCKED with the log path " +
-		"instead of killing it. See skill://implement/references/hard-rules.md.",
+		"worker-guard: killing Gradle, Java or build-slot processes by name also kills every other lane's builds on this machine. " +
+		"Wait for your own build (the build-slot queue runs them in turn; a hook adds the build-slot prefix, so seeing it in " +
+		"your command is expected); if one hangs, report BLOCKED with the log path instead of killing it. " +
+		"See skill://implement/references/hard-rules.md.",
 	"gradle-stop":
 		"worker-guard: `gradlew --stop` stops the Gradle daemons of every lane, not only yours. Let your build " +
 		"finish (daemons are reused on purpose); if it hangs, report BLOCKED with the log path. " +

@@ -3,7 +3,8 @@
   "positive": [
     "The swipe gesture sometimes flickers and drops the card - fix it",
     "App crashes when I open the gallery twice fast",
-    "The saved screen shows the wrong count after rotating"
+    "The saved screen shows the wrong count after rotating",
+    "Here's a screen recording of the bug, the card jumps around 0:04 - figure out what's going on frame by frame"
   ],
   "negative": [
     {

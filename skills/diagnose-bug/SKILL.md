@@ -79,7 +79,9 @@ than ten shell commands. Only reproduce what remains unexplained.
    loop: ask the USER (ask tool) to record the phone (they see it live) and, if frame
    analysis is truly needed, to mark the moment ("it flickers right after the
    card leaves the stack"). An agent scrubbing unmarked video is the
-   costliest path in the codebase.
+   costliest path in the codebase. Read any recording (the user's, a ticket
+   attachment, your own capture) with `scripts/frames.py <video> --from <s> --to <s>`:
+   timestamped frames plus one labelled contact sheet; never hand-build ffmpeg filters.
 
 ## 3. Diagnose, then hand off
 

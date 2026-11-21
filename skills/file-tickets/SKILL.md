@@ -100,8 +100,9 @@ problem → a new ticket.
 - Briefs name behaviour and contracts, never file paths or line numbers: the
   code moves before a worker arrives.
 - One point, one ticket. Never bundle unrelated points to save tickets.
-- Screenshots always go in with `--attach`. A path in chat dies with the
-  session.
+- Screenshots and recordings always go in with `--attach`. A path in chat dies
+  with the session. Read a recording with `diagnose-bug`/scripts/frames.py to
+  quote the moment (seconds) in the brief.
 
 Fresh skill for this repo's shared backlog. Its triage states follow
 mattpocock/skills (`triage`, MIT); no text adapted.
