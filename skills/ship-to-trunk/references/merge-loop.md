@@ -144,7 +144,7 @@ the orchestrator does next:
   Conflicts below, with the fast review of the resolution diff, then the
   ticket is enqueued again. Two tickets of one batch conflicting means they
   touch the same lines: the >~50 lines re-slice rule applies.
-- **waiting_user** (`--no-merge`: unflaggable live change, release PR before the owner's `release`): the PR
+- **waiting_user** (`--no-merge`: unflaggable live change, release PR awaiting the owner's Yes to "Release <X.Y.Z>?"): the PR
   is open after a green suite and is never merged by the lane. Ask the user
   through the ask tool (Claude Code: `AskUserQuestion`; `start` § Waiting on the user). On approval:
   `main_health.py status`; green → apply the main-moved verdicts below, `gh pr

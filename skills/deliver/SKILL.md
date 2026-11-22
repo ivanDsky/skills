@@ -135,7 +135,7 @@ passed; this stage adds no code.
    - `main` → the commit(s) go to the default branch per the consent ledger
      (`commit+push to the project repo`); report the commit id.
    - `trunk` → already landed: slices merged via `implement`/`open-pr`, the
-     release PR merged with the user's explicit `release`; report the release PR url + merge sha
+     release PR merged on the user's explicit Yes to "Release <X.Y.Z>?"; report the release PR url + merge sha
      and the `slice:` ledger lines.
    `pr`/`main` never bump semver; that waits for a release (step 3).
    Missing delivery answer on a standalone run → ask once, never infer `main`.

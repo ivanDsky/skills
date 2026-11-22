@@ -136,7 +136,8 @@ worktree never switches to main), then any post-merge step in PROFILE
    changelog) is the release: full body from steps 2–4 (summary,
    before/after, top-3 checks over the feature's merged range), the flags
    removed and any kept on by a red suite, and step 1's gate (`user-check:
-   ok`, thorough review green, the owner's `release`).
+   ok`, thorough review green). It stays open and unmerged until the owner
+   answers Yes to "Release <X.Y.Z>?".
 3. **Merge** per the `ship-to-trunk` authority table, never step 5's
    blanket consent: `gh pr merge <n> --squash --match-head-commit <sha>`,
    then `git push origin --delete <branch>`. Squash title = conventional-commit PR title.

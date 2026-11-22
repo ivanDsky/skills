@@ -66,7 +66,7 @@ worker's BLOCKED or NEEDS_CONTEXT only the user can clear.
   it yourself", "deploy it yourself", "you pick") → append it as a
   `pre-approved:` line the same turn and name it in the next status.
   Never pre-approvable, however delegated: the release (flags on and
-  removed, version bump; only an explicit `release` counts) or any flag
+  removed, version bump; only an explicit Yes to "Release <X.Y.Z>?" counts) or any flag
   flip, a production deploy, data deletion, anything public.
 - Budget: ≤5 questions per form, recommended option first; approvals for
   several PRs share one form; a question that blocks nothing waits for the
@@ -177,8 +177,9 @@ milestone. Brief, file format, models: [Lifecycle](references/lifecycle.md).
    last, in the PR. Delivery `trunk` differs: slices merge dark (fast review
    each) as tickets close, `user-check` runs on a debug build from `main`
    with the release flag forced on, and the one release PR (flags on and
-   removed, version bump) waits for the user's explicit `release` on the
-   check plus thorough review (`ship-to-trunk`).
+   removed, version bump) opens unmerged and waits for the user's explicit Yes to
+   "Release <X.Y.Z>?", asked apart from the check, plus thorough review
+   (`ship-to-trunk`).
 
 Tickets still claimed by this worktree → the run plan lists them and offers
 resume (feature epic → `implement`, otherwise `work-tickets`); the new ask is

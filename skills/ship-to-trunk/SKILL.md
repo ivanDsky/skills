@@ -13,7 +13,7 @@ interaction: mixed
 requires: [git, gh]
 ---
 
-> **TL;DR** One ticket = one small PR off fresh `main`, merged in hours; unfinished behavior merges dark behind a release flag; the feature ships by one release PR (flags on and removed, version bumped) after user-check, on one explicit owner `release`. Owns slice size, merge authority, unflaggable changes and the flag lifecycle on the git side.
+> **TL;DR** One ticket = one small PR off fresh `main`, merged in hours; unfinished behavior merges dark behind a release flag; the feature ships by one release PR (flags on and removed, version bumped) after user-check, on one explicit owner Yes to "Release <X.Y.Z>?". Owns slice size, merge authority, unflaggable changes and the flag lifecycle on the git side.
 > **Related**: skill://start (asks/plans delivery mode), skill://write-tickets (cuts mergeable-dark tickets), skill://implement (one worktree + PR per ticket), skill://open-pr (slice and release PR bodies, merge commands), skill://wire-dev-settings (owns flag code: release flags, overrides), skill://user-check (tries the feature from main, flag forced on), skill://review-change (fast tier per slice, thorough before the release), skill://deliver (ships the release), skill://micro-architecture (branch by abstraction, expand/contract), skill://init-profile (`changes: trunk`, consent line)
 
 # Ship to trunk
@@ -88,7 +88,7 @@ Commands, conflicts and the no-CI fallback:
 | Slice, dark or non-behavioral, check green (`pr-check: none`: local suite green on the rebased branch, or on a batch top it is part of) + fast review clean | agent, when the consent ledger has `merge dark slices on green` |
 | Bug fix (live by nature) | agent on green, same as PROFILE's fix rules; patch bump per project policy |
 | Unflaggable live change (invariant 7) | user approves the PR |
-| Release PR (flags on and removed + bump) | user approves with an explicit `release`, after thorough review |
+| Release PR (flags on and removed + bump) | user approves: an explicit Yes to "Release <X.Y.Z>?" asked once the PR is open and green, after thorough review |
 
 No consent line → every PR waits for the user; say so once in the run plan,
 never infer consent from silence. PRs waiting for the user share one ask (PR
@@ -118,21 +118,29 @@ main stops all merges but the fix (Red main below).
    release, never per slice.
 5. **Release PR**, one per epic, written up front as the last ticket
    (`Release <X.Y.Z>: turn on and remove <Epic> flags`); epics checked in
-   the same round may share one. The hands-on check and the release are one
-   ask on the check APK: "Feels right -> release <X.Y.Z> (<what> on, flags
-   removed)? Recommended: release." Options `release` / `fix first:
-   <what>`; only an explicit `release` counts, silence or a reply to
-   another question does not. Then one PR off fresh `origin/main`: one
-   commit per flag (flag, its off branch, debug override and the old code
-   path it hid; on is the only behavior), the same for every other
-   shipped-on flag still in code, and a last commit with the version bump
-   (PROFILE `version:`, the Gradle versionName fallback, top entry of
-   `docs/release-history.md`). One gate suite, plus the thorough review
-   already required before it. A red suite drops the failing flag's removal
-   commit for a one-line release-default-on flip: that flag ships on and
-   its removal goes to step 6; the release never waits on a removal fix. The
-   lane merges it as one flag-touching PR and `deliver` ships `main` at
-   that merge sha. Destructive migrations and manifest, permission or SDK
+   the same round may share one. The hands-on check ("does it feel right?")
+   is its own earlier ask on the check APK and carries no release ask. Then
+   one PR off fresh `origin/main`: one commit per flag (flag, its off
+   branch, debug override and the old code path it hid; on is the only
+   behavior), the same for every other shipped-on flag still in code, and a
+   last commit with the version bump (PROFILE `version:`, the Gradle
+   versionName fallback, top entry of `docs/release-history.md`). One gate suite, plus the thorough review
+   already required before it. It is enqueued with `--no-merge`: after the
+   green suite the PR is open and unmerged. The builder asks nothing; the
+   merging orchestrator asks "Release <X.Y.Z>?" through the ask tool, with
+   the release-history entry in the question (features turned on, fixes
+   since the last release, flags removed). Options `Yes, release
+   (Recommended)` / `No`; only an explicit Yes to that question merges,
+   never silence, "looks good" on the check or a reply to another
+   question. No, or no answer, leaves it enqueued `--no-merge`. Record the
+   answer on the release ticket. No ask tool in the merger's session → the
+   same question goes in an `OWNER:` line, relayed verbatim. On Yes it
+   merges as a `waiting_user` PR (`references/merge-loop.md`; ledger
+   `release: <X.Y.Z> approved by user <date> (PR #<n>)`). A red suite drops
+   the failing flag's removal commit for a one-line release-default-on flip:
+   that flag ships on and its removal goes to step 6; the release never
+   waits on a removal fix. It is one flag-touching PR in the lane and
+   `deliver` ships `main` at that merge sha. Destructive migrations and manifest, permission or SDK
    changes stay out of it (own tickets, own asks). Rollback is a revert of
    the release PR, a new release like any merge.
 6. **Leftover removal, batched**: only for flags the release PR did not

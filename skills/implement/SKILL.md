@@ -200,8 +200,8 @@ recollection.
    `user-check`'s re-gate → `review-change`. `trunk`: hand off once the
    last feature slice merged — the user checks a debug build from `main`
    with the flag forced on; the release ticket waits for the user's
-   explicit `release` and thorough review, and it removes the flags
-   itself (`ship-to-trunk` lifecycle).
+   explicit Yes to "Release <X.Y.Z>?" and thorough review, and it
+   removes the flags itself (`ship-to-trunk` lifecycle).
    Backlog packs (`work-tickets`): no epic, so no user-check hand-off;
    control returns to `work-tickets` for the next pack.
 4. Fast-fix briefs from `user-check` (`mode: fast-fix`, F-ids listed): the
