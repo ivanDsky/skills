@@ -21,7 +21,7 @@ PROFILE.md `## Delivery` `changes:` decides:
   one layer per ticket).
 - `trunk` → the plan lists `ship-to-trunk`: no run branch, one worktree +
   slice PR per ticket off fresh `origin/main`, ticket 01 adds the release
-  flag, the flip PR is the release (stacks only by its exception).
+  flag, the release PR (flags on and removed) is the release (stacks only by its exception).
 - `main` → commits land on the default branch.
 - `ask` (typed by the user at setup, or an old PROFILE without the answer)
   → one question ("trunk (small PRs into main), one PR, or straight to

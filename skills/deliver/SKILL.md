@@ -28,10 +28,10 @@ passed; this stage adds no code.
    `review-change`, with `<sha>` equal to HEAD. HEAD moved since → back to
    `review-change` (it reruns the suite once); missing user check → back to
    `user-check`. Fixes go back through `implement` + `review-change`.
-   `trunk` run: deliver fires once, after the flip PR merged (ledger `flag:
-   <Key> flipped (PR #<n>)`), and ships `main` at that merge sha; the gate
-   is the flip PR's (`user-check: ok`, thorough review green over the
-   feature's merged range). Slices never fire deliver (`ship-to-trunk`).
+   `trunk` run: deliver fires once, after the release PR merged (ledger
+   `release: <X.Y.Z> approved by user <date> (PR #<n>)`), and ships `main`
+   at that merge sha; the gate is the release PR's (`user-check: ok`,
+   thorough review green over the feature's merged range). Slices never fire deliver (`ship-to-trunk`).
 
 2. Pick the delivery mode, in precedence order (session override > project
    config > global defaults):
@@ -80,7 +80,7 @@ passed; this stage adds no code.
      the user asks for bumps it (minor by default, once for all its
      features), on main, then builds with `ship_apk.py --release` for the
      plain `1.4.0` name; see [Build identity](references/build-identity.md).
-     `trunk`: the flip PR is that release and carries the bump; slices
+     `trunk`: the release PR is that release and carries the bump; slices
      never bump, so a release workflow on push to main publishes nothing
      for them.
 
@@ -135,7 +135,7 @@ passed; this stage adds no code.
    - `main` → the commit(s) go to the default branch per the consent ledger
      (`commit+push to the project repo`); report the commit id.
    - `trunk` → already landed: slices merged via `implement`/`open-pr`, the
-     flip PR merged with user approval; report the flip PR url + merge sha
+     release PR merged on the user's explicit Yes to "Release <X.Y.Z>?"; report the release PR url + merge sha
      and the `slice:` ledger lines.
    `pr`/`main` never bump semver; that waits for a release (step 3).
    Missing delivery answer on a standalone run → ask once, never infer `main`.

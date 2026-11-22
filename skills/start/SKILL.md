@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Triages an ask — quick task, prototype, feature, unmapped codebase — prints the run plan, and fires the matching chain; use on /start.
-> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://user-check (hands-on check before review), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes), skill://ship-to-trunk (delivery = trunk: one small PR per ticket, merge dark, flip PR releases), skill://caveman (external: terse voice for chat, briefs, reports, ledgers)
+> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://user-check (hands-on check before review), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes), skill://ship-to-trunk (delivery = trunk: one small PR per ticket, merge dark, release PR releases), skill://caveman (external: terse voice for chat, briefs, reports, ledgers)
 
 # Start
 
@@ -65,8 +65,9 @@ worker's BLOCKED or NEEDS_CONTEXT only the user can clear.
   pre-approves is done, not asked. The user delegates a class of asks ("do
   it yourself", "deploy it yourself", "you pick") → append it as a
   `pre-approved:` line the same turn and name it in the next status.
-  Never pre-approvable, however delegated: the flag flip or release, a
-  production deploy, data deletion, anything public.
+  Never pre-approvable, however delegated: the release (flags on and
+  removed, version bump; only an explicit Yes to "Release <X.Y.Z>?" counts) or any flag
+  flip, a production deploy, data deletion, anything public.
 - Budget: ≤5 questions per form, recommended option first; approvals for
   several PRs share one form; a question that blocks nothing waits for the
   next checkpoint form instead of its own ask.
@@ -175,8 +176,10 @@ milestone. Brief, file format, models: [Lifecycle](references/lifecycle.md).
    `review-change` (suite once) → deliver → land. The user reviews code
    last, in the PR. Delivery `trunk` differs: slices merge dark (fast review
    each) as tickets close, `user-check` runs on a debug build from `main`
-   with the release flag forced on, and the flip PR waits for user-check OK
-   plus thorough review (`ship-to-trunk`).
+   with the release flag forced on, and the one release PR (flags on and
+   removed, version bump) opens unmerged and waits for the user's explicit Yes to
+   "Release <X.Y.Z>?", asked apart from the check, plus thorough review
+   (`ship-to-trunk`).
 
 Tickets still claimed by this worktree → the run plan lists them and offers
 resume (feature epic → `implement`, otherwise `work-tickets`); the new ask is
@@ -247,11 +250,11 @@ hand off).
 | backlog | `work-tickets` | triage 0: pick up backlog tickets by area, type, epic or ids; triage 1b: land the one filed ticket |
 | research | `fan-out-research` | ticket/spec declares an Unknown |
 | implement | `implement` | ready frontier ticket; `user-check` fast fixes; re-gate hardening tickets |
-| user check | `user-check` | implement done (feature tickets) or quick-task code written — the user tries the whole change before any review (trunk: after the last slice merged dark, before the flip PR); on OK it re-gates the run into hardening tickets |
+| user check | `user-check` | implement done (feature tickets) or quick-task code written — the user tries the whole change before any review (trunk: after the last slice merged dark, before the release PR); on OK it re-gates the run into hardening tickets |
 | review | `review-change` | hardening tickets closed after `user-check` OK (quick task: right after OK) |
 | deliver | `deliver` | review passes and `suite: green @ HEAD` is ledgered |
-| land | `open-pr` | run's delivery decision = pr (PROFILE `## Delivery` `changes:` or session answer), fired by `deliver`; = trunk → once per slice PR and for the flip PR (`ship-to-trunk`) |
-| land | `ship-to-trunk` | delivery = trunk: slice size, fresh-base worktree per ticket, merge authority, live changes, flag lifecycle through the flip PR |
+| land | `open-pr` | run's delivery decision = pr (PROFILE `## Delivery` `changes:` or session answer), fired by `deliver`; = trunk → once per slice PR and for the release PR (`ship-to-trunk`) |
+| land | `ship-to-trunk` | delivery = trunk: slice size, fresh-base worktree per ticket, merge authority, live changes, flag lifecycle through the release PR |
 | support | `android-env` | first Android command of a session fails, or before the first build/device action (bootstrap checklist) |
 | support | `web-env` | first web/Node command of a session fails, or before the first dev-server/build action (bootstrap checklist) |
 | support | `adopt-tool` | a new tool/capability is being adopted into the workflow |

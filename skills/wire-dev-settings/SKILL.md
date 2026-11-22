@@ -12,7 +12,7 @@ requires: []
 ---
 
 > **TL;DR** Wires a debug-only developer settings screen with release flags (unfinished trunk work dark), reactive Firebase Remote Config ops flags, overrides, and a playground; fires when adding feature flags.
-> **Related**: skill://preview-compose (prototype screens), skill://ship-to-trunk (when release flags are added, flipped, removed)
+> **Related**: skill://preview-compose (prototype screens), skill://ship-to-trunk (when release flags are added, released, removed)
 
 # Wire dev settings & flags
 
@@ -24,9 +24,9 @@ chosen per flag - never one blob:
    `main` (`ship-to-trunk`). Typed key; the release value is a compile-time
    constant `false` (per-build-type source set or a `BuildConfig` field) so R8
    strips the gated code; debug reads a local override, with a forced-on
-   toggle in the dev settings screen. NEVER remote-enabled before its flip PR.
-   Added by ticket 01, flipped by the flip PR, removed by the batched
-   flag-removal ticket once the flip ships (`ship-to-trunk` lifecycle).
+   toggle in the dev settings screen. NEVER remote-enabled before its release PR.
+   Added by ticket 01, turned on and removed by the epic's release PR
+   (`ship-to-trunk` lifecycle).
 2. **Ops/rollout flag (Firebase Remote Config)** - for a FINISHED feature
    that must change AFTER install: kill switches, gradual rollouts, per-user
    targeting. Update lands live from the console; the running app reacts.
