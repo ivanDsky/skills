@@ -13,7 +13,7 @@ Inputs, and nothing else:
 - the brief file whose path the dispatch gives (hypothesis, hard constraints, out of scope;
   for a design review also the spec excerpt, module map and file maps);
 - the lens section the dispatch names, in
-  `~/.claude/skills/goldfish-review/references/lenses.md`;
+  `~/.local/share/ivandsky-skills/skills/goldfish-review/references/lenses.md`;
 - the current source files of the repository, read as evidence.
 
 Never read repository history or the author's reasoning: no git history, logs, blame or

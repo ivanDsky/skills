@@ -127,10 +127,13 @@ hooks/claude/*.ts       # Claude Code PreToolUse entries running the same hooks 
 hooks/test/             # bun tests for the hooks
 claude/agents/*.md      # Claude Code subagents: reviewer, goldfish, scout, security-reviewer, sonic
 claude/CLAUDE.md        # omp → Claude Code term map, installed into ~/.claude/CLAUDE.md
+claude/bots.json        # Orca bot manifest: shared skills, per-bot skills + settings (§ Claude Code)
+claude/bots/<bot>/SOUL.md # each bot's SOUL.md, installed into ~/.orca/bots/<bot>/
 docs/skill-template/    # copy to skills/<name>/ to start a new skill
 scripts/lint_skills.py  # ported from awesome-llm-apps (Apache-2.0); no argument = every skill
 scripts/test_skills.py  # runs every skills/*/scripts/tests with pytest (lint calls it)
-scripts/claude_install.py # installs the Claude Code pieces into ~/.claude (tests: scripts/tests/)
+scripts/claude_install.py # installs the Claude Code pieces and the bots (tests: scripts/tests/)
+scripts/update.sh        # one command after git pull: omp skills, Claude Code and every bot
 ```
 
 ## Writing a skill
@@ -190,35 +193,87 @@ not a symlink. Limits are listed at the top of each hook.
 ## Claude Code (Orca bots)
 
 The skills are written for omp; the same checkout also runs under plain
-Claude Code. `scripts/claude_install.py` touches only `~/.claude` (omp never
-reads it, and `~/.agents/skills` stays the omp install):
+Claude Code, where the 8 Orca bots (intake, planner, designer, builder, fixer,
+lander, tester, coach) run. `scripts/claude_install.py` writes only `~/.claude`,
+`~/.orca/bots/<bot>/` and its store; omp never reads those, and `~/.agents/skills`
+stays the omp install.
 
+Each bot sees a small shared set plus its own role skills, nothing else. A skill
+list costs context at every session start, so scoping matters: a builder session
+went from 28.2k to 21.5k input tokens.
+
+- Manifest: `claude/bots.json` holds the `shared` set (what worker sessions in
+  PuzzleBox worktrees need: they only get user-level skills), the per-bot
+  `skills`, and each bot's `settings` (model, effortLevel, permissions). The
+  bot's `SOUL.md` lives in `claude/bots/<bot>/`. Change a bot here, not in its
+  folder.
+- Store: `install` copies `skills/`, `hooks/` and `claude/` to
+  `~/.local/share/ivandsky-skills`, and links every other skill in
+  `~/.agents/skills` (caveman, mattpocock, orchestration, …) into its `skills/`.
+  All links and hook commands point there, so deleting or moving this checkout
+  breaks nothing, and `skill://<name>` resolves there for every skill, installed
+  or not.
+- `~/.claude/skills`: the shared set only. Other symlinks are removed (their
+  original targets are kept in `~/.claude/.skills-bots-install.json`); real
+  directories are reported and left.
+- Bots: each existing `~/.orca/bots/<bot>/` gets `.claude/skills/<skill>` links
+  for its role set, plus `.claude/settings.json` and `SOUL.md` from the manifest.
+  A bot missing in Orca is reported, never created. Anything else in the bot
+  folder is kept. A `settings.json` or `SOUL.md` edited by hand is shown as a
+  diff and overwritten only with `install --force` (after a backup).
 - Settings: one `PreToolUse` group (matcher `Bash`) in `~/.claude/settings.json`
   runs `hooks/claude/<hook>.ts` with bun. Each entry imports the omp hook from
   `hooks/pre/` unchanged through `hooks/claude/adapter.ts`: a block becomes
-  `permissionDecision: "deny"`, a rewrite becomes `updatedInput`. Other hook
-  groups (Orca, Superset) are left as they are, and every write backs the file
-  up to `settings.json.pre-bots-<timestamp>`.
+  `permissionDecision: "deny"`, a rewrite becomes `updatedInput`. The manifest's
+  `user_settings` turn off claude.ai synced skills (`syncClaudeAiSkills`),
+  bundled skills (`disableBundledSkills`) and the built-in `plugin-authoring`
+  skill (`skillOverrides`). Other keys and hook groups (Orca, Superset) are left
+  as they are, and every write backs the file up to
+  `settings.json.pre-bots-<timestamp>`.
 - Subagents: `claude/agents/*.md` symlinked into `~/.claude/agents/`.
-- Skills: the `~/.claude/skills/<name>` symlinks of this repo's skills point at
-  this checkout; the original targets are kept in
-  `~/.claude/.skills-bots-install.json` for uninstall.
 - Note: `claude/CLAUDE.md` goes into a marked block of `~/.claude/CLAUDE.md`. It
   maps `skill://` paths and the omp tools (`task`, `todo`, `ask`, `eval`,
   `local://`, …) to their Claude Code equivalents, so the skill text keeps one
   wording for both harnesses.
 
+Update everything after a `git pull` (idempotent):
+
 ```bash
-python3 scripts/claude_install.py install     # idempotent
-python3 scripts/claude_install.py status
-python3 scripts/claude_install.py uninstall   # restores settings, links and CLAUDE.md
+scripts/update.sh            # npx skills update -g (omp), then claude_install.py install + status
+SKIP_OMP=1 scripts/update.sh # Claude Code and bots only
+```
+
+New machine:
+
+1. Install Orca (it provides the `orchestration` and `orca-cli` skills in
+   `~/.agents/skills`), Claude Code and bun, and clone this repo.
+2. Install omp's skills once; `install` refuses a manifest skill that exists
+   neither here nor in `~/.agents/skills`:
+
+   ```bash
+   for s in ivanDsky/skills mattpocock/skills JuliusBrussee/caveman emilkowalski/skill vercel-labs/skills tw93/Mole; do
+     npx skills add "$s" -g
+   done
+   ```
+
+3. Run `scripts/update.sh`.
+4. Create the 8 bots in the Orca GUI (a bot can't be created from outside Orca),
+   then run `scripts/update.sh` again so the bots get their skills, settings and
+   SOUL.md.
+
+```bash
+python3 scripts/claude_install.py install [--force]
+python3 scripts/claude_install.py status      # drift per bot: missing/extra skills, edited files
+python3 scripts/claude_install.py uninstall   # restores settings, links and CLAUDE.md; removes the store
 python3 -m pytest scripts/tests/test_claude_install.py
 ```
 
-The hooks run from the checkout, so a change under `hooks/pre/` reaches Claude
-Code without reinstalling; moving the checkout needs `install` again. Limits:
-the hooks see Bash calls only, and a subagent always gets Claude Code's git
-status snapshot (goldfish lenses are told not to use it).
+The store is a copy: changes in this checkout reach Claude Code and the bots
+only after `install`. Limits: the hooks see Bash calls only; skills with
+`disable-model-invocation: true` (pick-ui-library, review-animations, handoff)
+are installed but only typable as `/name`, never listed to the model; a
+subagent always gets Claude Code's git status snapshot (goldfish lenses are
+told not to use it).
 
 ## Planning
 

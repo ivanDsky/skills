@@ -1,0 +1,205 @@
+{
+  "shared": [
+    "senior-dev", "tdd", "implement", "diagnose-bug", "caveman", "caveman-commit",
+    "android-env", "android-cli", "preview-compose", "structure-checks",
+    "micro-architecture", "scope-creep-detector"
+  ],
+  "user_settings": {
+    "syncClaudeAiSkills": false,
+    "disableBundledSkills": true,
+    "skillOverrides": {"plugin-authoring": "off"}
+  },
+  "bots": {
+    "intake": {
+      "skills": ["orchestration", "start", "file-tickets", "research", "fan-out-research", "grilling"],
+      "settings": {
+        "model": "claude-opus-5-5",
+        "effortLevel": "medium",
+        "permissions": {
+          "deny": [
+            "Bash(git push origin main:*)",
+            "Bash(git push origin HEAD:main:*)",
+            "Bash(git push --force origin main:*)",
+            "Bash(git push -f origin main:*)",
+            "Bash(gh repo delete:*)",
+            "Bash(rm -rf ~:*)",
+            "Bash(rm -rf /:*)",
+            "Bash(rm -rf $HOME:*)",
+            "Bash(gh pr merge:*)"
+          ]
+        }
+      }
+    },
+    "planner": {
+      "skills": [
+        "orchestration", "run-intake", "draft-spec", "write-tickets", "grilling", "goldfish-review",
+        "research", "fan-out-research", "map-codebase", "init-profile", "domain-modeling",
+        "design-architecture"
+      ],
+      "settings": {
+        "model": "claude-opus-5-5",
+        "effortLevel": "high",
+        "permissions": {
+          "deny": [
+            "Bash(git push origin main:*)",
+            "Bash(git push origin HEAD:main:*)",
+            "Bash(git push --force origin main:*)",
+            "Bash(git push -f origin main:*)",
+            "Bash(gh repo delete:*)",
+            "Bash(rm -rf ~:*)",
+            "Bash(rm -rf /:*)",
+            "Bash(rm -rf $HOME:*)",
+            "Bash(gh pr merge:*)"
+          ]
+        }
+      }
+    },
+    "designer": {
+      "skills": [
+        "orchestration", "prototype", "senior-ux", "ui-ux-pro-max", "design-taste-frontend",
+        "apple-design", "emil-design-eng", "animation-vocabulary", "find-animation-opportunities",
+        "improve-animations", "review-animations", "graduate-prototype", "archify", "pick-ui-library"
+      ],
+      "settings": {
+        "model": "claude-opus-5-5",
+        "effortLevel": "high",
+        "permissions": {
+          "deny": [
+            "Bash(git push origin main:*)",
+            "Bash(git push origin HEAD:main:*)",
+            "Bash(git push --force origin main:*)",
+            "Bash(git push -f origin main:*)",
+            "Bash(gh repo delete:*)",
+            "Bash(rm -rf ~:*)",
+            "Bash(rm -rf /:*)",
+            "Bash(rm -rf $HOME:*)",
+            "Bash(gh pr merge:*)"
+          ]
+        }
+      }
+    },
+    "builder": {
+      "skills": [
+        "orchestration", "work-tickets", "review-change", "open-pr", "ship-to-trunk", "user-check",
+        "assess-teardown", "wire-dev-settings", "design-architecture"
+      ],
+      "settings": {
+        "model": "claude-sonnet-5-5",
+        "effortLevel": "high",
+        "permissions": {
+          "deny": [
+            "Bash(git push origin main:*)",
+            "Bash(git push origin HEAD:main:*)",
+            "Bash(git push --force origin main:*)",
+            "Bash(git push -f origin main:*)",
+            "Bash(gh repo delete:*)",
+            "Bash(rm -rf ~:*)",
+            "Bash(rm -rf /:*)",
+            "Bash(rm -rf $HOME:*)",
+            "Bash(gh pr merge:*)"
+          ]
+        }
+      }
+    },
+    "fixer": {
+      "skills": ["orchestration", "work-tickets", "review-change", "open-pr", "ship-to-trunk", "assess-teardown"],
+      "settings": {
+        "model": "claude-sonnet-5-5",
+        "effortLevel": "high",
+        "permissions": {
+          "deny": [
+            "Bash(git push origin main:*)",
+            "Bash(git push origin HEAD:main:*)",
+            "Bash(git push --force origin main:*)",
+            "Bash(git push -f origin main:*)",
+            "Bash(gh repo delete:*)",
+            "Bash(rm -rf ~:*)",
+            "Bash(rm -rf /:*)",
+            "Bash(rm -rf $HOME:*)",
+            "Bash(gh pr merge:*)"
+          ]
+        }
+      }
+    },
+    "lander": {
+      "skills": ["orchestration", "ship-to-trunk", "deliver", "open-pr", "code-review"],
+      "settings": {
+        "model": "claude-sonnet-5-5",
+        "effortLevel": "low",
+        "permissions": {
+          "deny": [
+            "Bash(git push origin main:*)",
+            "Bash(git push origin HEAD:main:*)",
+            "Bash(git push --force origin main:*)",
+            "Bash(git push -f origin main:*)",
+            "Bash(gh repo delete:*)",
+            "Bash(rm -rf ~:*)",
+            "Bash(rm -rf /:*)",
+            "Bash(rm -rf $HOME:*)"
+          ],
+          "ask": [
+            "Bash(gh release:*)",
+            "Bash(git tag:*)",
+            "Bash(python3 *build_identity.py allocate * --release*)",
+            "Bash(eval *build_identity.py allocate * --release*)"
+          ]
+        }
+      }
+    },
+    "tester": {
+      "skills": [
+        "orchestration", "user-check", "deliver", "deploy-tailscale", "deploy-firebase", "work-tickets",
+        "review-site"
+      ],
+      "settings": {
+        "model": "claude-sonnet-5-5",
+        "effortLevel": "medium",
+        "permissions": {
+          "deny": [
+            "Bash(git push origin main:*)",
+            "Bash(git push origin HEAD:main:*)",
+            "Bash(git push --force origin main:*)",
+            "Bash(git push -f origin main:*)",
+            "Bash(gh repo delete:*)",
+            "Bash(rm -rf ~:*)",
+            "Bash(rm -rf /:*)",
+            "Bash(rm -rf $HOME:*)",
+            "Bash(gh pr merge:*)"
+          ]
+        }
+      }
+    },
+    "coach": {
+      "skills": [
+        "orchestration", "skill-doctor", "integrate-skill", "adopt-tool", "find-skills", "ponytail-audit",
+        "ponytail-debt", "code-review", "assess-teardown", "handoff", "design-architecture"
+      ],
+      "settings": {
+        "model": "claude-opus-5-5",
+        "effortLevel": "high",
+        "permissions": {
+          "deny": [
+            "Bash(git push origin main:*)",
+            "Bash(git push origin HEAD:main:*)",
+            "Bash(git push --force origin main:*)",
+            "Bash(git push -f origin main:*)",
+            "Bash(gh repo delete:*)",
+            "Bash(rm -rf ~:*)",
+            "Bash(rm -rf /:*)",
+            "Bash(rm -rf $HOME:*)"
+          ],
+          "ask": [
+            "Bash(gh pr merge:*)",
+            "Bash(npx skills:*)",
+            "Bash(cp * ~/.omp/*)",
+            "Bash(cp * ~/.claude/*)",
+            "Edit(~/.claude/**)",
+            "Write(~/.claude/**)",
+            "Edit(~/.omp/**)",
+            "Write(~/.omp/**)"
+          ]
+        }
+      }
+    }
+  }
+}

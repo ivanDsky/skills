@@ -1,9 +1,13 @@
 # Skills under Claude Code (ivanDsky/skills, bots branch)
 
-The skills in `~/.claude/skills` were written for the omp harness. Read their omp terms this way:
+Only some skills are installed in a session (`~/.claude/skills` holds a small shared set; an Orca
+bot adds its own role skills in `.claude/skills`). The skills were written for the omp harness.
+Read their omp terms this way:
 
-- `skill://<name>/<path>` is the file `~/.claude/skills/<name>/<path>`; `skill://<name>` alone is
-  `~/.claude/skills/<name>/SKILL.md`. Read it with the Read tool, or invoke the skill by name.
+- `skill://<name>/<path>` is the file `~/.local/share/ivandsky-skills/skills/<name>/<path>`;
+  `skill://<name>` alone is `~/.local/share/ivandsky-skills/skills/<name>/SKILL.md`. That dir holds
+  every skill, installed or not: read the file with the Read tool, or invoke the skill by name when
+  it is installed.
 - `task` tool / "spawn a subagent" → the `Agent` tool. `agent: task` → `subagent_type: general-purpose`;
   `agent: scout|sonic|reviewer|security-reviewer` and goldfish lenses → the custom subagent of that name
   (`~/.claude/agents/`). `model: anthropic/claude-<family>-…` → `model: <family>` (`opus`, `sonnet`,
