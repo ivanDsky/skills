@@ -16,7 +16,7 @@ Models: effort-mapping.md, *Orchestrator by stage*.
 - **Main session** (the user's top-level session, on the model the user
   launched): triage, intake, spec, UI contract, ticketing, goldfish gates,
   user-check F-id triage and taste rulings, every ask, every approval, the
-  flip, milestone digests. Only the main session talks to the user
+  release, milestone digests. Only the main session talks to the user
   (start § Waiting on the user).
 - **Captain** (one fresh subagent per execution milestone, Sonnet): runs the
   milestone's ticket work as `implement`'s controller: worker dispatch,

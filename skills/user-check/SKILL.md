@@ -35,8 +35,13 @@ last slice merged, on a debug build from `main` with the release flag forced
 on (the first verify step says how to force it). Fast fixes and hardening
 tickets are new slice PRs off fresh `main`, still dark — never commits on a
 run branch; the re-gate diffs the feature's merged range. The ledger
-`user-check: ok <versionName> @ <sha>` is what the flip PR requires; slices
-need none.
+`user-check: ok <versionName> @ <sha>` is what the release PR requires; slices
+need none. The ask here is also the release ask: its one free-text field
+becomes "Feels right -> release <X.Y.Z> (<what> on, flags removed)?
+Recommended: release", options `release` / `fix first: <what>`. Only an
+explicit `release` is the OK and the owner's go; "looks good" or silence is
+neither, so ask again (ledger `release: <X.Y.Z> approved by user <date> (PR
+#<n>)`).
 
 **Backlog tickets** (filed by `file-tickets`, landed by `work-tickets`) have
 no epic and never come here one at a time. A hands-on ticket merges and

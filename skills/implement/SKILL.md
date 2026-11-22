@@ -36,7 +36,7 @@ recollection.
    Delivery `trunk` → no run branch. Each ticket's worker gets its own
    worktree from freshly fetched `origin/main` and ends with its PR merged
    per `ship-to-trunk`/references/merge-loop.md (merge authority: the
-   `ship-to-trunk` table; flip and live PRs wait for the user). Frontier =
+   `ship-to-trunk` table; release and live PRs wait for the user). Frontier =
    tickets whose parents' PRs are MERGED. Stacks only under
    `ship-to-trunk`'s exception. `pr-check: none`: a worker ends at "branch
    pushed, ready" (fast review done, no suite, no rebase, no PR, no merge,
@@ -199,9 +199,9 @@ recollection.
    (the user tries the whole epic, not each ticket). Hardening tickets from
    `user-check`'s re-gate → `review-change`. `trunk`: hand off once the
    last feature slice merged — the user checks a debug build from `main`
-   with the flag forced on; the flip and cleanup tickets wait for
-   user-check OK and thorough review, and the cleanup folds into the
-   batched flag removal once the flip ships (`ship-to-trunk` lifecycle).
+   with the flag forced on; the release ticket waits for the user's
+   explicit `release` and thorough review, and it removes the flags
+   itself (`ship-to-trunk` lifecycle).
    Backlog packs (`work-tickets`): no epic, so no user-check hand-off;
    control returns to `work-tickets` for the next pack.
 4. Fast-fix briefs from `user-check` (`mode: fast-fix`, F-ids listed): the

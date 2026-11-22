@@ -136,14 +136,15 @@ the orchestrator does next:
   dispatch a fix worker into the same worktree with the log path (prompt as
   `implement`/references/dispatch.md, hard-rules block included), then
   `enqueue` again when it reports ready. Tickets stacked after it come
-  back `requeued`. A flag-removal batch (SKILL lifecycle step 6) is not
-  fixed: the worker drops the failing flag's commit, notes the flag for the
-  next batch on the ticket, and enqueues again.
+  back `requeued`. A release PR or removal batch (SKILL lifecycle steps
+  5-6) is not fixed: the worker drops the failing flag's removal commit
+  (a release PR puts a one-line release-default-on flip in its place),
+  notes the flag for the next release on the ticket, and enqueues again.
 - **conflict**: a worker rebases onto `origin/main` and resolves per
   Conflicts below, with the fast review of the resolution diff, then the
   ticket is enqueued again. Two tickets of one batch conflicting means they
   touch the same lines: the >~50 lines re-slice rule applies.
-- **waiting_user** (`--no-merge`: unflaggable live change, flip PR): the PR
+- **waiting_user** (`--no-merge`: unflaggable live change, release PR before the owner's `release`): the PR
   is open after a green suite and is never merged by the lane. Ask the user
   through the ask tool (Claude Code: `AskUserQuestion`; `start` § Waiting on the user). On approval:
   `main_health.py status`; green → apply the main-moved verdicts below, `gh pr
@@ -448,4 +449,4 @@ PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
 
 Repos whose workflow publishes on every push to main (tag per version,
 skipped when the tag exists): slices never bump the version, so they
-publish nothing. The flip PR bumps the version and is the release.
+publish nothing. The release PR bumps the version and is the release.

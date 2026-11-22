@@ -40,11 +40,11 @@ keep the steps below unchanged:
   the local suite once on the batch top. A rebase conflict
   resolved by hand → fast tier again over the resolution diff only; a clean
   rebase is never re-reviewed.
-- **Once, before the flip PR**: thorough tier over the feature's merged range
+- **Once, before the release PR**: thorough tier over the feature's merged range
   (`git diff <base>..origin/main` scoped to its slice PRs), with the
   `user-check: ok` precondition, and step 8's one full-suite run on
   `origin/main`. Extra check, ❌ Important when missing: tests cover both
-  flag states (on and off), and the release default stays off until the flip.
+  flag states (on and off), and the release default stays off until the release PR.
 
 1. Pin the inputs: the diff vs base (`git diff <base>...HEAD` — verify the base
    resolves and the diff is non-empty before dispatching anything), the spec
@@ -86,7 +86,7 @@ keep the steps below unchanged:
      than the implementer by default).
    - **Thorough**: plus one fresh-context dual-verdict subagent, model per
      the same reviewer table (the fresh visual reviewer too). It runs once
-     per feature range before the flip (`trunk`) or once over the whole
+     per feature range before the release (`trunk`) or once over the whole
      change (`pr`/`main`), never per slice or per ticket: the range review
      is the one that caught the real crashes.
 3. Brief reviewers minimally: diff command, commit list, spec excerpt,

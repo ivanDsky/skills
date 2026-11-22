@@ -12,7 +12,8 @@
     "My green batches keep getting requeued with 'main keeps moving' because other sessions merge to main \u2014 unrelated merges shouldn't block each other",
     "How often does the merge lane rerun the suite because main moved, and which module's tests eat the most suite time?",
     "Main went red again \u2014 which tests failed in each red run, was it a Robolectric download, and has anyone's quarantine on main run out?",
-    "Five sessions each run their own merge lane and keep requeueing each other \u2014 make them share one lane and pipeline the suites across both build slots"
+    "Five sessions each run their own merge lane and keep requeueing each other \u2014 make them share one lane and pipeline the suites across both build slots",
+    "I answered 'looks good' on the check APK for release 0.41.0 but never wrote `release` \u2014 can the agents merge the release PR that removes the Community shelves flags and bumps the version?"
   ],
   "negative": [
     {
