@@ -98,9 +98,10 @@ links, what changed, why each is theirs) and agent merges are ledgered —
 never wait on it, and never merge: they push the branch, report ready and
 stop; the repository's one merge lane, shared by every session, lands
 ready tickets in batches of up to 5, two batches pipelined across the
-build slots (`scripts/merge_lane.py`). The orchestrator's background
-watcher records its verdict in a shared main-health ledger, and a red
-main stops all merges but the fix (Red main below).
+build slots (`scripts/merge_lane.py`). The lane starts a background
+watcher after a merge; `status` also records finished main runs from `gh`
+before it answers. The verdict lives in a shared main-health ledger, and a
+red main stops all merges but the fix (Red main below).
 
 ## Feature lifecycle
 

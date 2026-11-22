@@ -116,7 +116,7 @@ python3 ~/.agents/skills/ship-to-trunk/scripts/main_health.py status   # red (ex
 git push -u --force-with-lease origin HEAD
 gh pr create --base main --title "<conventional title>" --body-file <body>   # an OPEN PR for the branch is reused (gh pr view <branch>, read before the push: the ticket's own CLOSED PR → result closed, nothing pushed; a CLOSED PR closed before the enqueue and not on the ticket's head is an older PR of a reused branch name → ignored, a new PR is opened)
 gh pr merge <n> --squash --match-head-commit <sha>   # immediately; <n> always passed, never --delete-branch; a transient refusal (not mergeable yet; HTTP 5xx; network) is retried up to 3 times 5 s apart; "Base branch was modified" → fetch: origin/main still has the tree the ticket was rebased on (GitHub settling after the batch's previous squash) → the same retry, else main moved under the merge → rebase, rerun rule, push and merge again for this ticket and the rest (up to 3 times; never a blind retry); "Head branch was modified" (the PR head is not the pushed sha) is never retried; non-zero exit → gh pr view <n> decides (MERGED = merged; else a sha race left over → requeued, anything else → refused); <sha> = the head just pushed: the ticket rebased onto main with the previous squash, the tree the suite ran on
-# never watch main after the merge (no gh run watch/view/list): the orchestrator's watcher does
+# never watch main after the merge (no gh run watch/view/list): the lane's watcher does
 git push origin --delete <branch> && git worktree remove ../<repo>-wt/<NN> && git branch -D <branch>
 ```
 
@@ -131,7 +131,7 @@ the orchestrator does next:
   reports no merge commit; plus the `merge: … suite green tested @ <sha7>`
   ledger lines, which name the tested stack, never a main commit; the result
   line carries both as `sha` (null when unresolved) and `tested`): close the
-  ticket, start the `main_health.py watch` job when none is running.
+  ticket (the lane started the watcher).
 - **red** (log path in the line): the ticket turned the batch suite red;
   dispatch a fix worker into the same worktree with the log path (prompt as
   `implement`/references/dispatch.md, hard-rules block included), then
@@ -180,8 +180,8 @@ the orchestrator does next:
   killed or crashed between rebasing a ticket and logging its result
   leaves the worktree HEAD moved, so the next run reports it `invalid`;
   `enqueue` it again.
-- **exit 3** (`main red; lane paused`): wait for the watcher to record
-  green, then `wait` again; only a `--red-fix` ticket lands meanwhile.
+- **exit 3** (`main red; lane paused`): wait for a green main run to be
+  recorded (the watcher, or the next `status`), then `wait` again; only a `--red-fix` ticket lands meanwhile.
 
 ### Two batches, two slots
 
@@ -383,19 +383,25 @@ PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
   the branch, report `ready` and stop; the lane's last step is the last
   step anyone takes on a merge: no `gh run watch`, `gh run view` or `gh run
   list`.
-- **One watcher per orchestrator** (each runs its own; the ledger dedupes
-  runs): `python3 $MH watch --who <run slug>` as one background bash job
-  (async, costs no turns), started after the run's first merge and again
-  after any later merge, the fix PR included, when none is running. It
-  exits once no main run is pending: 0 green, 3 red, printing `main red at
-  <sha> (run <id>), range <last green>..<red sha>; cause <hint>: <first
-  failing tests>`. `status` reads only the ledger, so it stays red until a
-  watcher records the next green run.
+- **The lane starts the watcher.** After a `land`'s first merge, and again
+  before it returns when anything merged, the lane starts `main_health.py
+  watch --who <who>` detached (log `<lane dir>/main-health-watch.log`) unless
+  one is alive (pidfile `<git-common-dir>/agent-builds/main-health-watch.pid`,
+  written while it runs); it survives the `land` and prints `watch: started
+  pid <n>, log <path>` or `watch: running pid <n>`. It exits once no main run
+  is pending: 0 green, 3 red, printing `main red at <sha> (run <id>), range
+  <last green>..<red sha>; cause <hint>: <first failing tests>`. After
+  merging outside the lane (a `waiting_user` approval, a fix PR merged by
+  hand) start one yourself: `python3 $MH watch --who <run slug>` as one
+  background bash job (async, costs no turns). `status` first records the
+  finished runs newer than the ledger from `gh` (a `gh` failure prints
+  `main_health: ledger refresh failed: <err>` and keeps the ledger verdict),
+  so red clears as soon as a green run exists, watcher or not.
 - **Red → every merge stops except the fix.** `merge_lane.py land` sees
   `status` exit 3 and exits 3 (`main red; lane paused`), and every `wait`
   following queued tickets exits 3 with it: ready tickets wait in the
   queue with no PR open, so no `hold` is needed, and the lane stays
-  paused until the watcher records green. Workers are not involved in red
+  paused until a green run is recorded. Workers are not involved in red
   main at all. `main_health.py hold`/`held` stay for PRs that wait outside
   the lane: a `waiting_user` PR whose approval arrives while main is red is
   held (`hold --pr <n> --who <id>`) instead of merged.
@@ -405,7 +411,7 @@ PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
   `compile`, `download` (Robolectric android-all or a Gradle artifact
   fetch), `infra` (no job started, runner lost) or `unknown` (no log; read
   it yourself). `download` and `infra` name no commit: rerun the failed
-  jobs (`gh run rerun <id> --failed`) and start a watcher.
+  jobs (`gh run rerun <id> --failed`); `status` records the rerun.
 - **Culprit** (`test`, `compile`, `unknown`): failing test or task →
   module; each commit in the range → `git diff --name-only <sha>^ <sha>`
   → modules. One match is the culprit. Several (cancelled runs make one red
@@ -418,7 +424,8 @@ PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
   most 48 h out, with a filed ticket and a named owner who fixes or deletes
   the test. `status` and `watch` print `quarantine expired: <Class> #<N>
   since <date>` for each past date in `src/test` or `src/androidTest`
-  Kotlin; exit codes stay unchanged.
+  Kotlin sources (resources, such as Konsist fixtures, are skipped); exit
+  codes stay unchanged.
 - **Owner**: the orchestrator whose merge is the culprit prepares the fix
   in its own worktree: `git revert` of the culprit squash commit (the
   ticket reopens), or a fix forward when it is one obvious line, then the
@@ -435,7 +442,7 @@ PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
   Everyone else reads the claim in `status` and opens no second fix. A
   claim idle for 30 min with no merged fix → `claim --takeover` (refused
   while a merged fix has no red run after it yet).
-- **Green again**: the watcher records the green run, which closes the
+- **Green again**: the green run, recorded by the watcher or `status`, closes the
   incident. The lane resumes on the next `wait`: each orchestrator whose
   `wait` exited 3 starts it again for its queued tickets, and the first
   one starts `land`, which takes every session's queued tickets (nothing

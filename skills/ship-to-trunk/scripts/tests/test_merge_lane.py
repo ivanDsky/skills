@@ -408,6 +408,80 @@ def test_merge_without_a_merge_commit_from_gh_says_so_and_names_the_tested_head(
     assert ["pr", "view", "42", "--json", "mergeCommit", "-q", ".mergeCommit.oid"] in gh.calls()
 
 
+WATCH_LINE = re.compile(r"^watch: started pid (\d+), log (.+/lane/main-health-watch\.log)$", re.M)
+
+
+@pytest.fixture
+def watching(lane, gh, real_runs):
+    """A main workflow with a run still pending (`gh run watch` sleeps): a started watcher stays up.
+    Yields the watcher pidfile path; kills whatever watcher the test left."""
+    gh.set(runs=[dict(real_runs[0], databaseId=real_runs[0]["databaseId"] + 1, status="in_progress",
+                      conclusion=""), *real_runs], watch_s=60)
+    pidfile = lane.dir.parent / "main-health-watch.pid"
+    pidfile.parent.mkdir(exist_ok=True)
+    yield pidfile
+    pid = ml.watch_pid(lane.dir.parent)
+    if pid and pid != os.getpid():
+        os.kill(pid, signal.SIGKILL)
+
+
+def wait_for(cond):
+    deadline = time.time() + 15
+    while not cond() and time.time() < deadline:
+        time.sleep(0.05)
+    assert cond()
+
+
+def test_land_starts_watcher_after_merge(lane, watching):
+    lane.enqueue()
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    m = WATCH_LINE.search(r.stdout)
+    assert m, r.stdout
+    pid = int(m[1])
+    assert m[2] == str(lane.dir / "main-health-watch.log")
+    # The watcher outlives `land`: not killed by Land.stop, in a session of its own, pidfile written.
+    wait_for(lambda: watching.exists() and watching.read_text() == str(pid))
+    os.kill(pid, 0)
+    assert os.getsid(pid) == pid != os.getsid(0)
+    assert lane.idle() is None
+    os.kill(pid, 0)
+    assert ml.watch_pid(lane.dir.parent) == pid
+
+
+def test_land_skips_watcher_when_alive(lane, watching):
+    watching.write_text(str(os.getpid()))
+    lane.enqueue()
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert f"watch: running pid {os.getpid()}" in r.stdout.splitlines()
+    assert not WATCH_LINE.search(r.stdout) and not (lane.dir / "main-health-watch.log").exists()
+
+
+def test_land_restarts_watcher_on_stale_pid(lane, watching):
+    dead = subprocess.Popen([sys.executable, "-c", "pass"])
+    dead.wait()
+    watching.write_text(str(dead.pid))
+    lane.enqueue()
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    m = WATCH_LINE.search(r.stdout)
+    assert m and int(m[1]) != dead.pid
+    wait_for(lambda: watching.read_text() == m[1])
+
+
+def test_land_no_merge_no_watcher(lane, gh, watching, real_runs):
+    lane.enqueue("01", "--no-merge")  # waiting_user: nothing merged
+    r = lane.land()
+    assert r.returncode == 1 and "watch:" not in r.stdout
+    red = dict(real_runs[0], databaseId=real_runs[0]["databaseId"] + 2, conclusion="failure")
+    gh.set(runs=[red, *real_runs])  # red main: the lane pauses
+    lane.enqueue()
+    r = lane.land()
+    assert r.returncode == 3 and "watch:" not in r.stdout
+    assert not watching.exists() and not (lane.dir / "main-health-watch.log").exists()
+
+
 def test_already_checked_out_error_but_pr_merged_counts_as_merged(lane, gh):
     gh.set(merge="checkout_error")
     lane.enqueue()
@@ -1168,7 +1242,7 @@ def test_wait_after_the_land_replays_its_lines_from_the_event_log(lane, gh):
     w = lane.wait("test-run", "01")
     o, e = w.communicate(timeout=60)
     assert w.returncode == 0, o + e
-    assert o.splitlines() == r.stdout.splitlines()
+    assert o.splitlines() == [l for l in r.stdout.splitlines() if not l.startswith("watch:")]
     assert len(events(lane, "suite")) == 1  # nothing ran again
     w = lane.wait("test-run", "09")
     o, e = w.communicate(timeout=60)
@@ -1305,7 +1379,9 @@ def test_wait_fails_when_its_ticket_left_the_queue_without_a_result(lane, gh):
 
 
 def test_wait_fails_when_land_exits_without_a_ticket_result(lane, gh):
-    gh.set(runs=None)  # `gh run list` breaks: main_health status fails, land exits 1 before any ticket
+    prof = lane.wt / "PROFILE.md"  # no workflow to ask about: main_health status fails, land exits 1 before any ticket
+    prof.write_text(prof.read_text().replace("- release:", "- no-release:"))
+    git("commit", "-q", "-am", "drop the workflow", cwd=lane.wt)
     lane.enqueue()
     w = lane.wait("test-run", "01")
     o, e = w.communicate(timeout=60)
