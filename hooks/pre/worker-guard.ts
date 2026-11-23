@@ -255,7 +255,7 @@ const REASONS: Record<Violation["rule"], string> = {
 	"yes-pipe":
 		"worker-guard: `yes | cmd` never ends on its own and is left spinning at full CPU when its reader hangs or the shell " +
 		"is cut off (orphaned `yes` processes slowed the merge lane). Use the command's non-interactive flag instead " +
-		"(`--yes`, `-y`, `--assume-yes`, `--non-interactive`, `sdkmanager --licenses` with licenses pre-accepted); " +
+		"(`--yes`, `-y`, `--assume-yes`, `--non-interactive`; Android licenses: copy the `licenses/` directory); " +
 		"if it has none, feed a finite input (`printf 'y\\n' | cmd`) or report BLOCKED. Never clean up with pkill/killall: " +
 		"stop only processes you started, by pid. See skill://implement/references/hard-rules.md.",
 };

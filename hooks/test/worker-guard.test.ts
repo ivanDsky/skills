@@ -112,7 +112,7 @@ const ALLOWED: string[] = [
 	"find ~/Projects -name build -type d -exec rm -rf {} +",
 	"du -sh ~/.gradle ~/.android",
 	// `yes` only as text, or the command's own non-interactive flag
-	"sdkmanager --licenses --yes",
+	"yarn install --non-interactive",
 	"npm init -y",
 	"apt-get install --yes foo",
 	'echo "yes | sdkmanager --licenses"',

@@ -25,5 +25,5 @@ Read their omp terms this way:
 Guard hooks (`hooks/claude/` in the skills repo) run on every Bash call, in subagents too: they put
 `./gradlew` and `ship_apk.py` behind `~/.local/bin/build-slot` (that prefix is expected; never cancel,
 kill or script around it) and refuse pkill/killall of Gradle or build-slot, `gradlew --stop`, blind
-`git add`, deleting shared caches, non-canonical `adb install`, raw Taildrop, and commits carrying
+`git add`, deleting shared caches, `yes` pipelines, non-canonical `adb install`, raw Taildrop, and commits carrying
 tailnet addresses.
