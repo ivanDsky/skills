@@ -12,6 +12,7 @@ around 200 queued builds (audit 2026-11-21), hence the second line.
 ```
 Hard rules (a guard hook blocks the bash ones):
 - Never pkill, killall, or `gradlew --stop`; other lanes' builds share the machine.
+- Never pipe `yes` into a command (`yes | cmd`); use its non-interactive flag (`--yes`, `-y`), and stop only processes you started, by pid.
 - A hook runs `gradlew` and `ship_apk.py` behind `build-slot`; that prefix is expected: never cancel, kill or script around it.
 - Write only inside your worktree, plus the report/findings path your brief names.
 - Stage explicit paths; never `git add -A`, `git add .` or `--all`.

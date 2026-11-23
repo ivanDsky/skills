@@ -171,8 +171,9 @@ Rules an agent broke twice in prose are enforced by a hook, and the hook is
 versioned here instead of living only in `~/.omp`. `hooks/pre/worker-guard.ts`
 blocks the mechanically detectable worker hard rules in bash commands
 (`skills/implement/references/hard-rules.md`): `pkill`/`killall` of
-Gradle/Java/build-slot, `gradlew --stop`, `git add -A`/`--all`/`.`, and `rm` of
-`~/.gradle`, `~/Library` or `~/.android`. `hooks/pre/tailnet-leak-guard.ts`
+Gradle/Java/build-slot, `gradlew --stop`, `git add -A`/`--all`/`.`, `rm` of
+`~/.gradle`, `~/Library` or `~/.android`, and any `yes` command (`yes | cmd` leaves
+orphaned CPU-bound processes; use the command's `--yes`/`-y` flag). `hooks/pre/tailnet-leak-guard.ts`
 refuses a `git commit` or `git push` whose added lines carry a Tailscale
 address (100.64.0.0/10) or a `*.ts.net` name; device data belongs in the
 gitignored `PROFILE.local.md` (deploy-tailscale § 2). `hooks/pre/build-queue.ts`
