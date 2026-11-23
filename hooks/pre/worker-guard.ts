@@ -5,6 +5,9 @@
 //  2. `git add -A`, `git add --all`, `git add .` (blind staging reverts other work).
 //  3. `rm` (or `find -delete`) of ~/.gradle, ~/Library, ~/.android or an ancestor such as ~
 //     (shared caches; a full disk is reported BLOCKED, never cleaned by a worker).
+//  4. `yes` as a command (`yes | sdkmanager --licenses`): it never ends by itself, and when its reader hangs or
+//     the worker's shell is cut off it is left running at full CPU (24 orphans slowed the merge lane for 56 min).
+//     Use the command's non-interactive flag instead (`--yes`, `-y`, `--assume-yes`, `--non-interactive`).
 // The command is parsed into shell words, so a quoted commit message, an `echo`, a heredoc body or
 // a comment that merely mentions a forbidden command is allowed; `bash -c "…"`, `eval`, `$(…)`,
 // backticks, `sudo`, `env`, `xargs` and VAR=value prefixes are looked through.
@@ -227,7 +230,7 @@ function gitSubcommand(args: string[]): { sub: string; rest: string[] } | undefi
 }
 
 export interface Violation {
-	rule: "kill" | "gradle-stop" | "git-add" | "rm-cache";
+	rule: "kill" | "gradle-stop" | "git-add" | "rm-cache" | "yes-pipe";
 	reason: string;
 }
 
@@ -249,6 +252,12 @@ const REASONS: Record<Violation["rule"], string> = {
 		"worker-guard: ~/.gradle, ~/Library and ~/.android are shared by every lane; deleting them breaks other " +
 		"builds. Delete only inside your own worktree (`rm -rf build .gradle` with relative paths). Disk full or " +
 		"short on space: report BLOCKED, never free space yourself. See skill://implement/references/hard-rules.md.",
+	"yes-pipe":
+		"worker-guard: `yes | cmd` never ends on its own and is left spinning at full CPU when its reader hangs or the shell " +
+		"is cut off (orphaned `yes` processes slowed the merge lane). Use the command's non-interactive flag instead " +
+		"(`--yes`, `-y`, `--assume-yes`, `--non-interactive`; Android licenses: copy the `licenses/` directory); " +
+		"if it has none, feed a finite input (`printf 'y\\n' | cmd`) or report BLOCKED. Never clean up with pkill/killall: " +
+		"stop only processes you started, by pid. See skill://implement/references/hard-rules.md.",
 };
 
 export function findViolations(command: string): Violation[] {
@@ -260,6 +269,7 @@ export function findViolations(command: string): Violation[] {
 		const args = argv.slice(1);
 		if ((name === "pkill" || name === "killall") && args.some(a => TARGET.test(a))) found.add("kill");
 		if (killsByPid && (name === "jps" || (PROCESS_LISTERS.has(name) && args.some(a => TARGET.test(a))))) found.add("kill");
+		if (name === "yes") found.add("yes-pipe");
 		if (/^gradlew?(?:\.bat)?$/.test(name) && args.includes("--stop")) found.add("gradle-stop");
 		if (name === "git") {
 			const git = gitSubcommand(args);

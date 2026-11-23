@@ -3,7 +3,7 @@
 The one canonical block. Every worker spawn carries it verbatim; every other
 dispatch template points here. Agents broke these in prose more than once, so
 the bash-detectable ones (kill, `gradlew --stop`, blind `git add`, deleting
-caches) are also refused by the `hooks/pre/worker-guard.ts` guard hook
+caches, `yes` pipelines) are also refused by the `hooks/pre/worker-guard.ts` guard hook
 (install: README § Hooks). The rest are on the worker. `hooks/pre/build-queue.ts`
 rewrites a worker's `gradlew` and `ship_apk.py` calls to run behind `build-slot`;
 workers who took that prefix for their own slip cancelled, killed or scripted
@@ -12,6 +12,7 @@ around 200 queued builds (audit 2026-11-21), hence the second line.
 ```
 Hard rules (a guard hook blocks the bash ones):
 - Never pkill, killall, or `gradlew --stop`; other lanes' builds share the machine.
+- Never pipe `yes` into a command (`yes | cmd`); use its non-interactive flag (`--yes`, `-y`), and stop only processes you started, by pid.
 - A hook runs `gradlew` and `ship_apk.py` behind `build-slot`; that prefix is expected: never cancel, kill or script around it.
 - Write only inside your worktree, plus the report/findings path your brief names.
 - Stage explicit paths; never `git add -A`, `git add .` or `--all`.

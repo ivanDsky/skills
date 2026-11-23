@@ -57,6 +57,13 @@ const BLOCKED: Array<[string, string]> = [
 	["rm -rf build ~/.gradle/daemon", "rm-cache"],
 	["find ~/.gradle -mtime +7 -delete", "rm-cache"],
 	["find ~/Library/Caches -name '*.tmp' -exec rm {} +", "rm-cache"],
+	["yes | sdkmanager --licenses", "yes-pipe"],
+	["yes | /Users/ivandsky/.local/bin/build-slot ./gradlew :app:test", "yes-pipe"],
+	["yes y | npm init", "yes-pipe"],
+	["cd x && yes | git clean -i", "yes-pipe"],
+	["bash -c 'yes | sdkmanager --licenses'", "yes-pipe"],
+	["/usr/bin/yes | head -1", "yes-pipe"],
+	["yes > /tmp/y.txt", "yes-pipe"],
 ];
 
 const ALLOWED: string[] = [
@@ -104,6 +111,14 @@ const ALLOWED: string[] = [
 	"find . -name '*.orig' -delete",
 	"find ~/Projects -name build -type d -exec rm -rf {} +",
 	"du -sh ~/.gradle ~/.android",
+	// `yes` only as text, or the command's own non-interactive flag
+	"yarn install --non-interactive",
+	"npm init -y",
+	"apt-get install --yes foo",
+	'echo "yes | sdkmanager --licenses"',
+	"git commit -m 'never run yes | cmd'",
+	"printf 'y\\n' | sdkmanager --licenses",
+	"pgrep -x yes",
 ];
 
 describe("worker-guard blocks", () => {
@@ -116,6 +131,12 @@ describe("worker-guard allows", () => {
 	for (const command of ALLOWED) {
 		test(command, () => expect(rules(command)).toEqual([]));
 	}
+});
+
+test("the yes message names the non-interactive route", () => {
+	const reasons = findViolations("yes | sdkmanager --licenses").map(v => v.reason).join(" ");
+	expect(reasons).toContain("non-interactive flag");
+	expect(reasons).toContain("hard-rules.md");
 });
 
 test("a message names the allowed alternative", () => {
