@@ -1,4 +1,4 @@
-# Web testing ladder (React-first, stack-adapt on-site)
+# Web testing ladder (React-first, Svelte 5 section below, stack-adapt on-site)
 
 Web twin of the Android ladder in this file's sibling sections. Same law:
 **the cheapest rung that can see the failure class is the default, and the
@@ -54,3 +54,15 @@ diff against references — never a fresh manual click-through.
 | API integration | 2 with MSW; 4 for the real contract | pre-merge |
 | Critical user journeys (auth, checkout, settings-save) | 4 | pre-merge |
 | Visual accept, feel, motion | 5 (human) | release |
+
+## Svelte 5 / SvelteKit
+
+Same rungs, Svelte tools. Source: https://svelte.dev/docs/svelte/llms.txt (Testing).
+
+- **Rung 0:** `svelte-check` (the project's `check` script); `tsc --noEmit` cannot read `.svelte` files.
+- **Rung 1:** eslint with `eslint-plugin-svelte`.
+- **Rung 2, no DOM (the default):** state lives in classes in `.svelte.ts` files; test them with plain Vitest. A test file that itself uses runes (`$state`, `$effect.root`) must have `.svelte` in its name (`x.svelte.test.ts`). Effects run after a microtask: call `flushSync()` from `'svelte'`, and wrap effect tests in `$effect.root(() => { ... })` and call the returned cleanup. Fakes for ports go in through the constructor.
+- **Rung 2, component:** `@testing-library/svelte` (`render`, `screen`) with `@testing-library/user-event`, in `jsdom`. For two-way bindings, context or snippet props, render a wrapper component made for the test. Low level: `mount`/`unmount` from `'svelte'`; effects only run after `flushSync()`. Think first whether the logic belongs in a class, where it needs no component test.
+- **Vitest config:** Vitest runs in Node, so add `resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined` (it makes Vitest load packages' `browser` entry points) and `test.environment: 'jsdom'` (or `// @vitest-environment jsdom` per file) for component tests.
+- **UI SDK primitives (own, not the library's):** `mount` and `checkPattern` from `@ui-sdk/core/testing`, in jsdom; see `skill://ui-sdk` `references/testing.md`.
+- **Rungs 3-4:** Playwright against the built app (`webServer: { command: 'npm run build && npm run preview', port: 4173 }`), projects for Chromium and WebKit when the UI is touch-first. Touch, sheets, focus and fast pointer sweeps are rung 4, because jsdom has no layout or real pointers.

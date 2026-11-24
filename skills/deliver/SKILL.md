@@ -2,7 +2,7 @@
 name: deliver
 description: >-
   Build the change and deploy to the PROFILE.md deploy targets — build-only,
-  firebase, tailscale, or local — then attach the build/deploy output as
+  firebase, tailscale, local, or web-preview — then attach the build/deploy output as
   evidence so the final tickets close. Owns build identity across parallel
   worktrees: a shared versionCode ledger (never below the device), branch
   slug in versionName and APK name. Use when review passes and the run is
@@ -15,7 +15,7 @@ requires: [firebase CLI when target=firebase, tailscale CLI when target=tailscal
 ---
 
 > **TL;DR** Builds the change and deploys to PROFILE.md targets with output attached as evidence; never reruns the suite; fires when review passes and the run ships.
-> **Related**: skill://review-change (gate before delivery; owns the one suite run), skill://user-check (approved build; reuses build identity), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://implement (tickets to close), skill://open-pr (land step when delivery = pr), skill://android-env (worktrees share the build ledger), skill://ship-to-trunk (trunk runs: deliver ships the flip)
+> **Related**: skill://review-change (gate before delivery; owns the one suite run), skill://user-check (approved build; reuses build identity), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://deploy-cloudflare (public Cloudflare deploy; web-preview never goes public), skill://implement (tickets to close), skill://open-pr (land step when delivery = pr), skill://android-env (worktrees share the build ledger), skill://ship-to-trunk (trunk runs: deliver ships the flip)
 
 # Deliver
 
@@ -89,7 +89,8 @@ passed; this stage adds no code.
    build -> `deploy-firebase` (test users, tester groups, APK/AAB
    distribution); `tailscale` target -> `deploy-tailscale` (device
    registry + APK sharing). Everything else follows the checklist in
-   [Deploy targets](references/deploy-targets.md) (local run, web hosting).
+   [Deploy targets](references/deploy-targets.md) (local run, web hosting,
+   `web-preview`: a tailnet-only build for the user to try; never public).
    Decision rules:
    - Target CLI missing or not logged in → stop with the install pointer
      from the checklist. Never improvise a deploy path or swap in another
