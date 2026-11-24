@@ -138,6 +138,12 @@ milestone. Brief, file format, models: [Lifecycle](references/lifecycle.md).
 
 ## Triage — first match wins, in this order
 
+**Overnight wrapper** — the user hands a big chunk off for an unattended
+session ("overnight", "while I sleep", "check it in the morning") →
+`overnight` wraps whatever class the list below picks: its grill replaces
+the intake batch, its night brief replaces every HITL gate, and its morning
+check is `user-check` step 3.
+
 0. **Backlog session** — the ask is feedback, bugs or ideas to file for
    later, or a request to check what merged → `file-tickets`. The ask is
    to pick up backlog work ("pick up tickets in leaderboard", "take #42")
@@ -270,6 +276,7 @@ hand off).
 | support | `assess-teardown` | teardown gate: 2 failed fix rounds or reviewer discretion |
 | support | `diagnose-bug` | bug report (triage 1b) or a `bug` ticket in `work-tickets`: evidence ladder, user-time-last |
 | support | `skill-doctor` | the user asks for a session or workflow audit, or to re-measure after skill changes; never fired by the chain itself |
+| support | `overnight` | the user hands a big chunk to agents or a bot team for one unattended session: evening grill → night brief → night run without blocking asks → one morning check |
 
 `map-codebase`, `fan-out-research`, `graduate-prototype`, `assess-teardown`
 are the chain contract and land separately — when one fires and the skill is
