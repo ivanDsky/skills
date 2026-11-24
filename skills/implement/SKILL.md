@@ -155,8 +155,8 @@ recollection.
      goes through `android-env`'s checklist before being believed or
      re-derived.
 5. Style while writing, not after: `design-architecture`'s
-   `rules-code-style.md` (in design-architecture) governs comments (self-explanatory code;
-   comments only for WHY) and names the AI-slop patterns a worker must not
+   `rules-code-style.md` (in design-architecture) governs comments (none by default; the
+   allowlist there is lint-enforced where `structure:` is configured) and names the AI-slop patterns a worker must not
    emit; review grades against the same file.
 6. Event triggers while writing: creating a file → its one-sentence
    responsibility is written down first (the ticket's file map; none

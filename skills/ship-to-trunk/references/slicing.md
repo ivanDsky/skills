@@ -54,5 +54,5 @@ owns how (a thinner capability — one state, one variant, one entry point;
 ~600-line ceiling, this skill's ~400-line cap for `trunk`). Trunk-specific
 aids: one file per variant (`micro-architecture`), or scaffold then fill
 (inert route first, content next). A ticket whose diff is mostly one new
-file of > ~400 lines is a structure problem, not a slicing problem
-(`structure-checks` S2).
+file over the `structure-checks` S2 file cap is a structure problem, not a
+slicing problem.

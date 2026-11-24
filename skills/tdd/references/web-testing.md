@@ -13,9 +13,11 @@ Cypress) during `map-codebase`; the rungs don't change.
    a11y rules, exhaustive-deps). Catches what types can't: stale closures,
    missing keys, unreachable states.
 2. **Component logic on the host** — vitest/jest + React Testing Library:
-   render, query by role/text, assert behavior with `userEvent`. Mock the
-   network (MSW preferred — handlers are reusable as dev mocks). Seconds,
-   no browser, every commit. (Rung 2 ≈ Android's semantic JVM tests.)
+   render, query by role/text, assert behavior with `userEvent`. The network
+   is faked at a port by a memory adapter, never by `vi.fn`/`vi.mock`
+   (testing-rules 6, lint-enforced); MSW is allowed only inside the real
+   fetch adapter's own contract test (`*.real.test.ts`). Seconds, no
+   browser, every commit. (Rung 2 ≈ Android's semantic JVM tests.)
 3. **Pixel evidence, no human** — rendered captures of real components:
    Storybook/Ladle stories + a screenshot test runner, or Playwright
    component testing. One capture per state × size × theme variant;
@@ -51,7 +53,7 @@ diff against references — never a fresh manual click-through.
 | Pure logic (utils, hooks internals, stores) | 2 | every commit |
 | Component behavior + a11y roles | 2 + 1 (a11y lint) | every commit |
 | Component visuals (states, themes, widths) | 3 | every commit (CI-diffed) |
-| API integration | 2 with MSW; 4 for the real contract | pre-merge |
+| API integration | 2 against the memory adapter; MSW only in the real adapter's `*.real.test.ts`; 4 for the real contract | pre-merge |
 | Critical user journeys (auth, checkout, settings-save) | 4 | pre-merge |
 | Visual accept, feel, motion | 5 (human) | release |
 

@@ -62,18 +62,23 @@ keep the steps below unchanged:
    now — written by the implementer and watched failing by temporarily
    reverting the change. A missing one is ❌ Important.
    - **Fast**: lint + typecheck/compile, plus visual evidence of every touched UI
-     surface following the UI verification ladder
+     surface. Android follows the UI verification ladder
      (`tdd`/references/android-testing.md): JVM screenshot tests (Roborazzi / AGP
      preview suites) or `android preview render` first; emulator/device only
      when no JVM capture exists for
-     that surface, and never inside a fix round. On Android,
+     that surface, and never inside a fix round. Web: Playwright screenshots
+     of each touched surface at the project's target viewport (light and dark
+     when themed), per `tdd`/references/web-testing.md rungs 3–4 — never a
+     manual browser session. On Android,
      `android studio analyze-file` (when the IDE is open) supplements lint on
-     the touched files. On Kotlin diffs, run PROFILE.md's `structure:` command
-     (`structure-checks`) yourself: red is ❌ Important; not configured on a
-     Kotlin diff is `cannot-verify`, said out loud. Plus one design-only
+     the touched files. On Kotlin and web diffs, run PROFILE.md's `structure:`
+     command (`structure-checks`) yourself: red is ❌ Important; not
+     configured on a Kotlin or web diff is `cannot-verify`, said out loud.
+     Plus one design-only
      reviewer subagent (Claude Code: `Agent`, `subagent_type: reviewer`; agent/model per `start`/references/effort-mapping.md's
      reviewer table; diff, tickets' file maps, `rules-architecture.md`, and
-     `ui-components.md` when the diff has public composables) that fills the
+     `ui-components.md` when the diff has public composables or Svelte
+     components) that fills the
      step-5 architecture, component API, file-structure and patterns rows. A
      prototype run caps here plus the demo, at any effort. Plus, before
      anything is pushed:

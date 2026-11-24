@@ -7,9 +7,9 @@ description: >-
   existing ones), single responsibility at the smallest useful grain (one
   interaction, one decision per file). Use when designing a feature, before
   writing tickets, when parallel dispatch keeps colliding on shared files, or
-  when designing a reusable Compose component or design-system API (slots vs
-  params, Modifier vs component, where component state lives, XxxDefaults,
-  library vs app tier).
+  when designing a reusable Compose or Svelte 5 component or design-system
+  API (slots/snippets vs params, Modifier vs component, where component state
+  lives, XxxDefaults, library vs app tier).
 interaction: afk
 requires: [design-architecture for cross-app structure]
 ---
@@ -44,11 +44,28 @@ map:
   (extension point + their own file). In `trunk` runs that shared edit
   (registry, DI module, nav graph, `when` entry) is its own tiny ticket,
   merged first, inert or gated.
+- **Shared append points are the conflict hotspot**: a hand-edited
+  registry or barrel, an import list, a changelog, a `when`/`switch` ladder.
+  Two parallel branches each appending one entry land on adjacent lines and
+  conflict, and a clean merge can still break the build. Evidence: two agent
+  PRs were open at once in 40.2% of 2,807 repos, and those co-active pairs
+  cover 79.4% of agent PRs ([Xu et al.](https://arxiv.org/abs/2607.04697));
+  a replay of 733 agent PR pairs conflicted on 179 (24.4%; 43.3% for pairs
+  from different agents), with changelogs, CI workflows and import lines
+  common overlaps, and one clean merge in 44 testable pairs broke the build
+  with a duplicated object key
+  ([gitta replay](https://gitta.io/research/replay-agent-pull-requests) —
+  its authors sell a related product, so an interested party); 84.57% of
+  human merge conflicts were edits to the same or consecutive lines, and
+  members added in one text area conflict under line-based merge
+  ([Accioly et al.](https://pauloborba.cin.ufpe.br/publication/2018understanding_semi-structured_merge_conflict_characteristics_in_open-source_java_projects/2018ESESemistructuredMergeConflictCharacteristics.pdf)).
+  Remove the append point (§2) instead of scheduling around it.
 
 ## 2. Open/closed at file granularity
 
-Adding part N+1 must mean: new file + at most one-line registration. Never
-modifying part N's logic.
+Adding part N+1 must mean: a new file and zero registration lines
+(auto-discovery). A one-line registration is allowed only where discovery is
+unavailable. Never modifying part N's logic.
 
 - Prefer **registries, maps, and sealed hierarchies with per-entry files**
   over `when`/`if` ladders inside shared files. A new variant, provider,
@@ -62,13 +79,64 @@ modifying part N's logic.
   wrong: extract the variation point first (that refactor is its own
   ticket, done before the fan-out).
 
+### Auto-discovery recipe (removes the append point)
+
+Web (Vite, SvelteKit): the plugin contract and an identity function live in
+`core` (`src/lib/core/plugin.ts`); each plugin is a folder
+(`src/lib/plugins/alpha/plugin.ts`) that default-exports the identity call;
+the registry (`src/lib/plugins/registry.ts`) is one glob line.
+
+```ts
+export interface Plugin { id: string; title: string }
+export const definePlugin = (plugin: Plugin): Plugin => plugin;
+```
+
+```ts
+import { definePlugin } from '$lib/core/plugin';
+export default definePlugin({ id: 'alpha', title: 'Alpha' });
+```
+
+```ts
+import type { Plugin } from '$lib/core/plugin';
+const modules = import.meta.glob<Plugin>('./*/plugin.ts', { eager: true, import: 'default' });
+export const plugins: readonly Plugin[] = Object.values(modules);
+```
+
+A unit test beside the registry, with its own copy of the same glob, is
+mandatory: ids are unique and each id equals its folder name
+(`path.split('/')[1]` over `Object.entries`). Adding a plugin is then one new
+folder.
+
+- **Cost.** dependency-cruiser sees no edge from the registry to the plugin
+  files (the registry has zero dependencies, each plugin zero dependents);
+  layer rules still apply to the plugin files, which are in the cruised tree.
+  The glob generic is an unchecked cast, which is why `definePlugin` types
+  each file when authored. A lazy glob (the default) is async and splits
+  chunks, so keep `eager: true` unless per-plugin chunks matter. Vite
+  documents the glob as a compile-time transform
+  ([glob import](https://vite.dev/guide/features#glob-import)); in Vitest 5.1
+  it returned every match in sorted key order, SvelteKit prerender and build
+  were not run `[unverified]`.
+- **Measured.** In a scratch repo two branches each appending an import and
+  an array entry conflicted; two branches each adding a plugin folder under
+  the glob merged cleanly.
+- **Kotlin.** A sealed hierarchy with one file per top-level variant, or a
+  registration contributed from the variant's own file (a DI multibinding
+  declared beside the variant) `[unverified]`. Not a hand-edited
+  `META-INF/services` list: that is itself a shared append point.
+- **Changelogs and lockfiles.** One fragment file per change instead of one
+  shared file ([towncrier](https://towncrier.readthedocs.io/)); pnpm merges
+  `pnpm-lock.yaml` conflicts itself when both sides are valid lockfiles
+  ([pnpm](https://pnpm.io/git)). Keep other shared append-only files out of
+  tickets.
+
 ### Patterns that buy this (reach for these first)
 
 | Pattern | Use it when | Why it simplifies agent work |
 |---|---|---|
 | **Strategy** | one behavior, many interchangeable implementations (validators, sorters, pricing rules) | each strategy is one file, parallel-writable; swap without touching callers |
 | **Factory / Abstract Factory** | object creation scatters `if`-branches by type or platform | creation lives in one file; adding a type touches only the factory's registry |
-| **Registry (plugin map)** | many self-contained units discovered by key | the canonical OCP shape: part N+1 = new file + one registration line |
+| **Registry (plugin map)** | many self-contained units discovered by key | the canonical OCP shape: part N+1 = a new file and no registration line (auto-discovery); a hand-edited map line only where discovery is unavailable |
 | **Command** | user actions / undoable operations / queued work | each command is one file with one `execute`; history, undo, queue come free |
 | **Facade** | a subsystem with many parts behind one call site | consumers code to the facade; you can rewrite the subsystem without breaking agents working on consumers |
 | **Adapter** | third-party or legacy API doesn't match your interface | the mismatch is quarantined in one file; swapping the dependency = new adapter |
@@ -108,9 +176,10 @@ agents; (c) testable without scaffolding for unrelated concerns.
 4. Build the core + one variant as a tracer bullet — end-to-end, tested —
    before fanning out the rest.
 5. Hand the remaining variants to parallel agents; each adds files only.
-6. Registration/wiring lands in one closing ticket (or was a one-line slot
-   from step 2). `trunk` runs: the slot lands first instead, inert or
-   behind the release flag.
+6. Registration/wiring: none with auto-discovery (the glob finds the new
+   file). Otherwise it lands in one closing ticket (or was a one-line slot
+   from step 2). `trunk` runs: the slot lands first instead, inert or behind
+   the release flag.
 
 ### Trunk runs — every ticket merges dark
 
@@ -143,6 +212,11 @@ sample (Tag, TagGroup, headless holder test) is in
   parallel, but create only the files the component needs.
 - **Ask before building**: if callers compose it from public blocks in a few
   readable lines, it is not a component.
+- **Svelte 5.** The same layering holds: one `.svelte` file is one
+  component, snippets replace slots, callback props replace events, and the
+  state-owner ladder ends in a plain class holder in a `.svelte.ts` file. The
+  rules (W1–W10) and which of them the web engine enforces are in
+  [references/ui-components.md](references/ui-components.md#svelte-5-components).
 
 ## Anti-patterns
 
@@ -160,3 +234,7 @@ sample (Tag, TagGroup, headless holder test) is in
 - **Clean Architecture inside a component**: a use case or ViewModel for
   expanded/selected state. UI-only state belongs to the composition or a
   plain holder (`references/ui-components.md` rule 6).
+- **Hand-edited append point**: every new variant adds an import and a list
+  entry to the same registry, barrel, changelog or `when` ladder. Adjacent
+  insertions conflict, and a clean merge can still break the build.
+  Auto-discover (§2) or give each change its own fragment file.

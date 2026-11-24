@@ -6,7 +6,11 @@
     "The agent keeps stuffing multiple classes into one Kotlin file — enforce it mechanically",
     "Wire a layer-dependency test so domain never imports data",
     "This ticket adds new Kotlin files — what evidence do I need for the structure rules?",
-    "Make the build fail when a public composable has no modifier parameter or takes a MutableState"
+    "Make the build fail when a public composable has no modifier parameter or takes a MutableState",
+    "Set up ESLint and dependency-cruiser on this SvelteKit app so a feature can't import another feature and only the composition root imports adapters",
+    "Ban vi.fn, vi.mock and spies in this TypeScript project with lint so agents write fakes instead",
+    "Agents keep leaving narrating comments and 400-line files in our Svelte code — make lint fail on both",
+    "This ticket adds new Svelte components and TypeScript files — what evidence do I need for the structure rules?"
   ],
   "negative": [
     {
@@ -27,6 +31,14 @@
     },
     {
       "prompt": "Should this chip take a slot or a String label?",
+      "owner": "micro-architecture"
+    },
+    {
+      "prompt": "Write a memory fake and a contract test for the storage port",
+      "owner": "tdd"
+    },
+    {
+      "prompt": "Replace the hand-edited plugin registry with import.meta.glob so parallel branches stop conflicting",
       "owner": "micro-architecture"
     }
   ]

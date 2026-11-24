@@ -17,7 +17,7 @@ The most important distinction on Android is **where a test runs**: **instrument
 
 Android adds: doubles live in the test source set and never ship; make big tests **hermetic** (no network or other external dependencies); use dependency injection — Google recommends Hilt — to swap doubles in instrumented and end-to-end tests, not just unit tests.
 
-**Reconciliation with [testing-rules](testing-rules.md):** no contradiction. Android prefers fakes for the same reason rule 6 does, and Android's mock example (verify called exactly once) is exactly rule 8's case — assert call counts only when they are the contract. The one addition Android makes explicit: inject fakes through Hilt into instrumented UI tests too, so hermetic E2E stays possible.
+**Reconciliation with [testing-rules](testing-rules.md):** no contradiction. Android prefers fakes for the same reason rule 6 does, and Android's mock example (verify called exactly once) is rule 8's case — assert call counts only when they are the contract, through a hand-written recording fake rather than a mocking library. The one addition Android makes explicit: inject fakes through Hilt into instrumented UI tests too, so hermetic E2E stays possible.
 
 ## Test strategies — the pyramid
 
