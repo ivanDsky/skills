@@ -35,8 +35,11 @@ last slice merged, on a debug build from `main` with the release flag forced
 on (the first verify step says how to force it). Fast fixes and hardening
 tickets are new slice PRs off fresh `main`, still dark — never commits on a
 run branch; the re-gate diffs the feature's merged range. The ledger
-`user-check: ok <versionName> @ <sha>` is what the flip PR requires; slices
-need none.
+`user-check: ok <versionName> @ <sha>` is what the release PR requires; slices
+need none. This ask stays "does it feel right?" and never carries the
+release: the release PR is opened later and asked as its own "Release
+<X.Y.Z>?" (`ship-to-trunk` lifecycle step 5); "looks good" here is not that
+Yes.
 
 **Backlog tickets** (filed by `file-tickets`, landed by `work-tickets`) have
 no epic and never come here one at a time. A hands-on ticket merges and
@@ -116,9 +119,10 @@ not Fable). Write the result to `.scratch/<slug>/regate.md`:
 2. **Design check** over `git diff <base>...HEAD`, fast commits first:
    `senior-dev` questions; file split and patterns per `micro-architecture`;
    dependency direction per `design-architecture`'s
-   `rules-architecture.md`; component API of public composables per
-   `micro-architecture`/references/ui-components.md at the ledgered
-   `ui-tier`; PROFILE `structure:` on Kotlin diffs; UI per `senior-ux`.
+   `rules-architecture.md`; component API of public composables or Svelte
+   components per `micro-architecture`/references/ui-components.md at the
+   ledgered `ui-tier`; PROFILE `structure:` on Kotlin and web diffs; UI per
+   `senior-ux`.
    Each finding names the file and the rule it breaks, graded with
    `review-change`'s grades: Critical (breaks a spec criterion, an F-id, a
    PROFILE hard rule or the dependency rule; crash or data loss), Important

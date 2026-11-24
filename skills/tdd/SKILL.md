@@ -6,7 +6,7 @@ requires: []
 ---
 
 > **TL;DR** Implements every change test-first — failing test, minimal passing code, refactor while green — and owns the what-to-test policy; fires on TDD, red-green-refactor, bug repro as test, or "which tests does this need".
-> **Related**: skill://implement (ticket execution), skill://diagnose-bug (bug repro), skill://preview-compose (screenshot tests), skill://structure-checks (structure suite as Kotlin evidence), skill://goldfish-review (verifiability lens)
+> **Related**: skill://implement (ticket execution), skill://diagnose-bug (bug repro), skill://preview-compose (screenshot tests), skill://structure-checks (structure suite or web lint as evidence), skill://goldfish-review (verifiability lens)
 
 # TDD
 
@@ -80,7 +80,7 @@ The one test policy for every skill; `write-tickets`, `implement` and `user-chec
 
 Read [testing-rules](references/testing-rules.md) when writing or changing tests, choosing fakes over mocks, or checking what a test really catches.
 Read [android-testing](references/android-testing.md) when testing Android or Compose apps — choosing JVM-unit vs Robolectric vs instrumented tests, or mapping what to test at each layer.
-Read [web-testing](references/web-testing.md) when testing web/React apps — the six-rung ladder (types → lint → component logic → pixel captures → scripted browser flows → human), browser-as-emulator rule, and coverage mapping.
+Read [web-testing](references/web-testing.md) when testing web, React or Svelte/SvelteKit apps — the six-rung ladder (types → lint → component logic → pixel captures → scripted browser flows → human), browser-as-emulator rule, coverage mapping, and Svelte 5 test tools.
 
 ---
 

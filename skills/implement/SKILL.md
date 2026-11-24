@@ -36,7 +36,7 @@ recollection.
    Delivery `trunk` → no run branch. Each ticket's worker gets its own
    worktree from freshly fetched `origin/main` and ends with its PR merged
    per `ship-to-trunk`/references/merge-loop.md (merge authority: the
-   `ship-to-trunk` table; flip and live PRs wait for the user). Frontier =
+   `ship-to-trunk` table; release and live PRs wait for the user). Frontier =
    tickets whose parents' PRs are MERGED. Stacks only under
    `ship-to-trunk`'s exception. `pr-check: none`: a worker ends at "branch
    pushed, ready" (fast review done, no suite, no rebase, no PR, no merge,
@@ -52,7 +52,7 @@ recollection.
    with one suite; never enqueue a series one ticket at a time as each
    finishes. It handles each result line per merge-loop.md (red → fix
    worker, conflict → rebase worker, refused/closed/stuck → the reason
-   first, waiting_user → ask tool). The orchestrator also runs one
+   first, waiting_user → ask tool, Claude Code: `AskUserQuestion`). The orchestrator also runs one
    `main_health.py watch --who <slug>`
    background bash job, started after the run's first merge and after a
    later merge when none is running; on red it attributes the culprit and
@@ -69,7 +69,7 @@ recollection.
    fallback): fast = none (research only when a ticket is
    blocked), standard = cap 3, thorough = full parallel. Agent per
    `start`/references/effort-mapping.md's reviewer/research table: `scout`
-   for code/repo questions, `task` for web/primary sources.
+   for code/repo questions, `task` (Claude Code: `Agent`, `general-purpose`) for web/primary sources.
 
 ## 2. Dispatch
 
@@ -94,7 +94,7 @@ recollection.
    to review-change.
 5. Knobs, enforced at dispatch: dispatch per the ticket's `tier:` using
    `start`/references/effort-mapping.md's *Tier → agent and model* table
-   (agent, model and spawn `effort`); never pass `model` to scout/sonic
+   (agent, model and spawn `effort`; Claude Code: the `Agent` tool, `agent` → `subagent_type`, `task` → `general-purpose`, model family only, no `effort`); never pass `model` to scout/sonic
    (config-pinned); escalation per the same section. Missing `tier:` → the
    table's defaults. Missing `effort:` → fall back to the run default.
 
@@ -155,8 +155,8 @@ recollection.
      goes through `android-env`'s checklist before being believed or
      re-derived.
 5. Style while writing, not after: `design-architecture`'s
-   `rules-code-style.md` (in design-architecture) governs comments (self-explanatory code;
-   comments only for WHY) and names the AI-slop patterns a worker must not
+   `rules-code-style.md` (in design-architecture) governs comments (none by default; the
+   allowlist there is lint-enforced where `structure:` is configured) and names the AI-slop patterns a worker must not
    emit; review grades against the same file.
 6. Event triggers while writing: creating a file → its one-sentence
    responsibility is written down first (the ticket's file map; none
@@ -172,7 +172,7 @@ recollection.
 
 - DONE_WITH_CONCERNS: concerns go to the ledger as deferred findings for
   review-change. DONE: nothing extra.
-- NEEDS_CONTEXT: answer as a brief addendum file, resume the same worker.
+- NEEDS_CONTEXT: answer as a brief addendum file, resume the same worker (Claude Code: `SendMessage` to its agent id).
   Only the user can answer → the orchestrator asks through the ask tool
   first (`start` § Waiting on the user); workers never ask the user.
 - Review findings (slice review or `review-change`): the worker that wrote
@@ -199,9 +199,9 @@ recollection.
    (the user tries the whole epic, not each ticket). Hardening tickets from
    `user-check`'s re-gate → `review-change`. `trunk`: hand off once the
    last feature slice merged — the user checks a debug build from `main`
-   with the flag forced on; the flip and cleanup tickets wait for
-   user-check OK and thorough review, and the cleanup folds into the
-   batched flag removal once the flip ships (`ship-to-trunk` lifecycle).
+   with the flag forced on; the release ticket waits for the user's
+   explicit Yes to "Release <X.Y.Z>?" and thorough review, and it
+   removes the flags itself (`ship-to-trunk` lifecycle).
    Backlog packs (`work-tickets`): no epic, so no user-check hand-off;
    control returns to `work-tickets` for the next pack.
 4. Fast-fix briefs from `user-check` (`mode: fast-fix`, F-ids listed): the

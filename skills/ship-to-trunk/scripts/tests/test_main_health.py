@@ -3,7 +3,9 @@
 Regression: #26 — `unknown` reported because most recent runs were cancelled.
 Run: python3 -m pytest skills/ship-to-trunk/scripts/tests
 """
+import argparse
 import json
+import os
 import subprocess
 import sys
 
@@ -256,3 +258,52 @@ def test_watch_reports_expired_quarantine_before_its_verdict(qrepo, gh, real_run
 def test_quarantine_target(text, want):
     m = main_health.QUARANTINE.search(text)
     assert main_health.quarantine_target(text, m.end(), "x/src/test/Foo.kt") == want
+
+
+def test_status_refreshes_stale_ledger(repo, gh, real_runs):
+    """A ledger holding green run N must not pass a main whose newer run N+1 failed."""
+    gh.set(runs=real_runs)
+    assert mh(repo, "status")[0] == 0
+    newer = dict(real_runs[0], databaseId=real_runs[0]["databaseId"] + 1, conclusion="failure")
+    gh.set(runs=[newer, *real_runs])
+    rc, out, _ = mh(repo, "status")
+    assert rc == 3 and out.splitlines()[0] == "red"
+    assert out.splitlines()[1].startswith(f"main red at {newer['headSha'][:9]} (run {newer['databaseId']})")
+
+
+def test_status_keeps_ledger_verdict_when_gh_fails(repo, gh, real_runs):
+    gh.set(runs=real_runs)
+    assert mh(repo, "status")[0] == 0
+    gh.set(run_list_error="HTTP 502")
+    rc, out, err = mh(repo, "status")
+    assert (rc, out) == (0, "green at 889eafb35 (run 43640083876)")
+    assert err.startswith("main_health: ledger refresh failed:") and "HTTP 502" in err
+
+
+def test_watch_writes_and_removes_pidfile(repo, gh, monkeypatch):
+    pidfile = repo / ".git" / "agent-builds" / "main-health-watch.pid"
+    seen = []
+
+    def list_runs(*a, **kw):
+        seen.append(pidfile.read_text() if pidfile.exists() else None)
+        return []
+    monkeypatch.setattr(main_health, "list_runs", list_runs)
+    root = str(repo)
+    assert main_health.cmd_watch(argparse.Namespace(who="t"), root, "release.yml", main_health.Ledger(root)) == 0
+    assert seen and set(seen) == {str(os.getpid())}
+    assert not pidfile.exists()
+
+
+def test_quarantine_in_resources_ignored(tmp_path, profile_text, gh, real_runs):
+    """A Konsist fixture under src/test/resources is test data, not a quarantine of this repo."""
+    stale = '@Ignore("quarantine #1 until 2000-01-01")\nclass X {}\n'
+    repo = init_repo(tmp_path / "r", {
+        "PROFILE.md": profile_text,
+        "konsist/src/test/resources/fixtures/S11/sample/src/test/kotlin/X.kt": stale,
+        "konsist/src/test/resources/Y.kt": stale,
+    })
+    gh.set(runs=real_runs)
+    assert mh(repo, "status")[:2] == (0, "green at 889eafb35 (run 43640083876)")
+    assert main_health.expired_quarantines(str(repo)) == []
+    init_repo(tmp_path / "r2", {"PROFILE.md": profile_text, "app/src/test/kotlin/X.kt": stale})
+    assert main_health.expired_quarantines(str(tmp_path / "r2")) == ["quarantine expired: X #1 since 2000-01-01"]

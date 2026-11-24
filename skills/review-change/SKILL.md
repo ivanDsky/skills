@@ -40,11 +40,11 @@ keep the steps below unchanged:
   the local suite once on the batch top. A rebase conflict
   resolved by hand → fast tier again over the resolution diff only; a clean
   rebase is never re-reviewed.
-- **Once, before the flip PR**: thorough tier over the feature's merged range
+- **Once, before the release PR**: thorough tier over the feature's merged range
   (`git diff <base>..origin/main` scoped to its slice PRs), with the
   `user-check: ok` precondition, and step 8's one full-suite run on
   `origin/main`. Extra check, ❌ Important when missing: tests cover both
-  flag states (on and off), and the release default stays off until the flip.
+  flag states (on and off), and the release default stays off until the release PR.
 
 1. Pin the inputs: the diff vs base (`git diff <base>...HEAD` — verify the base
    resolves and the diff is non-empty before dispatching anything), the spec
@@ -62,18 +62,23 @@ keep the steps below unchanged:
    now — written by the implementer and watched failing by temporarily
    reverting the change. A missing one is ❌ Important.
    - **Fast**: lint + typecheck/compile, plus visual evidence of every touched UI
-     surface following the UI verification ladder
+     surface. Android follows the UI verification ladder
      (`tdd`/references/android-testing.md): JVM screenshot tests (Roborazzi / AGP
      preview suites) or `android preview render` first; emulator/device only
      when no JVM capture exists for
-     that surface, and never inside a fix round. On Android,
+     that surface, and never inside a fix round. Web: Playwright screenshots
+     of each touched surface at the project's target viewport (light and dark
+     when themed), per `tdd`/references/web-testing.md rungs 3–4 — never a
+     manual browser session. On Android,
      `android studio analyze-file` (when the IDE is open) supplements lint on
-     the touched files. On Kotlin diffs, run PROFILE.md's `structure:` command
-     (`structure-checks`) yourself: red is ❌ Important; not configured on a
-     Kotlin diff is `cannot-verify`, said out loud. Plus one design-only
-     reviewer subagent (agent/model per `start`/references/effort-mapping.md's
+     the touched files. On Kotlin and web diffs, run PROFILE.md's `structure:`
+     command (`structure-checks`) yourself: red is ❌ Important; not
+     configured on a Kotlin or web diff is `cannot-verify`, said out loud.
+     Plus one design-only
+     reviewer subagent (Claude Code: `Agent`, `subagent_type: reviewer`; agent/model per `start`/references/effort-mapping.md's
      reviewer table; diff, tickets' file maps, `rules-architecture.md`, and
-     `ui-components.md` when the diff has public composables) that fills the
+     `ui-components.md` when the diff has public composables or Svelte
+     components) that fills the
      step-5 architecture, component API, file-structure and patterns rows. A
      prototype run caps here plus the demo, at any effort. Plus, before
      anything is pushed:
@@ -86,7 +91,7 @@ keep the steps below unchanged:
      than the implementer by default).
    - **Thorough**: plus one fresh-context dual-verdict subagent, model per
      the same reviewer table (the fresh visual reviewer too). It runs once
-     per feature range before the flip (`trunk`) or once over the whole
+     per feature range before the release (`trunk`) or once over the whole
      change (`pr`/`main`), never per slice or per ticket: the range review
      is the one that caught the real crashes.
 3. Brief reviewers minimally: diff command, commit list, spec excerpt,

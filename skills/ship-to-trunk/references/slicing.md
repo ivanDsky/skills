@@ -11,8 +11,8 @@ one PR, or when a change cannot hide behind a flag.
 | 02..N slices | one capability each, end to end, behind the flag; each builds and passes alone | gated |
 | shared-file edits | registry / DI module / nav graph / `when` entry, alone and first | gated or inert |
 | hardening (after user-check) | fixes plus regression tests for the bug each fixes (`tdd` § What to test, what not to) | gated |
-| flip | release default on, version bump, changelog | flips `<Key>` |
-| flag removal (batched, lifecycle step 6) | every shipped-on flag on main: flag, dead branch, override; one commit per flag, one PR, one suite | removes each `<Key>` |
+| release (written up front, last) | flags removed with the old path they hid (one commit per flag), every other shipped-on flag folded in, then version bump + changelog; one PR, one suite; replaces the flip and cleanup tickets | removes each `<Key>` |
+| leftover removal (batched, lifecycle step 6) | flags a red suite dropped from a release, or flipped outside one; one commit per flag, one PR, one suite | removes each `<Key>` |
 
 Every ticket names `flag: <Key> | none` and, for invariant-7 changes,
 `live: <what> — <why it is backward compatible>`.
@@ -26,8 +26,8 @@ Every ticket names `flag: <Key> | none` and, for invariant-7 changes,
   one; switch callers in a later slice behind the flag.
 - **Branch by abstraction** for replacements: introduce the seam (interface
   over the old implementation, no behavior change) → add the new
-  implementation behind the seam → flag selects → flip → delete the old
-  implementation in the batched flag removal (its commit for that flag).
+  implementation behind the seam → flag selects → delete the old
+  implementation in the release PR (its commit for that flag).
 - **Tests travel with the slice**: both flag states are covered where
   behavior differs (JVM test per state; screenshot per state for UI).
 - **Inert wiring is fine**: an unused API, an empty screen behind a gated
@@ -37,11 +37,11 @@ Every ticket names `flag: <Key> | none` and, for invariant-7 changes,
 
 | Change | Rule |
 |---|---|
-| Room/SQL schema | expand/contract: additive migration (new table/column, nullable or defaulted) ships first; the code stops reading the old shape only after the flip; the destructive migration is its own live-change ticket after the flip ships, never inside the flag-removal batch. Migration test per version. |
+| Room/SQL schema | expand/contract: additive migration (new table/column, nullable or defaulted) ships first; the code stops reading the old shape only after the release; the destructive migration is its own live-change ticket after the release ships, never inside the release PR or a removal batch. Migration test per version. |
 | Persisted formats (DataStore, files, Firestore docs) | readers accept old and new before any writer writes new; new fields optional; never rename in place. |
 | Manifest, permissions, exported components | own ticket, user approves; a new permission prompt is user-visible even if the feature is dark. |
 | Dependency / SDK / Gradle bumps | own ticket, no feature code in the same PR. |
-| Public API of a published module | additive only until the flip; removal follows the module's deprecation cycle. |
+| Public API of a published module | additive only until the release; removal follows the module's deprecation cycle. |
 
 Old installed versions keep running against shared data (Firestore,
 backend): anything they read must stay readable until the minimum supported
@@ -54,5 +54,5 @@ owns how (a thinner capability — one state, one variant, one entry point;
 ~600-line ceiling, this skill's ~400-line cap for `trunk`). Trunk-specific
 aids: one file per variant (`micro-architecture`), or scaffold then fill
 (inert route first, content next). A ticket whose diff is mostly one new
-file of > ~400 lines is a structure problem, not a slicing problem
-(`structure-checks` S2).
+file over the `structure-checks` S2 file cap is a structure problem, not a
+slicing problem.

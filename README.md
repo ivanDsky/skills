@@ -52,6 +52,7 @@ feedback session ──file──> backlog ──claim pack──> worker (any w
 `diagnose-bug` (bug reports: evidence ladder, user-time-last) ·
 `file-tickets` (feedback session: deduplicated backlog tickets, batched hands-on checks; never implements) ·
 `work-tickets` (worker session: atomic pack claims, one dark PR per ticket; GitHub Issues or local backend) ·
+`overnight` (unattended session: evening grill until every decision and contingency sits in a night brief, night run that never blocks on you — questions defaulted, logged and isolated so a morning "no" reverts only their work — then one morning check doc and build) ·
 `design-architecture` (SOLID payload, wired into spec/implement/review) ·
 `preview-compose` (previews + animation preview verification) ·
 `deploy-firebase` (test users + APK distribution) ·
@@ -61,14 +62,16 @@ feedback session ──file──> backlog ──claim pack──> worker (any w
 `android-cli` (Android CLI routing: device-free preview renders, Studio analysis, docs, emulator/device control, Journeys, Crashlytics signals) ·
 `android-env` (session bootstrap: PATH, local.properties, worktree git, device connect, Gradle triage, Studio modal handling) ·
 `web-env` (web/Node session bootstrap: runtime + package-manager resolution, env files, ports, lockfiles, dev-server triage, Playwright evidence) ·
+`svelte-kit3` (SvelteKit 3 / Svelte 5 rules: removed Kit 2 APIs, `#lib` imports, runes-only logic classes testable without a DOM, SSR-safe construction, UI SDK beta gotchas; uses the third-party `svelte-core-bestpractices`, `svelte-code-writer`, `ui-sdk` skills, installed with `npx skills add sveltejs/ai-tools` and `vercel-labs/ui`) ·
+`deploy-cloudflare` (Worker + static assets, D1, Rate Limiting, Turnstile, secrets; a public deploy only on the owner's explicit go in the session; needs the third-party `wrangler` skill from `cloudflare/skills`) ·
 `senior-ux` (UX engineering method: framework-judged pixels, measured references, A/B on user hardware, tokens with computed floors, walk-every-state) ·
-`micro-architecture` (feature-level file split: parallel-safe waves, open/closed one-file extension, single responsibility per file; reusable Compose component API — library/app tier, slots vs params, Modifier vs component, state owner ladder, `XxxDefaults`, with a compiled sample) ·
+`micro-architecture` (feature-level file split: parallel-safe waves, open/closed one-file extension with auto-discovered registries so parallel branches stop colliding on shared append points, single responsibility per file; reusable Compose and Svelte 5 component API — library/app tier, slots/snippets vs params, Modifier vs component, state owner ladder, `XxxDefaults`, with a compiled Compose sample) ·
 `senior-dev` (judgment defaults: verify before trusting, smallest correct change, reproduce before fixing, own mistakes) ·
 `adopt-tool` (one-pass capability adoption checklist: verify → route → wire → mandate → navigate → eval → demo → ship from repo) ·
 `goldfish-review` (fresh-context lenses on a concept or design before code: reuse, persona flows, data, failure, best version, verifiability; architecture, patterns, file structure — concept lenses run only after you confirm scope, at most 2 picked by risk; design lenses: you choose none / up to 3 / all) ·
-`structure-checks` (Konsist suite for Kotlin: one public type per file, layer dependencies, shrink-only allowlist, opt-in component-API check — the mechanical backstop for file structure) ·
+`structure-checks` (two engines, one rule set: Konsist + detekt on Kotlin, ESLint + dependency-cruiser on SvelteKit/TypeScript — one class per file, hard size and complexity caps, layer dependencies, no agent-written comments, no mocking APIs, shrink-only ratchet, opt-in component-API check — the mechanical backstop for file structure, readability and fakes over mocks) ·
 `open-pr` (PR as a 2-minute read: summary, before/after screenshot-test captures, major changes, top-3 review checks with line links, optional diagram; big runs as a per-ticket `gh stack` with fixes landing in the owning layer; start asks trunk, one PR, or straight to main) ·
-`ship-to-trunk` (trunk-based delivery: every ticket a small slice PR merged into main within hours behind a release flag, live changes backward compatible and user-approved, the flip PR as the release, one batched ticket removes every shipped-on flag) ·
+`ship-to-trunk` (trunk-based delivery: every ticket a small slice PR merged into main within hours behind a release flag, live changes backward compatible and user-approved, one release PR per epic turns the flags on, removes them and bumps the version on one explicit owner Yes to "Release <X.Y.Z>?"; a leftover ticket removes any the release left) ·
 `prototype` (quick throwaway prototype: one task → one self-contained HTML page, 2-3 switchable variants judged with senior-ux on your phone, one subagent per task + an index page; small picks ported straight into the app, big ones through graduate-prototype)
 
 **Adapted (owned text, credited sources):**
@@ -123,10 +126,17 @@ skills/<name>/          # one directory per skill
     └── tests/          # pytest suites + fixtures from real inputs; lint runs them
 evals/<name>.json       # routing trigger cases (>=3 positive, >=2 near-miss)
 hooks/pre/*.ts          # versioned omp guard hooks (install: § Hooks)
+hooks/claude/*.ts       # Claude Code PreToolUse entries running the same hooks (§ Claude Code)
 hooks/test/             # bun tests for the hooks
+claude/agents/*.md      # Claude Code subagents: reviewer, goldfish, scout, security-reviewer, sonic
+claude/CLAUDE.md        # omp → Claude Code term map, installed into ~/.claude/CLAUDE.md
+claude/bots.json        # Orca bot manifest: shared skills, per-bot skills + settings (§ Claude Code)
+claude/bots/<bot>/SOUL.md # each bot's SOUL.md, installed into ~/.orca/bots/<bot>/
 docs/skill-template/    # copy to skills/<name>/ to start a new skill
 scripts/lint_skills.py  # ported from awesome-llm-apps (Apache-2.0); no argument = every skill
 scripts/test_skills.py  # runs every skills/*/scripts/tests with pytest (lint calls it)
+scripts/claude_install.py # installs the Claude Code pieces and the bots (tests: scripts/tests/)
+scripts/update.sh        # one command after git pull: omp skills, Claude Code and every bot
 ```
 
 ## Writing a skill
@@ -164,8 +174,9 @@ Rules an agent broke twice in prose are enforced by a hook, and the hook is
 versioned here instead of living only in `~/.omp`. `hooks/pre/worker-guard.ts`
 blocks the mechanically detectable worker hard rules in bash commands
 (`skills/implement/references/hard-rules.md`): `pkill`/`killall` of
-Gradle/Java/build-slot, `gradlew --stop`, `git add -A`/`--all`/`.`, and `rm` of
-`~/.gradle`, `~/Library` or `~/.android`. `hooks/pre/tailnet-leak-guard.ts`
+Gradle/Java/build-slot, `gradlew --stop`, `git add -A`/`--all`/`.`, `rm` of
+`~/.gradle`, `~/Library` or `~/.android`, and any `yes` command (`yes | cmd` leaves
+orphaned CPU-bound processes; use the command's `--yes`/`-y` flag). `hooks/pre/tailnet-leak-guard.ts`
 refuses a `git commit` or `git push` whose added lines carry a Tailscale
 address (100.64.0.0/10) or a `*.ts.net` name; device data belongs in the
 gitignored `PROFILE.local.md` (deploy-tailscale § 2). `hooks/pre/build-queue.ts`
@@ -182,6 +193,91 @@ bun test hooks/
 
 Re-run the `cp` after every change under `hooks/pre/`; the installed copy is
 not a symlink. Limits are listed at the top of each hook.
+
+## Claude Code (Orca bots)
+
+The skills are written for omp; the same checkout also runs under plain
+Claude Code, where the 8 Orca bots (intake, planner, designer, builder, fixer,
+lander, tester, coach) run. `scripts/claude_install.py` writes only `~/.claude`,
+`~/.orca/bots/<bot>/` and its store; omp never reads those, and `~/.agents/skills`
+stays the omp install.
+
+Each bot sees a small shared set plus its own role skills, nothing else. A skill
+list costs context at every session start, so scoping matters: a builder session
+went from 28.2k to 21.5k input tokens.
+
+- Manifest: `claude/bots.json` holds the `shared` set (what worker sessions in
+  PuzzleBox worktrees need: they only get user-level skills), the per-bot
+  `skills`, and each bot's `settings` (model, effortLevel, permissions). The
+  bot's `SOUL.md` lives in `claude/bots/<bot>/`. Change a bot here, not in its
+  folder.
+- Store: `install` copies `skills/`, `hooks/` and `claude/` to
+  `~/.local/share/ivandsky-skills`, and links every other skill in
+  `~/.agents/skills` (caveman, mattpocock, orchestration, …) into its `skills/`.
+  All links and hook commands point there, so deleting or moving this checkout
+  breaks nothing, and `skill://<name>` resolves there for every skill, installed
+  or not.
+- `~/.claude/skills`: the shared set only. Other symlinks are removed (their
+  original targets are kept in `~/.claude/.skills-bots-install.json`); real
+  directories are reported and left.
+- Bots: each existing `~/.orca/bots/<bot>/` gets `.claude/skills/<skill>` links
+  for its role set, plus `.claude/settings.json` and `SOUL.md` from the manifest.
+  A bot missing in Orca is reported, never created. Anything else in the bot
+  folder is kept. A `settings.json` or `SOUL.md` edited by hand is shown as a
+  diff and overwritten only with `install --force` (after a backup).
+- Settings: one `PreToolUse` group (matcher `Bash`) in `~/.claude/settings.json`
+  runs `hooks/claude/<hook>.ts` with bun. Each entry imports the omp hook from
+  `hooks/pre/` unchanged through `hooks/claude/adapter.ts`: a block becomes
+  `permissionDecision: "deny"`, a rewrite becomes `updatedInput`. The manifest's
+  `user_settings` turn off claude.ai synced skills (`syncClaudeAiSkills`),
+  bundled skills (`disableBundledSkills`) and the built-in `plugin-authoring`
+  skill (`skillOverrides`). Other keys and hook groups (Orca, Superset) are left
+  as they are, and every write backs the file up to
+  `settings.json.pre-bots-<timestamp>`.
+- Subagents: `claude/agents/*.md` symlinked into `~/.claude/agents/`.
+- Note: `claude/CLAUDE.md` goes into a marked block of `~/.claude/CLAUDE.md`. It
+  maps `skill://` paths and the omp tools (`task`, `todo`, `ask`, `eval`,
+  `local://`, …) to their Claude Code equivalents, so the skill text keeps one
+  wording for both harnesses.
+
+Update everything after a `git pull` (idempotent):
+
+```bash
+scripts/update.sh            # npx skills update -g (omp), then claude_install.py install + status
+SKIP_OMP=1 scripts/update.sh # Claude Code and bots only
+```
+
+New machine:
+
+1. Install Orca (it provides the `orchestration` and `orca-cli` skills in
+   `~/.agents/skills`), Claude Code and bun, and clone this repo.
+2. Install omp's skills once; `install` refuses a manifest skill that exists
+   neither here nor in `~/.agents/skills`:
+
+   ```bash
+   for s in ivanDsky/skills mattpocock/skills JuliusBrussee/caveman emilkowalski/skill vercel-labs/skills tw93/Mole; do
+     npx skills add "$s" -g
+   done
+   ```
+
+3. Run `scripts/update.sh`.
+4. Create the 8 bots in the Orca GUI (a bot can't be created from outside Orca),
+   then run `scripts/update.sh` again so the bots get their skills, settings and
+   SOUL.md.
+
+```bash
+python3 scripts/claude_install.py install [--force]
+python3 scripts/claude_install.py status      # drift per bot: missing/extra skills, edited files
+python3 scripts/claude_install.py uninstall   # restores settings, links and CLAUDE.md; removes the store
+python3 -m pytest scripts/tests/test_claude_install.py
+```
+
+The store is a copy: changes in this checkout reach Claude Code and the bots
+only after `install`. Limits: the hooks see Bash calls only; skills with
+`disable-model-invocation: true` (pick-ui-library, review-animations, handoff)
+are installed but only typable as `/name`, never listed to the model; a
+subagent always gets Claude Code's git status snapshot (goldfish lenses are
+told not to use it).
 
 ## Planning
 

@@ -15,6 +15,11 @@ the recorded start time (the checks of a SIGKILLed land; a reused pid is
 spared), then clears it. Workers never run the lane: they push the branch and
 report ready; the orchestrator enqueues the ticket.
 
+After a merge a `land` starts `main_health.py watch` detached (`watch: started
+pid <n>, log <lane>/main-health-watch.log`) unless the pidfile in agent-builds/
+names a live one (`watch: running pid <n>`). The watcher outlives the `land`:
+no SIGTERM, stop or kill_orphans touches it.
+
   merge_lane.py enqueue --who <run slug> --nn <NN> --worktree <path>
                         --title "<conventional title>" --body-file <f>
                         [--no-merge] [--red-fix <sha|#PR>]
@@ -478,6 +483,8 @@ def names(wt, *rng):
 
 LOCK_WAIT_S = 30
 EVENTS = "lane-events.jsonl"
+WATCH_PID = "main-health-watch.pid"  # in agent-builds/, written by `main_health.py watch` while it runs
+WATCH_LOG = "main-health-watch.log"  # in the lane dir
 CHECK_GROUPS = "check-groups"  # process groups of the running checks, one per line
 WAIT_POLL_S = 0.5
 KILL_GRACE_S = 30
@@ -741,6 +748,16 @@ def proc_start(pid):
     return subprocess.run(["ps", "-o", "lstart=", "-p", str(pid)], capture_output=True, text=True).stdout.strip()
 
 
+def watch_pid(agent_builds):
+    """The pid of the live `main_health.py watch` (pidfile present, `kill -0` succeeds), else None."""
+    try:
+        pid = int((Path(agent_builds) / WATCH_PID).read_text())
+        os.kill(pid, 0)
+    except (OSError, ValueError) as e:
+        return pid if isinstance(e, PermissionError) else None  # EPERM: alive, another user's
+    return pid
+
+
 def kill_orphans(lane):
     """Kill the checks a SIGKILLed `land` left running: each process group on the
     CHECK_GROUPS record whose leader still has the recorded start time (else the pid
@@ -867,6 +884,7 @@ class Land:
         self.checks = []  # (batch, check) for every check started; stop() ends the live ones
         self.groups = self.lane / CHECK_GROUPS
         self.mh = [sys.executable, str(HERE / "main_health.py")]
+        self.watcher = None  # the watch this land started
         self.slot = ["build-slot"] if shutil.which("build-slot") else []
 
     def emit(self, e, result, pipe, **kw):
@@ -882,6 +900,8 @@ class Land:
         self.events.log("ticket", {"who": e["who"], "nn": e["nn"], "id": e["id"], "pipe": pipe,
                                    "result": result, "reason": kw.get("reason"), "pr": kw.get("pr"),
                                    "line": line})
+        if result == "merged" and "merged" not in self.results.values():
+            self.watch()  # the first merge of this land; land() checks again on exit
         self.results[e["id"]] = result
         if result != "requeued":
             self.q.update(lambda recs: [r for r in recs if r.get("id") != e["id"]])
@@ -906,6 +926,24 @@ class Land:
             if c["p"].returncode is None:
                 batch.finish(c, discard=True)
         self.groups.unlink(missing_ok=True)
+
+    def watch(self):
+        """Keep main-health fresh after a merge: start `main_health.py watch` detached unless one is
+        alive. It outlives this land on purpose: neither stop() nor kill_orphans knows its pid."""
+        pid = self.watcher.pid if self.watcher and self.watcher.poll() is None else watch_pid(self.lane.parent)
+        if pid:
+            print(f"watch: running pid {pid}", flush=True)
+            return
+        log = self.lane / WATCH_LOG
+        try:
+            with log.open("a") as f:
+                self.watcher = subprocess.Popen(self.mh + ["watch", "--who", self.who], cwd=self.repo,
+                                                stdin=subprocess.DEVNULL, stdout=f, stderr=subprocess.STDOUT,
+                                                start_new_session=True)
+        except OSError as e:
+            print(f"watch: not started: {e}", flush=True)
+            return
+        print(f"watch: started pid {self.watcher.pid}, log {log}", flush=True)
 
     def ledger(self, line, entries):
         print(line, flush=True)
@@ -1258,6 +1296,8 @@ def land(a):
         try:
             return L.run()
         finally:
+            if "merged" in L.results.values():
+                L.watch()  # the first watch may have ended before the later merges' runs started
             L.stop()
             signal.signal(signal.SIGTERM, old)
 

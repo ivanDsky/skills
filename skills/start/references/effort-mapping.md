@@ -9,7 +9,7 @@ here.
 |---|---|---|---|---|---|---|---|---|
 | fast | low | see *Tier → agent and model* | skip (only when a ticket is blocked) | focused | none (not asked) | post-and-proceed | post-and-proceed | lint + screenshots + design-only reviewer |
 | standard | medium | see *Tier → agent and model* | 1 per unknown, cap 3 | focused | stage A: 0–2 lenses by risk after the checkpoint, not asked; stage B asked, recommend up to 3, only if architecture-heavy | blocking | post-and-proceed | one code reviewer (also fills the design rows), not two |
-| thorough | high | see *Tier → agent and model* | full parallel fan-out | deep if high stakes, else focused | stage A: 0–2 lenses by risk after the checkpoint, not asked; stage B asked, recommend all | blocking | post-and-proceed | + dual-verdict + visual reviewer, once per feature range before the flip (`pr`/`main`: once per change), never per slice |
+| thorough | high | see *Tier → agent and model* | full parallel fan-out | deep if high stakes, else focused | stage A: 0–2 lenses by risk after the checkpoint, not asked; stage B asked, recommend all | blocking | post-and-proceed | + dual-verdict + visual reviewer, once per feature range before the release (`pr`/`main`: once per change), never per slice |
 
 Ticket confirm blocks at no effort: the list is posted and the run proceeds;
 `write-tickets` asks about granularity only when its ticket count gate fires
@@ -70,7 +70,7 @@ Orchestrator by stage (who runs each stage: lifecycle.md):
 | stage | orchestrator | model |
 |---|---|---|
 | triage, intake, spec, UI contract, goldfish gates, ticketing | main session | the session's launch model: `anthropic/claude-opus-5-5` (`anthropic/claude-fable-5-2` when the user launches it for thorough design); the agent never switches it |
-| user-check F-id triage, taste rulings, asks, approvals, flip, milestone digests | main session | same launch model; taste stays off Sonnet |
+| user-check F-id triage, taste rulings, asks, approvals, release, milestone digests | main session | same launch model; taste stays off Sonnet |
 | execution milestone after spec freeze: slices, user-check build, one fix round, hardening + review, deliver | captain, one fresh spawn per milestone | `agent: task`, no `model` (Sonnet); spawn `effort` omitted, `hi` at run effort `thorough` |
 | quick task, quick prototype, bug diagnosis | main session, no captain | launch model |
 

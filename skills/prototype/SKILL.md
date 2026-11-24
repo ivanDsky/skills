@@ -35,7 +35,7 @@ contract stage instead → § 5.
 ## 1. One task per page
 
 - One task = one question = one HTML file. Never two questions in a page.
-- Several tasks → **one fresh subagent per task**, all dispatched at once,
+- Several tasks → **one fresh subagent per task** (Claude Code: `Agent`, `subagent_type: general-purpose`), all dispatched at once,
   each with the brief in [references/page-brief.md](references/page-brief.md)
   and its own absolute output path. The parent writes nothing but the index.
 - Output lives in `.scratch/<slug>/prototype/` (gitignored, throwaway by

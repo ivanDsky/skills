@@ -4,12 +4,14 @@
 The ledger lives in the git common dir (shared by every worktree, never
 committed): <git-common-dir>/agent-builds/main-health.jsonl, append-only.
 
-  watch   background job: waits for main's CI (newest queued/running run of
+  watch   background job (pidfile agent-builds/main-health-watch.pid while
+          it runs; the lane starts it after a merge): waits for main's CI (newest queued/running run of
           the main workflow) until nothing is pending, records each run
           attempt that ended success or failure (cancelled runs are skipped;
           a `gh run rerun` is a newer attempt of the same run), prints one
           line per state change. Exit 0 green or unknown, 3 red.
-  status  green|red|unknown before `gh pr merge`; red adds sha, range, cause,
+  status  records finished runs newer than the ledger, then reads it:
+          green|red|unknown before `gh pr merge`; red adds sha, range, cause,
           first failing tests, claim and held PRs. Exit 0 green or unknown,
           3 red (hold the PR).
   claim   who fixes red main (--culprit sha|PR, --fix-pr N). Refused while
@@ -24,13 +26,14 @@ A red run's ledger record carries `failed_tests` (`Class.method` from
 
 `status` and `watch` also print `quarantine expired: <Class> #<N> since
 <date>` for each `@Ignore("quarantine #<N> until <YYYY-MM-DD>")` in src/test
-or src/androidTest Kotlin whose date is past; exit codes ignore it.
+or src/androidTest Kotlin sources (resources excluded) whose date is past; exit codes ignore it.
 
 Workflow: --workflow, else PROFILE `- main-check:`, else the basename of
 PROFILE `- release:`.
 """
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -105,6 +108,7 @@ class Ledger:
         d.mkdir(exist_ok=True)
         self.path = d / "main-health.jsonl"
         self.lock = d / "main-health.lock"
+        self.pid = d / "main-health-watch.pid"  # the live `watch`, for the lane's alive check
 
     def read(self):
         if not self.path.exists():
@@ -248,7 +252,8 @@ def quarantine_target(text, end, path):
 def expired_quarantines(root):
     """`quarantine expired: …` lines for quarantines whose date is before today."""
     listed = sh("git", "ls-files", "-z", "-co", "--exclude-standard", "--",
-                ":(glob)**/src/test/**/*.kt", ":(glob)**/src/androidTest/**/*.kt", cwd=root, check=False)
+                ":(glob)**/src/test/**/*.kt", ":(glob)**/src/androidTest/**/*.kt",
+                ":(exclude,glob)**/src/*/resources/**", cwd=root, check=False)
     today = datetime.now().date().isoformat()  # local date: the day the quarantine's author meant
     lines = []
     for rel in filter(None, listed.split("\0")):
@@ -324,6 +329,14 @@ def record_new_runs(root, wf, led, who):
 
 
 def cmd_watch(a, root, wf, led):
+    led.pid.write_text(str(os.getpid()))
+    try:
+        return watch_loop(a, root, wf, led)
+    finally:
+        led.pid.unlink(missing_ok=True)
+
+
+def watch_loop(a, root, wf, led):
     prev = State(led.read()).verdict
     changed = False
     while True:
@@ -350,10 +363,11 @@ def cmd_watch(a, root, wf, led):
 
 
 def cmd_status(a, root, wf, led):
-    state = State(led.read())
-    if not state.last:
+    try:
         record_new_runs(root, wf, led, "status")
-        state = State(led.read())
+    except SystemExit as e:  # gh_json exits on a gh error: keep the ledger verdict
+        print(f"main_health: ledger refresh failed: {str(e.code).removeprefix('main_health: ')}", file=sys.stderr)
+    state = State(led.read())
     if state.verdict != "red":
         line = state.verdict if not state.last else f"green at {state.last['sha'][:9]} (run {state.last['run']})"
         print(line)

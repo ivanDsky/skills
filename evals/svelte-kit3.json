@@ -1,0 +1,29 @@
+{
+  "skill": "svelte-kit3",
+  "positive": [
+    "Add a settings screen to the SvelteKit app with its own ViewModel class and a unit test",
+    "svelte-check says Cannot find module '$lib/utils/format' after upgrading to SvelteKit 3 — fix the imports",
+    "Replace the $page store in this layout with the Kit 3 way of reading the current URL",
+    "Where does svelte.config.js go now? Kit 3 says the config moved",
+    "Pass the analytics service into the checkout page through createContext instead of a module-level singleton",
+    "Write the +server.ts endpoint that returns JSON for the contact form"
+  ],
+  "negative": [
+    {
+      "prompt": "Add a Tabs component from the UI SDK and check its keyboard behaviour",
+      "owner": "ui-sdk"
+    },
+    {
+      "prompt": "pnpm dev serves stale content and node isn't found in this worktree",
+      "owner": "web-env"
+    },
+    {
+      "prompt": "Write the failing test first for the undo logic in the domain rules",
+      "owner": "tdd"
+    },
+    {
+      "prompt": "Deploy the worker to Cloudflare and apply the D1 migrations",
+      "owner": "deploy-cloudflare"
+    }
+  ]
+}

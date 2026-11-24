@@ -1,0 +1,30 @@
+{
+  "skill": "deploy-cloudflare",
+  "positive": [
+    "Deploy the app to Cloudflare",
+    "Create the D1 database for the app and apply the migrations",
+    "The form endpoint must allow 3 submissions per hour — set up the rate limit in wrangler.jsonc",
+    "Add Turnstile verification to the form endpoint and test it locally with the dummy keys",
+    "wrangler deploy fails with Types file not found at worker-configuration.d.ts",
+    "Put the Turnstile secret on the Worker and set the kill-switch variable",
+    "Make the app public so I can send the link to testers"
+  ],
+  "negative": [
+    {
+      "prompt": "Send the built preview to my phone over Tailscale and check the link works",
+      "owner": "deliver"
+    },
+    {
+      "prompt": "Share the Android build with the Firebase testers",
+      "owner": "deploy-firebase"
+    },
+    {
+      "prompt": "Replace the $page store with the Kit 3 equivalent in the layout",
+      "owner": "svelte-kit3"
+    },
+    {
+      "prompt": "pnpm install fails on this worktree and node isn't found",
+      "owner": "web-env"
+    }
+  ]
+}

@@ -23,12 +23,15 @@ State lives in $GH_FAKE_DIR/state.json (written by the test):
   logs   {"<run id>": `gh run view --log-failed` text}; a run absent here
          fails like an expired log
   jobs   {"<run id>": `gh run view --json jobs` list}; absent → gh error
+  run_list_error  stderr of a failing `gh run list` (exit 1)
+  watch_s         seconds `gh run watch` sleeps before returning (default 0)
 Every call is appended to $GH_FAKE_DIR/calls.log as one JSON argv line.
 """
 import json
 import os
 import subprocess
 import sys
+import time
 
 d = os.environ["GH_FAKE_DIR"]
 state_path = os.path.join(d, "state.json")
@@ -58,6 +61,9 @@ def find_pr(ref):
 
 
 if args[:2] == ["run", "list"]:
+    if state.get("run_list_error"):
+        print(state["run_list_error"], file=sys.stderr)
+        sys.exit(1)
     runs = state["runs"]
     want = opt("--status")
     if want:
@@ -66,6 +72,7 @@ if args[:2] == ["run", "list"]:
     assert wf, "run list without --workflow"
     print(json.dumps([project(r, opt("--json")) for r in runs[: int(opt("-L", "20"))]]))
 elif args[:2] == ["run", "watch"]:
+    time.sleep(state.get("watch_s", 0))
     sys.exit(0)
 elif args[:2] == ["run", "view"]:
     key = "logs" if "--log-failed" in args else "jobs"

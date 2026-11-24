@@ -27,7 +27,7 @@ frame-by-frame video analysis is below it.
 
 ## 1. Question batch first (one batch, intake format)
 
-Before touching any device, send ONE batch through the ask tool (one call,
+Before touching any device, send ONE batch through the ask tool (Claude Code: `AskUserQuestion`; one call,
 `run-intake` step 4; the screenshot request rides along as a note in the
 message before it):
 

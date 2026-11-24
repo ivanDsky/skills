@@ -1,0 +1,28 @@
+{
+  "skill": "overnight",
+  "positive": [
+    "I'm going to bed — grill me on everything you need, then hand the whole leaderboard epic to the bots and have a build ready for me to check in the morning",
+    "Set this up as an overnight run: ask me all the decisions now, then work without asking me anything until 8am",
+    "Long unattended session: you can ask questions while I sleep but don't block on them, take your best guess and keep going",
+    "Hand this big chunk completely to the agents tonight; I want one big user check tomorrow morning",
+    "Work on the onboarding redesign all night; before you start, make sure you know every decision so nobody gets stuck at 3am"
+  ],
+  "negative": [
+    {
+      "prompt": "Grill me on this pricing plan, I want to stress-test the idea",
+      "owner": "grilling"
+    },
+    {
+      "prompt": "Ask me what you need to know before drafting the spec for reminders",
+      "owner": "run-intake"
+    },
+    {
+      "prompt": "Pick up the ready tickets in the leaderboard area and land them",
+      "owner": "work-tickets"
+    },
+    {
+      "prompt": "Implementation is done, send me the build so I can try it",
+      "owner": "user-check"
+    }
+  ]
+}

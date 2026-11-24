@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Triages an ask — quick task, prototype, feature, unmapped codebase — prints the run plan, and fires the matching chain; use on /start.
-> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://user-check (hands-on check before review), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes), skill://ship-to-trunk (delivery = trunk: one small PR per ticket, merge dark, flip PR releases), skill://caveman (external: terse voice for chat, briefs, reports, ledgers)
+> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://user-check (hands-on check before review), skill://structure-checks (Konsist/detekt or ESLint/dependency-cruiser structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes), skill://ship-to-trunk (delivery = trunk: one small PR per ticket, merge dark, release PR releases), skill://caveman (external: terse voice for chat, briefs, reports, ledgers)
 
 # Start
 
@@ -65,8 +65,9 @@ worker's BLOCKED or NEEDS_CONTEXT only the user can clear.
   pre-approves is done, not asked. The user delegates a class of asks ("do
   it yourself", "deploy it yourself", "you pick") → append it as a
   `pre-approved:` line the same turn and name it in the next status.
-  Never pre-approvable, however delegated: the flag flip or release, a
-  production deploy, data deletion, anything public.
+  Never pre-approvable, however delegated: the release (flags on and
+  removed, version bump; only an explicit Yes to "Release <X.Y.Z>?" counts) or any flag
+  flip, a production deploy, data deletion, anything public.
 - Budget: ≤5 questions per form, recommended option first; approvals for
   several PRs share one form; a question that blocks nothing waits for the
   next checkpoint form instead of its own ask.
@@ -137,6 +138,12 @@ milestone. Brief, file format, models: [Lifecycle](references/lifecycle.md).
 
 ## Triage — first match wins, in this order
 
+**Overnight wrapper** — the user hands a big chunk off for an unattended
+session ("overnight", "while I sleep", "check it in the morning") →
+`overnight` wraps whatever class the list below picks: its grill replaces
+the intake batch, its night brief replaces every HITL gate, and its morning
+check is `user-check` step 3.
+
 0. **Backlog session** — the ask is feedback, bugs or ideas to file for
    later, or a request to check what merged → `file-tickets`. The ask is
    to pick up backlog work ("pick up tickets in leaderboard", "take #42")
@@ -175,8 +182,10 @@ milestone. Brief, file format, models: [Lifecycle](references/lifecycle.md).
    `review-change` (suite once) → deliver → land. The user reviews code
    last, in the PR. Delivery `trunk` differs: slices merge dark (fast review
    each) as tickets close, `user-check` runs on a debug build from `main`
-   with the release flag forced on, and the flip PR waits for user-check OK
-   plus thorough review (`ship-to-trunk`).
+   with the release flag forced on, and the one release PR (flags on and
+   removed, version bump) opens unmerged and waits for the user's explicit Yes to
+   "Release <X.Y.Z>?", asked apart from the check, plus thorough review
+   (`ship-to-trunk`).
 
 Tickets still claimed by this worktree → the run plan lists them and offers
 resume (feature epic → `implement`, otherwise `work-tickets`); the new ask is
@@ -247,24 +256,27 @@ hand off).
 | backlog | `work-tickets` | triage 0: pick up backlog tickets by area, type, epic or ids; triage 1b: land the one filed ticket |
 | research | `fan-out-research` | ticket/spec declares an Unknown |
 | implement | `implement` | ready frontier ticket; `user-check` fast fixes; re-gate hardening tickets |
-| user check | `user-check` | implement done (feature tickets) or quick-task code written — the user tries the whole change before any review (trunk: after the last slice merged dark, before the flip PR); on OK it re-gates the run into hardening tickets |
+| user check | `user-check` | implement done (feature tickets) or quick-task code written — the user tries the whole change before any review (trunk: after the last slice merged dark, before the release PR); on OK it re-gates the run into hardening tickets |
 | review | `review-change` | hardening tickets closed after `user-check` OK (quick task: right after OK) |
 | deliver | `deliver` | review passes and `suite: green @ HEAD` is ledgered |
-| land | `open-pr` | run's delivery decision = pr (PROFILE `## Delivery` `changes:` or session answer), fired by `deliver`; = trunk → once per slice PR and for the flip PR (`ship-to-trunk`) |
-| land | `ship-to-trunk` | delivery = trunk: slice size, fresh-base worktree per ticket, merge authority, live changes, flag lifecycle through the flip PR |
+| land | `open-pr` | run's delivery decision = pr (PROFILE `## Delivery` `changes:` or session answer), fired by `deliver`; = trunk → once per slice PR and for the release PR (`ship-to-trunk`) |
+| land | `ship-to-trunk` | delivery = trunk: slice size, fresh-base worktree per ticket, merge authority, live changes, flag lifecycle through the release PR |
 | support | `android-env` | first Android command of a session fails, or before the first build/device action (bootstrap checklist) |
 | support | `web-env` | first web/Node command of a session fails, or before the first dev-server/build action (bootstrap checklist) |
+| support | `svelte-kit3` | writing or editing `.svelte`, `.svelte.ts`, `+page`/`+layout`/`+server` files, vite config or `package.json` imports in a SvelteKit 3 project |
+| support | `deploy-cloudflare` | `wrangler.jsonc`, D1, rate limits, Turnstile, Worker secrets or any Cloudflare deploy; a public deploy needs the owner's explicit go in the session |
 | support | `adopt-tool` | a new tool/capability is being adopted into the workflow |
 | spec/tickets | `micro-architecture` | designing a feature's file split before tickets — parallel-safe decomposition, OCP extension points |
 | spec/review | `senior-ux` | UI/UX design or review work — evaluation framework, A/B-on-hardware, tokens-with-floors method |
 | always-on | `senior-dev` | every coding session — judgment defaults alongside the stage skills |
-| implement/review | `structure-checks` | Kotlin/Android ticket adds or moves files, or the diff touches Kotlin — the PROFILE `structure:` command is Evidence and a fast-tier review check |
+| implement/review | `structure-checks` | Kotlin, Android or web ticket adds or moves files, or the diff touches Kotlin or web sources — the PROFILE `structure:` command is Evidence and a fast-tier review check |
 | report | `review-site` | run's publish decision = yes (PROFILE `Review site publish:` or session answer) |
 | support | `graduate-prototype` | prototype promoted to feature work |
 | prototype | `prototype` | quick prototype (one page per question; big ports via `graduate-prototype`); feature contract stage (§ 5) |
 | support | `assess-teardown` | teardown gate: 2 failed fix rounds or reviewer discretion |
 | support | `diagnose-bug` | bug report (triage 1b) or a `bug` ticket in `work-tickets`: evidence ladder, user-time-last |
 | support | `skill-doctor` | the user asks for a session or workflow audit, or to re-measure after skill changes; never fired by the chain itself |
+| support | `overnight` | the user hands a big chunk to agents or a bot team for one unattended session: evening grill → night brief → night run without blocking asks → one morning check |
 
 `map-codebase`, `fan-out-research`, `graduate-prototype`, `assess-teardown`
 are the chain contract and land separately — when one fires and the skill is

@@ -76,18 +76,20 @@ answer.
    for, and the core loop (the main flow a user repeats). Understanding pain
    points and what users care about starts here — every later spec builds on
    this frame instead of re-asking it.
-8. Structure checks — Kotlin/Android projects only: opt in to
-   `structure-checks` (Konsist tests: one public type per file, layer
-   dependencies)? Recommend yes; it adds a test dependency. `yes` records the
-   command under Testing style after `structure-checks` setup runs; `no`
-   records `structure: none`.
+8. Structure checks — Kotlin/Android and web (SvelteKit/TypeScript)
+   projects: opt in to `structure-checks` (Kotlin: Konsist tests plus
+   detekt; web: ESLint plus dependency-cruiser — one class per file, size
+   caps, layer dependencies, no agent comments, no mocking APIs)? Recommend
+   yes; it adds dev dependencies and config. `yes` records the command under
+   Testing style after `structure-checks` setup runs; `no` records
+   `structure: none`.
 9. Development style: `default | trunk`.
    - `default`: each run lands as one PR from its run branch, or a
      `gh stack` for big runs, merged after user-check and review. Records
      `changes: pr`.
    - `trunk`: every ticket is its own small PR into main, unfinished
      behavior merged dark behind a release flag, and the feature released
-     by a flip PR (`ship-to-trunk`). Records `changes: trunk` plus the
+     by one release PR (`ship-to-trunk`). Records `changes: trunk` plus the
      consent line `merge dark slices on green`; `trunk-ask` records trunk
      without it, so every PR waits for the user.
    - `trunk-local` (typed answer, never recommended): trunk with no PR CI —
@@ -152,7 +154,7 @@ Send the batch and stop. Never a second batch.
 
 ## Consent ledger            # what the agent may do without asking
 - pre-approved: merge to main after green review; lint fixes; dependency bumps; secret-free fixture redaction; commit+push to the project repo
-# - pre-approved: merge dark slices on green   # written on a `trunk` answer (not `trunk-ask`): agent merges dark/non-behavioral slice PRs on green check + clean fast review; flip PRs and live changes still ask. `trunk-local`: "on green LOCAL suite + clean fast review"
+# - pre-approved: merge dark slices on green   # written on a `trunk` answer (not `trunk-ask`): agent merges dark/non-behavioral slice PRs on green check + clean fast review; release PRs and live changes still ask. `trunk-local`: "on green LOCAL suite + clean fast review"
 # - pre-approved: versionCode allocation; merge order; re-record goldens in the ticket's own module; delete build dirs and the worktree's own outputs   # candidates, written when the user delegates them (start § Waiting on the user); never ~/.gradle or ~/Library caches
 - always ask: public pushes; publish/delete; runs longer than ~30 min of dispatch; anything touching user data
 
@@ -172,7 +174,7 @@ Send the batch and stop. Never a second batch.
 - runner: <command>
 - approach: tdd-fakes        # tdd-fakes | tdd-real | smoke-only
 - seams: <where tests attach>
-- structure: <command | none>  # Gradle task running the structure-checks suite; set by structure-checks setup
+- structure: <command | none>  # Gradle task or lint script running the structure-checks suite; set by structure-checks setup
 ```
 
 The four contract sections are Care-axes, Effort, Deploy targets, Testing

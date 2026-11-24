@@ -34,10 +34,9 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
    main alone and dark. Ticket 01 is the flag ticket (release flag, off in
    release) and the walking skeleton follows behind it; then slices; a
    shared-file edit (registry, DI module, nav graph, `when` entry) is its
-   own ticket merged first; the flip ticket and the cleanup ticket are
-   written up front, last. The cleanup ticket is never worked alone: once
-   its flags ship on it folds into the batched flag-removal ticket
-   (`ship-to-trunk` lifecycle step 6). Rules:
+   own ticket merged first; the epic's one release ticket (`Release
+   <X.Y.Z>: turn on and remove <Epic> flags`) is written up front, last.
+   There is no separate flip or cleanup ticket. Rules:
    `ship-to-trunk`/references/slicing.md.
 3. Size: one ticket = one fresh subagent context, one sitting, and by default
    one user-visible capability end to end (data → domain → ViewModel → UI),

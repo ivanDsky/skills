@@ -8,7 +8,9 @@
     "The user approved the build — which tests do the fast fixes still need? Only the changed logic, no pin tests for the visual tweaks",
     "Should this change get a hex color assertion next to the golden, or a flag-off test for a flag we delete next week?",
     "Decide which goldens this composable needs and quarantine the test that flaked twice",
-    "this e2e test fails sometimes on main — find out if it's flaky before we quarantine it"
+    "this e2e test fails sometimes on main — find out if it's flaky before we quarantine it",
+    "Write the test first for this Svelte 5 ViewModel class that holds $state — no component mounting",
+    "My $effect never runs in the Vitest test for this SvelteKit component; how do I test it red-green?"
   ],
   "negative": [
     {

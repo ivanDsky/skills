@@ -57,10 +57,11 @@ waits until the series lands instead of conflicting with it. The tickets
 of one series are claimed and enqueued together (`ship-to-trunk` §
 Decision rules).
 
-A flag-removal ticket (`ship-to-trunk` lifecycle step 6) is claimed as the
-whole batch: re-check fresh `origin/main` for every other shipped-on flag,
-add them to the ticket, and close any per-feature cleanup ticket it absorbs
-with a pointer. Never land one flag's removal alone.
+A release ticket (`ship-to-trunk` lifecycle step 5) or leftover removal
+ticket (step 6) is claimed as the whole batch: re-check fresh `origin/main`
+for every other shipped-on flag and every open removal ticket, fold them
+into the claimed ticket, and close each with a pointer. Never land one
+flag's removal alone.
 
 Then read every ticket of the pack and collect what only the user can
 answer: a product or design choice, scope, a behavior the ticket leaves
@@ -80,7 +81,7 @@ Who merges is `ship-to-trunk` § Merge authority, never a rule of this skill:
 with the consent line, the agent merges on a green gate plus a clean fast
 review. The gate is the required PR check, or under `pr-check: none` the
 local suite on the branch rebased onto fresh `origin/main`. Only a missing
-consent line, a live change (invariant 7) or a flip PR waits for the user.
+consent line, a live change (invariant 7) or a release PR waits for the user.
 
 Per ticket, before dispatch, write the brief from the ticket
 ([pack-loop.md](references/pack-loop.md) § Brief):
@@ -101,7 +102,7 @@ suite:
    `ship_apk.py` (slug = ticket id), reports `device-check` with the build
    and the one thing to feel or look at, and stops. It opens no PR and
    enqueues nothing.
-2. The session asks the user through the ask tool (`start` § Waiting on
+2. The session asks the user through the ask tool (Claude Code: `AskUserQuestion`; `start` § Waiting on
    the user). The ask blocks only the session's turn; the pack's other
    workers keep running.
 3. Not right yet: the same worker takes another round on the same branch

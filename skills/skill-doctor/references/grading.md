@@ -13,7 +13,7 @@ One grader call sees one session and one axis. A grader that sees several axes l
 | code_quality | `scorer-code-quality.md` | condensed transcript; `span` output for review reports and user corrections when the digest is thin |
 | verbosity | `scorer-verbosity.md` | condensed transcript, the session's `replies` block |
 
-Run each grader as a `task` subagent or a stateless completion call with an explicit model. Never leave `model` unset; omitted models resolve through config to whatever the role default is that day.
+Run each grader as a `task` subagent (Claude Code: `Agent` with `model: sonnet` or `opus`) or a stateless completion call with an explicit model. Never leave `model` unset; omitted models resolve through config to whatever the role default is that day.
 
 - Graders: `anthropic/claude-sonnet-5-5:high`.
 - If most of the session's own turns ran on Sonnet, grade it with `anthropic/claude-opus-5-5:high` so the grader is not the model under test.
