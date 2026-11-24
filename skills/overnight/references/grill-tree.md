@@ -57,8 +57,8 @@ it depends on are settled.
   deploy. Each line names its limit.
 - Never at night, not delegable: release, flag flip, production deploy,
   anything public, data deletion, force-push to main, money.
-- Question policy: which ping channel exists, if any; default none (all
-  Q entries wait for the morning).
+- Questions at night: none reach the user; every Q and P entry waits for
+  the morning check. Not a grill question.
 
 ## 8. Environment at night
 

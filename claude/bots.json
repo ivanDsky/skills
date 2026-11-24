@@ -11,7 +11,7 @@
   },
   "bots": {
     "intake": {
-      "skills": ["orchestration", "start", "file-tickets", "research", "fan-out-research", "grilling"],
+      "skills": ["orchestration", "start", "file-tickets", "research", "fan-out-research", "grilling", "overnight"],
       "settings": {
         "model": "claude-opus-5-5",
         "effortLevel": "medium",
@@ -34,7 +34,7 @@
       "skills": [
         "orchestration", "run-intake", "draft-spec", "write-tickets", "grilling", "goldfish-review",
         "research", "fan-out-research", "map-codebase", "init-profile", "domain-modeling",
-        "design-architecture"
+        "design-architecture", "overnight"
       ],
       "settings": {
         "model": "claude-opus-5-5",

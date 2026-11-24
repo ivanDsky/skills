@@ -87,9 +87,9 @@ Executor, as the brief says:
    `.scratch/<slug>/overnight/questions.md` (question, options, default
    taken, the work that depends on it, cost to undo), ledger `assumed: Qn —
    <default>`. The dependent work lands in its own commit or ticket tagged
-   `Qn`, so a morning "no" reverts only that. Keep going. A channel that
-   notifies without waiting (a push, a chat line) may carry one line per Q;
-   the blocking ask tool never runs at night.
+   `Qn`, so a morning "no" reverts only that. Keep going. No ping: Q and P
+   entries reach the user only in the morning check, and the ask tool never
+   runs at night.
 3. Irreversible, on the never list, or outside the brief's envelope → `Pn`
    park entry; that lane stops, every other lane keeps moving.
 4. The user answers during the night → persist it as a `Decision:` line
@@ -103,8 +103,8 @@ Keep the night productive:
   what landed (tests at seams, `structure:` clean). Never new scope.
 - All lanes parked, budget spent, or 1 hour before the morning time →
   stop dispatching and build the morning check.
-- No chat to the user except Q/P lines; state lives in the ledger and
-  `resume.md`.
+- No message to the user until the morning check; state lives in the
+  ledger and `resume.md`.
 
 ## 3. Morning check
 

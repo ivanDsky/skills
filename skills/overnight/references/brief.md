@@ -37,7 +37,7 @@ May decide: <list>
 Pre-approved tonight: <gate> — <limit>   (one line each)
 Never tonight: release, flag flip, production deploy, anything public,
 data deletion, force-push to main, money<, project additions>
-Ping channel: none | <channel>
+Night questions: none sent; Q and P entries wait for the morning check.
 
 ## Environment
 Preflight <time>: <item> ok, <item> ok, ...
