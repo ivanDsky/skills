@@ -106,7 +106,7 @@
     "fixer": {
       "skills": [
         "orchestration", "work-tickets", "review-change", "open-pr", "ship-to-trunk", "assess-teardown",
-        "svelte-code-writer", "svelte-core-bestpractices"
+        "svelte-code-writer", "svelte-core-bestpractices", "design-architecture"
       ],
       "settings": {
         "model": "claude-sonnet-5-5",
