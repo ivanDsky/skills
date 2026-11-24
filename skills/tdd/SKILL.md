@@ -80,7 +80,7 @@ The one test policy for every skill; `write-tickets`, `implement` and `user-chec
 
 Read [testing-rules](references/testing-rules.md) when writing or changing tests, choosing fakes over mocks, or checking what a test really catches.
 Read [android-testing](references/android-testing.md) when testing Android or Compose apps — choosing JVM-unit vs Robolectric vs instrumented tests, or mapping what to test at each layer.
-Read [web-testing](references/web-testing.md) when testing web/React apps — the six-rung ladder (types → lint → component logic → pixel captures → scripted browser flows → human), browser-as-emulator rule, and coverage mapping.
+Read [web-testing](references/web-testing.md) when testing web, React or Svelte/SvelteKit apps — the six-rung ladder (types → lint → component logic → pixel captures → scripted browser flows → human), browser-as-emulator rule, coverage mapping, and Svelte 5 test tools.
 
 ---
 

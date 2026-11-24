@@ -257,6 +257,8 @@ hand off).
 | land | `ship-to-trunk` | delivery = trunk: slice size, fresh-base worktree per ticket, merge authority, live changes, flag lifecycle through the release PR |
 | support | `android-env` | first Android command of a session fails, or before the first build/device action (bootstrap checklist) |
 | support | `web-env` | first web/Node command of a session fails, or before the first dev-server/build action (bootstrap checklist) |
+| support | `svelte-kit3` | writing or editing `.svelte`, `.svelte.ts`, `+page`/`+layout`/`+server` files, vite config or `package.json` imports in a SvelteKit 3 project |
+| support | `deploy-cloudflare` | `wrangler.jsonc`, D1, rate limits, Turnstile, Worker secrets or any Cloudflare deploy; a public deploy needs the owner's explicit go in the session |
 | support | `adopt-tool` | a new tool/capability is being adopted into the workflow |
 | spec/tickets | `micro-architecture` | designing a feature's file split before tickets — parallel-safe decomposition, OCP extension points |
 | spec/review | `senior-ux` | UI/UX design or review work — evaluation framework, A/B-on-hardware, tokens-with-floors method |
