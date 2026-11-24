@@ -1,12 +1,14 @@
 # UI component rules — payload
 
-Read when a ticket or diff adds or changes a public `@Composable`, an
-`XxxState` holder, an `XxxDefaults`/`XxxColors` type, or a `Modifier`
-factory. A reusable component has no business rules, only UI logic and UI
-element state. It does not get Clean Architecture's layers. It gets
-building-block layers, hoisted state, plain state holders, slots and
-`XxxDefaults`. App-level layering (screen → ViewModel → domain → data) stays
-with `design-architecture`/references/rules-architecture.md. Canonical shape:
+Read when a ticket or diff adds or changes a public `@Composable` or a Svelte
+5 component, an `XxxState` holder, an `XxxDefaults`/`XxxColors` type, or a
+`Modifier` factory. A reusable component has no business rules, only UI
+logic and UI element state. It does not get Clean Architecture's layers. It
+gets building-block layers, hoisted state, plain state holders, slots
+(Svelte: snippets) and `XxxDefaults`. App-level layering (screen → ViewModel →
+domain → data) stays with `design-architecture`/references/rules-architecture.md.
+Rules 1–11 below are written for Compose; the Svelte 5 form is the section
+"Svelte 5 components" (W1–W10). Canonical Compose shape:
 [../examples/ui-component/](../examples/ui-component/).
 
 ## Tier first
@@ -158,6 +160,101 @@ component needs: a stateless component with two defaults is one file.
 | `TagColors.kt` | `@Immutable class TagColors` |
 | `TagGroupState.kt` | `@Stable class TagGroupState` + `rememberTagGroupState()` + its `Saver` |
 
+## Svelte 5 components
+
+The same decisions in Svelte 5 terms. Tier for web: library = a shared
+components folder consumed by two or more features, or any published
+package (rules at their MUST); app = components used inside one feature
+(MUST drops to SHOULD; W7 and W8 stay MUST at both tiers, mirroring
+rule 7).
+
+1. **W1 Need.** As rule 1: if callers write it in a few readable lines from
+   plain elements, there is no component. SHOULD.
+2. **W2 One problem.** One component solves one problem; no Boolean shape
+   flags (`<Button checked>` becomes `Button` and `ToggleButton`). A styled
+   component is built from an unstyled block. MUST.
+3. **W3 Props.** Declare props with `$props()` against an `interface Props`
+   exported from `<script module lang="ts">`; extend the root element's
+   attribute type and spread the rest (which carries `class`) once, on the
+   root. No second `class` or style-bag prop. MUST.
+   ([`$props`](https://svelte.dev/docs/svelte/$props))
+4. **W4 Snippets.** A caller-varying region is a snippet prop: `children`
+   for the default region, named snippets for others, a parameterised
+   snippet when the caller needs the component's data. Optional regions are
+   optional props, rendered with `{@render x?.()}`. A region the design
+   constrains stays a typed prop. No `<slot>`. MUST.
+   ([snippets](https://svelte.dev/docs/svelte/snippet))
+5. **W5 Events.** Events are callback props (`onremove`, `onselect`), never
+   `createEventDispatcher` or a custom DOM event. MUST.
+   ([migration guide](https://svelte.dev/docs/svelte/v5-migration-guide#Event-changes))
+6. **W6 `$bindable`.** Only for a genuine two-way value, such as a form
+   field. Otherwise the parent passes `value` and an `onchange` callback.
+   SHOULD. ([`$bindable`](https://svelte.dev/docs/svelte/$bindable))
+7. **W7 State owner: the lowest that works.** Ladder: local `$state` in the
+   component; the lowest common ancestor of the readers and writers, passing
+   values down and callbacks up; a plain class holder in a `.svelte.ts` file
+   (private `#field = $state(…)`, public getters or `$derived`, mutation
+   only through methods, as in rules-architecture 19), unit-tested without
+   rendering; a route-level or screen-level owner only for business state or
+   screen state. No mutable module-level state on the server: it is shared
+   across requests. MUST.
+   ([`$state`](https://svelte.dev/docs/svelte/$state),
+   [server state](https://svelte.dev/docs/kit/state-management))
+8. **W8 State boundaries.** No route-level state, store or screen holder
+   below the route or screen component: pass the slice and the callbacks. A
+   plain holder never depends on a longer-lived one. MUST at both tiers.
+9. **W9 No lookups in leaves.** A leaf component takes everything through
+   props: no service, port or adapter import, and no `getContext` for data
+   the caller could pass. Context is allowed only inside one component
+   family (a `TagGroup` and its tags). MUST.
+10. **W10 One file, one component; tokens.** A `.svelte` file is one
+    component; extra types and helpers go in sibling `.ts` files (rule
+    mechanics in `structure-checks` S1). Design values come from CSS custom
+    properties set by the theme, never hard-coded colors or sizes; a caller
+    restyles through `--token` props
+    ([custom properties](https://svelte.dev/docs/svelte/custom-properties)).
+    MUST.
+
+Shape sketch (not compiled `[unverified]`):
+
+```svelte
+<script module lang="ts">
+  import type { Snippet } from 'svelte';
+  import type { HTMLAttributes } from 'svelte/elements';
+  export interface Props extends HTMLAttributes<HTMLLIElement> {
+    label: string;
+    onremove?: (label: string) => void;
+    icon?: Snippet;
+  }
+</script>
+
+<script lang="ts">
+  let { label, onremove, icon, ...rest }: Props = $props();
+</script>
+
+<li {...rest}>
+  {@render icon?.()}{label}
+  <button onclick={() => onremove?.(label)}>×</button>
+</li>
+```
+
+Files for one component: `Tag.svelte`, `tag.defaults.ts`,
+`tag-group.svelte.ts` (the holder). Create only the files the component
+needs.
+
+What the web engine enforces mechanically and what stays review work:
+
+| Rule | Mechanical | Where |
+|---|---|---|
+| W10 one component per file | yes | S1 (a `.svelte` file is one component) |
+| Block size (script, template, style each capped) | yes | S2 `svelte/max-lines-per-block` |
+| W8, W9 no state or service reach below the route | in part | S3 `ui-leaf`: the components folder imports only itself, `core` and npm |
+| No explanatory comments | yes | S7 |
+| W1–W7, rest of W8–W9, token use | no | review (`review-change` component-API axis) |
+
+Template nesting is not measured (extract components to keep templates
+shallow).
+
 ## Trigger rules
 
 - Adding a public composable → rule 1 first; write the reason in the ticket.
@@ -172,6 +269,13 @@ component needs: a stateless component with two defaults is one file.
 - A use case, mapper or domain model added for UI-only state → delete it;
   the app layering rules do not apply.
 - Changing a public signature in a published module → rule 11.
+- Adding a Svelte component → W1 first, write the reason in the ticket.
+- A Boolean or enum prop that changes structure → W2 (split) or W4
+  (snippet).
+- `createEventDispatcher`, `<slot>`, or a bare `export let` in new code →
+  W3, W4, W5.
+- A store, service or port import inside a components-folder file → W8, W9:
+  take props.
 
 ## Final checklist
 
@@ -185,6 +289,9 @@ component needs: a stateless component with two defaults is one file.
 - Slots, restrictive params and scopes each match table B.
 - Previews render from parameters alone.
 - Published module: no removed parameter; new ones are defaulted.
+- Svelte: props through `$props()` with an exported `Props`, snippets not
+  slots, callback props not dispatchers, one state owner per W7, no store or
+  service below the route.
 
 ## Sources
 
@@ -202,3 +309,9 @@ Paraphrased; requirement levels kept. Licenses and notices are in
   (table B).
 - Stream, [Composition patterns in Jetpack Compose](https://getstream.io/blog/composition-pattern-compose/)
   (scope caveats).
+- Svelte docs: [`$props`](https://svelte.dev/docs/svelte/$props),
+  [`$bindable`](https://svelte.dev/docs/svelte/$bindable),
+  [`$state`](https://svelte.dev/docs/svelte/$state),
+  [snippet](https://svelte.dev/docs/svelte/snippet),
+  [custom properties](https://svelte.dev/docs/svelte/custom-properties),
+  [SvelteKit state management](https://svelte.dev/docs/kit/state-management).

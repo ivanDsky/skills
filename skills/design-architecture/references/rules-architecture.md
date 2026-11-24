@@ -14,12 +14,13 @@ grading a diff's dependency direction — draft-spec's architecture section,
 implement's architecture-heavy tickets, review-change's thorough tier.
 
 Scope gate: rules 13, 14, 15 and 19 (data/domain/UI layers, use cases, state
-machines, ViewModel state) apply to code that owns business state or data.
-Reusable UI components (a public composable, its `XxxState` holder,
-`XxxDefaults`) follow `micro-architecture`/references/ui-components.md
+machines, observable state) apply to code that owns business state or data.
+Reusable UI components (a public composable or Svelte component, its
+`XxxState` holder, `XxxDefaults`) follow `micro-architecture`/references/ui-components.md
 instead: no domain layer, use case or ViewModel for UI-only state. For a
-component, rule 15's state machine is the plain `@Stable` `XxxState` holder,
-unit-tested headless. Rules 1–12, 16–18 and 20 still apply.
+component, rule 15's state machine is the plain `@Stable` `XxxState` holder
+(Svelte: a plain class holder in a `.svelte.ts` file), unit-tested headless.
+Rules 1–12, 16–18, 20 and 21 still apply.
 
 ## Primary bias to correct
 
@@ -89,28 +90,49 @@ ciembor/agent-rules-books, plus the books cited below):
     canonical shape instead of inventing a variant. MUST NOT pattern-drop.
     (Patterns of Enterprise Application Architecture)
 17. File discipline (user bar, overrides rule 3's scope note where they
-    conflict): a file holds one task or one abstraction and stays short; a
-    second responsibility or a growing symbol table is the split signal —
-    split by responsibility, not by line count alone. MUST. (user bar,
-    2026-10-29; SRP per Clean Code)
+    conflict): a file holds one task or one abstraction and is readable at a
+    glance — it fits one screen; a second responsibility or a growing symbol
+    table is the split signal — split by responsibility, not by line count
+    alone. The hard caps (file, function, complexity, nesting, parameters)
+    live in `structure-checks` S2 and are enforced there. MUST. (user bar,
+    2026-10-29 and 2026-11-23; SRP per Clean Code; agent windows of about
+    100 lines, SWE-agent https://arxiv.org/abs/2405.15793)
 18. Dispatchers, clocks, and scopes are injected, never hardcoded: classes
     take a DispatcherProvider (or injected `Dispatchers` values) so tests run
     virtual time deterministically. `Dispatchers.IO` / `Dispatchers.Default`
     appear only in the composition root that builds the provider. MUST.
     (kotlinx-coroutines-test guidance; user bar)
-19. ViewModels expose read-only state: a private `MutableStateFlow`/field per
-    concern, exposed as `StateFlow`/`State`; no public mutable fields, no raw
-    `var` state. One exposed stream per concern, combined in one data class
-    when the screen needs several. MUST. (Android state-holders guidance;
-    user bar)
+19. Observable state has one owner and is read-only outside it: the owner
+    holds private writable state, exposes read-only views, and changes it
+    only through its own methods; no public mutable fields, no raw `var`
+    state. One exposed stream per concern, combined in one data class when
+    the screen needs several. MUST. (Android state-holders guidance; user
+    bar)
+    - Kotlin: a private `MutableStateFlow`/field per concern, exposed as
+      `StateFlow`/`State`.
+    - Svelte 5: a class with private `#field = $state(…)` plus public
+      getters or `$derived` values; mutation only through methods (arrow
+      functions when passed as callbacks). Never export reassigned `$state`
+      from a module (https://svelte.dev/docs/svelte/$state).
 20. One public top-level type per file, in every layer: a file holds ONE
     public class/interface/object/composable (plus private helpers, its own
     extensions, typealiases, and previews). Several public top-level types
     sharing a file — however idiomatic the language — is the split signal;
     split before stacking a second. A sealed hierarchy either nests its
     variants inside the parent (one type) or gives each top-level variant its
-    own file (`micro-architecture`). MUST. Mechanical check:
-    `structure-checks`. (user bar; sharpens rule 17)
+    own file (`micro-architecture`). TypeScript/Svelte: one exported class or
+    component per file; a `.svelte` file is one component. MUST. Mechanical
+    check: `structure-checks`. (user bar; sharpens rule 17)
+21. Dependency inversion at every external (database, network, clock,
+    randomness, storage, device, third-party SDK): the caller owns the port
+    interface, an adapter implements it, a memory fake implements it too,
+    and ONE contract test runs against both the real adapter and the fake.
+    Mocking frameworks are banned; tests cross the seam with the fake
+    (`tdd` testing-rules, enforced by `structure-checks` S8). Layer
+    direction is enforced by `structure-checks` S3. MUST. (Clean
+    Architecture DIP; Software Engineering at Google ch. 13,
+    https://abseil.io/resources/swe-book/html/ch13.html; user bar,
+    2026-11-23)
 
 ## Trigger rules
 
@@ -128,6 +150,10 @@ ciembor/agent-rules-books, plus the books cited below):
   deepen or re-place the seam (rules 8–9). (APoSD)
 - Naming a module Manager, Helper, Util, ServiceImpl → language gap: name it
   from the project glossary (rule 11). (DDD)
+- A new external dependency (SDK, API, storage, clock, random source) → port
+  first, adapter and memory fake second, contract test run against both
+  (rule 21); a test that needs `vi.fn`, mockk or a spy means the port is
+  missing.
 - Touching a legacy module → rule 12 first: characterization tests before
   redesign; structure in its own commit. (WELC)
 
@@ -149,4 +175,6 @@ ciembor/agent-rules-books, plus the books cited below):
 - Interactive screens have an explicit state machine; transitions tested headless
   (a reusable component: its plain `XxxState` holder, per the scope gate).
 - Patterns in the diff carry their forcing function in the decision note.
+- Each external has a caller-owned port, a real adapter, a memory fake and
+  one contract test run against both; no mocking framework in the diff.
 - No file serves two responsibilities; the split signal was acted on.

@@ -11,7 +11,7 @@ requires: []
 ---
 
 > **TL;DR** Triages an ask — quick task, prototype, feature, unmapped codebase — prints the run plan, and fires the matching chain; use on /start.
-> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://user-check (hands-on check before review), skill://structure-checks (Konsist structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes), skill://ship-to-trunk (delivery = trunk: one small PR per ticket, merge dark, release PR releases), skill://caveman (external: terse voice for chat, briefs, reports, ledgers)
+> **Related**: skill://init-profile (prerequisite setup), skill://run-intake (first stage), skill://map-codebase (unmapped triage), skill://goldfish-review (blind lenses at spec and tickets), skill://user-check (hands-on check before review), skill://structure-checks (Konsist/detekt or ESLint/dependency-cruiser structure evidence), skill://open-pr (PR landing when delivery = pr), skill://prototype (quick one-page prototypes), skill://ship-to-trunk (delivery = trunk: one small PR per ticket, merge dark, release PR releases), skill://caveman (external: terse voice for chat, briefs, reports, ledgers)
 
 # Start
 
@@ -263,7 +263,7 @@ hand off).
 | spec/tickets | `micro-architecture` | designing a feature's file split before tickets — parallel-safe decomposition, OCP extension points |
 | spec/review | `senior-ux` | UI/UX design or review work — evaluation framework, A/B-on-hardware, tokens-with-floors method |
 | always-on | `senior-dev` | every coding session — judgment defaults alongside the stage skills |
-| implement/review | `structure-checks` | Kotlin/Android ticket adds or moves files, or the diff touches Kotlin — the PROFILE `structure:` command is Evidence and a fast-tier review check |
+| implement/review | `structure-checks` | Kotlin, Android or web ticket adds or moves files, or the diff touches Kotlin or web sources — the PROFILE `structure:` command is Evidence and a fast-tier review check |
 | report | `review-site` | run's publish decision = yes (PROFILE `Review site publish:` or session answer) |
 | support | `graduate-prototype` | prototype promoted to feature work |
 | prototype | `prototype` | quick prototype (one page per question; big ports via `graduate-prototype`); feature contract stage (§ 5) |

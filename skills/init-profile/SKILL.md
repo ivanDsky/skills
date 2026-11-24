@@ -76,11 +76,13 @@ answer.
    for, and the core loop (the main flow a user repeats). Understanding pain
    points and what users care about starts here — every later spec builds on
    this frame instead of re-asking it.
-8. Structure checks — Kotlin/Android projects only: opt in to
-   `structure-checks` (Konsist tests: one public type per file, layer
-   dependencies)? Recommend yes; it adds a test dependency. `yes` records the
-   command under Testing style after `structure-checks` setup runs; `no`
-   records `structure: none`.
+8. Structure checks — Kotlin/Android and web (SvelteKit/TypeScript)
+   projects: opt in to `structure-checks` (Kotlin: Konsist tests plus
+   detekt; web: ESLint plus dependency-cruiser — one class per file, size
+   caps, layer dependencies, no agent comments, no mocking APIs)? Recommend
+   yes; it adds dev dependencies and config. `yes` records the command under
+   Testing style after `structure-checks` setup runs; `no` records
+   `structure: none`.
 9. Development style: `default | trunk`.
    - `default`: each run lands as one PR from its run branch, or a
      `gh stack` for big runs, merged after user-check and review. Records
@@ -172,7 +174,7 @@ Send the batch and stop. Never a second batch.
 - runner: <command>
 - approach: tdd-fakes        # tdd-fakes | tdd-real | smoke-only
 - seams: <where tests attach>
-- structure: <command | none>  # Gradle task running the structure-checks suite; set by structure-checks setup
+- structure: <command | none>  # Gradle task or lint script running the structure-checks suite; set by structure-checks setup
 ```
 
 The four contract sections are Care-axes, Effort, Deploy targets, Testing
