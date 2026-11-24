@@ -52,6 +52,7 @@ feedback session ──file──> backlog ──claim pack──> worker (any w
 `diagnose-bug` (bug reports: evidence ladder, user-time-last) ·
 `file-tickets` (feedback session: deduplicated backlog tickets, batched hands-on checks; never implements) ·
 `work-tickets` (worker session: atomic pack claims, one dark PR per ticket; GitHub Issues or local backend) ·
+`overnight` (unattended session: evening grill until every decision and contingency sits in a night brief, night run that never blocks on you — questions defaulted, logged and isolated so a morning "no" reverts only their work — then one morning check doc and build) ·
 `design-architecture` (SOLID payload, wired into spec/implement/review) ·
 `preview-compose` (previews + animation preview verification) ·
 `deploy-firebase` (test users + APK distribution) ·
