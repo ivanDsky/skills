@@ -59,7 +59,7 @@
         "orchestration", "prototype", "senior-ux", "ui-ux-pro-max", "design-taste-frontend",
         "apple-design", "emil-design-eng", "animation-vocabulary", "find-animation-opportunities",
         "improve-animations", "review-animations", "graduate-prototype", "archify", "pick-ui-library",
-        "svelte-code-writer", "svelte-core-bestpractices"
+        "svelte-code-writer", "svelte-core-bestpractices", "goldfish-review"
       ],
       "settings": {
         "model": "claude-opus-5-5",

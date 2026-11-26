@@ -5,7 +5,8 @@
     "Play devil's advocate on the plan — someone who hasn't seen our conversation",
     "Run a blind review of the design before we cut tickets",
     "Have a few independent reviewers poke holes in the concept: reuse, failure modes, data migration",
-    "Scope is confirmed — pick the two riskiest lenses and challenge the concept before tickets"
+    "Scope is confirmed — pick the two riskiest lenses and challenge the concept before tickets",
+    "I gave notes on the prototype twice and the results screen still feels off — get fresh reviewers to click through it and fix what they find"
   ],
   "negative": [
     {

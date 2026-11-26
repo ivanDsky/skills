@@ -1,26 +1,33 @@
-# Contract sitting (UI features in the chain)
+# Prototype loop (chain stage)
 
-All taste decisions for a UI feature happen in one up-front sitting on served
-pages. The frozen result is the contract the build implements and the gate
-checks against, so the build runs AFK and `user-check` confirms instead of
-discovering design. Read this when `start` routes a feature through the
-contract stage (after spec, before tickets).
+All taste decisions for a redesign happen up front on served pages, looping
+with the user until they say it is right. The frozen result is the contract
+the build implements and the gate checks against, so the build runs AFK and
+`user-check` confirms instead of discovering design. Read this when `start`'s
+redesign check routes work here: a feature after spec and before tickets, or
+a bug or quick fix before any code.
 
 ## When it applies
 
-- Applies: the frozen spec adds a screen, redesigns one (layout, hierarchy,
-  navigation placement, phone/tablet adaptation), or adds motion.
-- Skips, unchanged: the fixes-batch path, quick tasks, small UI fixes
-  (spacing, copy, colour on an existing screen), non-UI features. A
-  `user-check` layout or motion F-item follows `user-check`'s own rule, not
-  this sitting.
-- Close call → skip and say why in the run plan line. A UI feature
-  without a contract keeps the old discovery path at `user-check`, so the
-  skip has a known cost.
+- Applies: the work adds a screen, redesigns one (layout, hierarchy, flow,
+  navigation placement, phone/tablet adaptation), or adds motion, and no
+  approved prototype or contract already fixes the look. The user often
+  does not know a fix needs a redesign: `start` decides from the evidence (a
+  bug whose root cause is the layout or flow itself, a fix that cannot land
+  without moving or adding UI), says so in one line, and asks "Prototype
+  first? ➡️ yes".
+- Skips, no question: no visible design change (logic, data, infra,
+  refactor), small UI fixes (spacing, copy, colour on an existing screen),
+  the fixes-batch path. A `user-check` layout or motion F-item follows
+  `user-check`'s own rule.
+- Close call → ask the question; the user's "no" costs one word, a missed
+  redesign costs a rebuild. The answer is a `Decision: prototype <slug> —
+  yes|no` ledger line.
 
-## Before the sitting
+## Before the first round
 
-1. Inventory from the spec: every screen × state (default, empty, loading,
+1. Inventory from the spec (a bug or quick fix: from the ticket and the
+   screens it touches): every screen × state (default, empty, loading,
    error, longest content, plus feature states) × phone and tablet, light
    and dark where dark changes layout or contrast rather than only colour
    tokens. Every motion: trigger, what moves, enter and exit.
@@ -61,30 +68,42 @@ Motion HTML cannot prove (springs and gesture-driven motion, shared-element
 transitions, haptics, frame rate on the device, anything Compose renders
 differently) → a debug-only playground screen on the tablet with sliders
 for the same values (`wire-dev-settings`, playground and prototype screens).
-It is one quick-task port built and installed before the sitting, so the
-sitting still costs one build.
+It is one quick-task port built and installed before the first round, so
+the loop still costs one build.
 
-## The sitting — one session
+## The loop
 
-1. Serve and check every URL (`prototype` § 3 Serve), then one ask-tool
-   form (`start` § Waiting on the user): the index URL, the motion URL (and
-   the playground route when built), one free-text question "every frame
-   OK, or list `<frame id>: <note>` for the ones that are not", plus at
-   most four rulings the user must pick (variant choices, an empty-state
-   policy). Never preselect a variant.
-2. Notes come back → one revision pass covering every note, re-serve, one
-   confirm form listing only the changed frames. Each answer becomes a
-   `Decision: <screen> — <rule>` ledger line the same turn; a rejection
-   that generalizes becomes a PROFILE `## Taste rules` line (`start` §
-   Decisions and waiting).
-3. A frame rejected in the confirm round too → stop revising it: one ask
-   with two options, freeze the closest variant with the note as a
-   `Decision:` or rethink the screen (`senior-ux` question 1). Never a third
-   blind revision.
+Each user round: serve and check every URL (`prototype` § 3 Serve), then one
+ask-tool form (`start` § Waiting on the user): the index URL, the motion URL
+(and the playground route when built), one free-text question "every frame
+OK, or list `<frame id>: <note>` — or say what still feels off", plus at
+most four rulings the user must pick (variant choices, an empty-state
+policy). Never preselect a variant. Each answer becomes a `Decision:
+<screen> — <rule>` ledger line the same turn; a rejection that generalizes
+becomes a PROFILE `## Taste rules` line (`start` § Decisions and waiting).
+
+Route the reply:
+
+| Reply | Next |
+|---|---|
+| Every frame OK, "perfect", "let's go", "out of the loop" | Freeze. No lens round. |
+| First round, nameable notes only | One revision pass covering every note, re-serve, next user round listing only the changed frames. |
+| Something still feels off: a note on a frame already revised, a second not-OK round, or "off" the user cannot name | Revision of the named notes, then a lens round, then the next user round. |
+| "Lens feedback is irrelevant" | Restore `prototype/pre-lens/`, keep only the user-note fixes, freeze. |
+
+Lens round: copy the pages to `.scratch/<slug>/prototype/pre-lens/`, then
+run `goldfish-review` stage P on the served prototype with the user's
+verbatim notes. Every finding with evidence is fixed in the pages; a
+finding that contradicts a user `Decision:` line is dropped, never applied.
+The next user form lists each lens-driven change in one line under the
+notes it answers, so the user can judge them. Two lens rounds and the same
+frame still off → one ask with two options: freeze the closest version with
+the note as a `Decision:`, or rethink the screen (`senior-ux` question 1).
+The user ends the loop; the agent never freezes on its own judgment.
 
 ## Freeze
 
-The user's OK on every frame freezes the contract. Write
+The loop's exit freezes the contract. Write
 `.scratch/<slug>/contract/`:
 
 - `reference/<screen>__<state>__<phone|tablet>__<light|dark>.png`,
@@ -105,11 +124,14 @@ The user's OK on every frame freezes the contract. Write
 - `motion.md`: per motion, its name, trigger, values, reduced-motion
   behavior, and where they were confirmed (`prototype` or `playground`).
 - `contract.md`: the served prototype URL, the freeze date, the `Decision:`
-  lines of the sitting verbatim, and the taste rules applied.
+  lines of the loop verbatim, each lens round's changes, and the taste
+  rules applied.
 
 Then ledger `Decision: contract <slug> — frozen <date>`, send the milestone
-digest (`start` § Waiting on the user), and hand to `write-tickets`, which
-carries the `Contract:` and `Reference:` lines into each UI ticket.
+digest (`start` § Waiting on the user), and hand off: a feature to
+`write-tickets`, which carries the `Contract:` and `Reference:` lines into
+each UI ticket; a bug or quick fix to its fix ticket, which gains the same
+two lines.
 
 ## After freeze — AFK
 

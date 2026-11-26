@@ -86,7 +86,10 @@ than ten shell commands. Only reproduce what remains unexplained.
 ## 3. Diagnose, then hand off
 
 1. State the hypothesis in one line with the evidence that supports it and
-   the evidence that ruled out the top alternative.
+   the evidence that ruled out the top alternative. A root cause in the
+   layout or flow itself (the fix moves or adds UI) → `start`'s redesign
+   check before the ticket: on "Prototype first? yes", the prototype loop
+   runs and the frozen contract joins the ticket.
 2. The fix becomes a ticket with the DoD from step 1 (the user's own
    acceptance test) and the evidence channel for verifying it
    (Crashlytics clean / logcat clean / user reproduces once more).

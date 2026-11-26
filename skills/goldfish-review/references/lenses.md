@@ -127,3 +127,37 @@ effort inside the confirmed scope.
 - Knowledge skill: `micro-architecture`, `structure-checks`
   (`references/rules-structure.md`). Evidence: the file maps and the files
   that exist today.
+
+## Stage P — prototype (input: served pages + criteria + the user's notes)
+
+Runs only inside the prototype loop after a user round that was not OK
+(SKILL.md § 1). Disposition for every finding: a page fix (name the frame
+id and the change) or a question for the user's next round. A finding that
+contradicts a user `Decision:` line is reported as a tension, never as a
+fix.
+
+### spec fit
+- Objective: does every frame meet every success criterion and A-item, and
+  does any frame contradict one, re-add Out-of-scope work, or leave a
+  criterion with no frame that shows it? Then: does each fix for the user's
+  notes actually answer the note, or move the problem elsewhere?
+- Knowledge skill: `senior-ux` (question 1: what decision is this screen
+  for). Evidence: the criterion or note quoted beside the frame id.
+
+### persona walk
+- Objective: click through the served pages as each persona: first use, the
+  happy path, and an interrupted path (back, empty data, error state); name
+  every point they stall, misread, or cannot find the next step.
+- Personas come only from PROFILE.md's Product frame — never invented. At
+  most 3; none → not run (reason: no personas).
+- Knowledge skill: `senior-ux`. Evidence: the click path as frame ids, and
+  the existing app screens the flow must sit beside.
+
+### UX and taste
+- Objective: hierarchy, spacing rhythm, legibility, touch targets,
+  contrast, phone vs tablet adaptation, motion values, and every PROFILE
+  `## Taste rules` line; name what makes the frame feel off and the
+  smallest change that fixes it.
+- Knowledge skill: `senior-ux`, `ui-ux-pro-max`, `apple-design`,
+  `emil-design-eng`; `animation-vocabulary` to name motion. Evidence: the
+  frame id, the rule or heuristic broken, measured values where they apply.

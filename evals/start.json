@@ -46,7 +46,7 @@
       "owner": "implement"
     },
     {
-      "prompt": "Run the contract sitting for the spec'd duel screens and freeze the reference screenshots",
+      "prompt": "Run the prototype loop for the spec'd duel screens and freeze the reference screenshots",
       "owner": "prototype"
     }
   ]

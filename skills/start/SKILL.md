@@ -175,8 +175,8 @@ check is `user-check` step 3.
      question answered or demoable, the last ticket carries
      `deploy: main | standalone | none`.
    Close call → quick; its answer decides whether the big one is worth it.
-4. **Feature** — default → full chain: intake → spec → contract (new or
-   redesigned screens or motion: `prototype` § 5) → tickets → implement
+4. **Feature** — default → full chain: intake → spec → prototype loop (when
+   the redesign check fires: `prototype` § 5) → tickets → implement
    (TDD at the seams) → `user-check` on the whole epic (feedback rounds are
    fast fixes) → on OK, re-gate into hardening tickets → implement →
    `review-change` (suite once) → deliver → land. The user reviews code
@@ -186,6 +186,16 @@ check is `user-check` step 3.
    removed, version bump) opens unmerged and waits for the user's explicit Yes to
    "Release <X.Y.Z>?", asked apart from the check, plus thorough review
    (`ship-to-trunk`).
+
+**Redesign check** — for classes 1, 1b and 4: does the work change what the
+user sees (a new or redesigned screen, flow or motion) with no approved
+prototype or contract fixing the look? Bugs count: a root cause in the
+layout or flow itself, or a fix that cannot land without moving or adding
+UI, is a redesign even when the user only reported the symptom. Yes → say
+so in one line and ask "Prototype first? ➡️ yes"; on yes the prototype loop
+(`prototype` § 5) runs before tickets or any fix code, and the frozen
+contract feeds the ticket. No visible design change → no question, no
+prototype. Small UI fixes (spacing, copy, colour) never count.
 
 Tickets still claimed by this worktree → the run plan lists them and offers
 resume (feature epic → `implement`, otherwise `work-tickets`); the new ask is
@@ -250,7 +260,7 @@ hand off).
 | intake | `run-intake` | feature, prototype |
 | orientation | `map-codebase` | unmapped codebase + chain work |
 | spec | `draft-spec` | feature, prototype |
-| spec/tickets | `goldfish-review` | stage A after the spec checkpoint confirms scope (orchestrator picks 0–2 lenses by risk); stage B at `write-tickets`' design-review question (user picks none / up to 3 / all) |
+| spec/tickets | `goldfish-review` | stage A after the spec checkpoint confirms scope (orchestrator picks 0–2 lenses by risk); stage B at `write-tickets`' design-review question (user picks none / up to 3 / all); stage P inside the prototype loop after a not-OK user round |
 | tickets | `write-tickets` | feature, prototype (ticket sets are parallel-first: minimal file overlap; device checks get one aggregate ticket, or none); publishes to the shared backlog with `--epic` |
 | backlog | `file-tickets` | triage 0: feedback, bugs or ideas to file; the batched hands-on check of `needs-check` tickets; triage 1b filing |
 | backlog | `work-tickets` | triage 0: pick up backlog tickets by area, type, epic or ids; triage 1b: land the one filed ticket |
@@ -272,7 +282,7 @@ hand off).
 | implement/review | `structure-checks` | Kotlin, Android or web ticket adds or moves files, or the diff touches Kotlin or web sources — the PROFILE `structure:` command is Evidence and a fast-tier review check |
 | report | `review-site` | run's publish decision = yes (PROFILE `Review site publish:` or session answer) |
 | support | `graduate-prototype` | prototype promoted to feature work |
-| prototype | `prototype` | quick prototype (one page per question; big ports via `graduate-prototype`); feature contract stage (§ 5) |
+| prototype | `prototype` | quick prototype (one page per question; big ports via `graduate-prototype`); prototype loop when the redesign check fires (§ 5) |
 | support | `assess-teardown` | teardown gate: 2 failed fix rounds or reviewer discretion |
 | support | `diagnose-bug` | bug report (triage 1b) or a `bug` ticket in `work-tickets`: evidence ladder, user-time-last |
 | support | `skill-doctor` | the user asks for a session or workflow audit, or to re-measure after skill changes; never fired by the chain itself |
