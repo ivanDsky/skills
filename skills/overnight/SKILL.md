@@ -76,6 +76,7 @@ Executor, as the brief says:
 |---|---|
 | intake batch, spec checkpoint | the brief; spec freezes when it meets the brief's acceptance; `goldfish-review` stage A, ≤2 lenses by risk; a finding that changes scope → Q entry, default = the brief |
 | ticket checkpoint, design review | auto; stage B lenses as the brief lists (default: architecture) |
+| prototype loop (redesign check fired) | the night builds the prototype pages; the morning check is the first user round; tickets and fix code that depend on the look wait for the morning freeze, every other lane keeps moving; no lens round at night (lenses only follow a user round). Night code for the look → the grill runs the loop to its freeze before go |
 | `user-check` try-it | the morning check |
 | merges | per the brief's delivery line: dark slices merge, PRs only the user may merge stay open and listed |
 | release, flag flip, prod deploy, anything public, data deletion | never; park |

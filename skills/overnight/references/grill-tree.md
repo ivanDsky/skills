@@ -32,6 +32,11 @@ it depends on are settled.
   `animation-vocabulary`. PROFILE `## Taste rules` pasted, not re-asked.
 - Choices the user will not settle now → design options built side by
   side (`prototype` variants) and picked in the morning; never one guess.
+- Redesign in the chunk (`start`'s redesign check) → one question: run the
+  prototype loop now, before go, to its freeze (the night may build the
+  look), or build the prototype at night and make the morning check the
+  first round (look-dependent tickets wait). Recommend the morning round
+  unless the look is the night's main deliverable.
 
 ## 5. Architecture and seams
 

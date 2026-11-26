@@ -6,8 +6,9 @@
     "Mock up the onboarding flow as a page I can open on my phone",
     "Prototype these three screens before we build them: settings, profile, paywall",
     "Make a clickable demo of the sync state machine so I can see if it feels right",
-    "The duel spec is frozen — run the contract sitting: every screen and state on phone and tablet plus the reveal motion, then freeze the reference screenshots",
-    "Let me approve every results-screen frame once up front so the build can run without asking me about design"
+    "The duel spec is frozen — prototype every screen and state on phone and tablet plus the reveal motion, loop with me until I say go, then freeze the reference screenshots",
+    "Let me approve every results-screen frame once up front so the build can run without asking me about design",
+    "Fixing this overlap bug means moving the timer off the board — mock the new layout first so I can check it before you code the fix"
   ],
   "negative": [
     {
