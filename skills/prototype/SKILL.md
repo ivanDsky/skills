@@ -4,18 +4,18 @@ description: >-
   Fast throwaway prototype of ONE task as a single self-contained HTML page:
   2-3 switchable design variants judged by senior-ux method, or a clickable
   state/logic demo, opened on the user's own phone over the LAN, then ported
-  into the app; also runs a UI feature's contract sitting, freezing reference
-  screenshots before tickets. Several tasks → one subagent per task, one page
-  each, plus an index page. Use when the user says prototype, quick sketch,
-  mock it up, "show me options", "would this work?", wants to see a screen or
-  flow before it is built into the app, or a feature with new screens or
-  motion reaches the contract stage.
+  into the app; also runs the chain's prototype loop (user rounds, fresh-eyes
+  lens rounds when something still feels off, freeze) before tickets or a
+  fix. Several tasks → one subagent per task, one page each, plus an index
+  page. Use when the user says prototype, quick sketch, mock it up, "show me
+  options", "would this work?", wants to see a screen or flow before it is
+  built into the app, or a feature or bug fix needs a redesign first.
 interaction: mixed
 requires: [python3 (serves the page on the LAN), Chromium-family browser (contract freeze capture only)]
 ---
 
-> **TL;DR** One task → one throwaway HTML file in `.scratch/`, built in minutes: design questions get 2-3 structurally different variants on a switcher (senior-ux decides the method, the user picks on their phone); logic questions get buttons that drive the state with the state always visible. Small picks are ported straight into the app; big ones go through `graduate-prototype`. In the feature chain it also runs the contract sitting (§ 5).
-> **Related**: skill://senior-ux (method for every design prototype), skill://emil-design-eng, skill://apple-design, skill://animation-vocabulary (taste and motion names), skill://graduate-prototype (exit for big ports), skill://start (quick vs big triage, contract stage), skill://preview-compose (the Compose port's previews), skill://wire-dev-settings (motion playground the contract needs when HTML cannot prove it)
+> **TL;DR** One task → one throwaway HTML file in `.scratch/`, built in minutes: design questions get 2-3 structurally different variants on a switcher (senior-ux decides the method, the user picks on their phone); logic questions get buttons that drive the state with the state always visible. Small picks are ported straight into the app; big ones go through `graduate-prototype`. In the chain it runs the prototype loop (§ 5).
+> **Related**: skill://senior-ux (method for every design prototype), skill://emil-design-eng, skill://apple-design, skill://animation-vocabulary (taste and motion names), skill://graduate-prototype (exit for big ports), skill://start (quick vs big triage, redesign check), skill://goldfish-review (stage P lens rounds inside the loop), skill://preview-compose (the Compose port's previews), skill://wire-dev-settings (motion playground the contract needs when HTML cannot prove it)
 
 # Prototype
 
@@ -30,7 +30,7 @@ nothing real touched. Use the chain + prototype flag in `start` instead when
 the prototype needs real app code, real persisted data, several modules, or
 is meant to ship. Close call → quick: a page costs minutes, and its answer
 tells you whether the big one is worth running. Fired by `start`'s
-contract stage instead → § 5.
+redesign check or a feature's prototype stage instead → § 5.
 
 ## 1. One task per page
 
@@ -113,15 +113,20 @@ This is the port's spec.
   which turns them into tickets for the standard chain.
 - Rejected or discarded → one line in the handoff (what was learned), done.
 
-## 5. Contract sitting (UI feature in the chain)
+## 5. Prototype loop (chain stage)
 
-`start` fires it after spec and before tickets when the feature adds or
-redesigns screens or adds motion; fixes batches and small UI fixes skip it.
+`start`'s redesign check fires it when the work changes what the user sees
+and nothing approved fixes the look yet: a feature's new or redesigned
+screen, flow or motion (after spec, before tickets), or a bug or quick fix
+whose real fix is a redesign (before any code). One opt-out question
+first, "Prototype first? ➡️ yes"; no visible design change → no question
+and no prototype.
 [references/contract.md](references/contract.md) owns the steps — read it
-first: contract pages for every screen × state at phone and tablet plus a
-motion page, one sitting with one revision round, freeze to
-`.scratch/<slug>/contract/` (`scripts/capture_reference.py`), then an AFK
-build with no taste asks.
+first: pages for every screen × state at phone and tablet plus a motion
+page; the loop (user round → revision → lens round only after a
+not-yet-OK reply → user round); exit on the user's OK, "let's go" or "lens
+feedback irrelevant"; freeze to `.scratch/<slug>/contract/`
+(`scripts/capture_reference.py`), then an AFK build with no taste asks.
 
 Adapted from mattpocock/skills (`prototype` — throwaway-answers-a-question,
 variant switcher, visible state), MIT. Single-file page, senior-ux method,

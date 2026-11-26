@@ -1,20 +1,22 @@
 ---
 name: goldfish-review
 description: >-
-  Challenge a feature concept (stage A, once the user confirmed scope) or a
-  design (stage B, before tickets) with fresh-context subagents that never
-  saw the conversation — one lens each: reuse, persona flows, data and
-  migration, failure and resources, best version, verifiability; then
-  architecture, patterns, file structure. Use when the user asks for fresh
-  eyes, a blind review, a devil's advocate or second opinion on a plan, when
-  a spec checkpoint has passed, or when write-tickets reaches its
-  design-review step.
+  Challenge a feature concept (stage A, once the user confirmed scope), a
+  design (stage B, before tickets) or a served prototype the user still
+  finds off (stage P) with fresh-context subagents that never saw the
+  conversation — one lens each: reuse, persona flows, data and migration,
+  failure and resources, best version, verifiability; architecture,
+  patterns, file structure; spec fit, persona walk, UX and taste. Use when
+  the user asks for fresh eyes, a blind review, a devil's advocate or second
+  opinion on a plan, when a spec checkpoint has passed, when write-tickets
+  reaches its design-review step, or when the prototype loop calls a lens
+  round.
 interaction: mixed
 requires: []
 ---
 
 > **TL;DR** Fresh subagents that only know the hypothesis and hard constraints each attack one angle of a feature before code exists; the parent merges their findings into numbered assumptions and shows the user where lenses disagree. No fresh subagent, no review — never a same-context stand-in.
-> **Related**: skill://draft-spec (stage A follows its checkpoint), skill://run-intake (prior-art step), skill://write-tickets (stage B at its design-review step), skill://review-change (stage C — the diff — and shared triage rules), skill://fan-out-research (same one-file-per-subagent contract), skill://grilling (irreversible forks), skill://micro-architecture, skill://design-architecture, skill://structure-checks, skill://ship-to-trunk (file-structure lens: `trunk` tickets merge alone and dark)
+> **Related**: skill://draft-spec (stage A follows its checkpoint), skill://run-intake (prior-art step), skill://write-tickets (stage B at its design-review step), skill://prototype (stage P inside its loop, § 5), skill://review-change (stage C — the diff — and shared triage rules), skill://fan-out-research (same one-file-per-subagent contract), skill://grilling (irreversible forks), skill://micro-architecture, skill://design-architecture, skill://structure-checks, skill://ship-to-trunk (file-structure lens: `trunk` tickets merge alone and dark)
 
 # Goldfish review
 
@@ -31,6 +33,7 @@ multiplied.
 |---|---|---|---|
 | **A — concept** | after the spec checkpoint confirms scope, before `write-tickets` | hypothesis + hard constraints + Out of scope | reuse, persona flows, data & migration, failure & resources, best version, verifiability |
 | **B — design** | `write-tickets` design-review step (item 9) | spec + module map + file maps | architecture, patterns, file structure |
+| **P — prototype** | prototype loop, only after a user round that is not OK (`prototype` § 5) | served index URL + `frames.tsv` + success criteria + A-items + hard constraints + taste rules + the user's notes verbatim | spec fit, persona walk, UX & taste — all three every round |
 | **C — diff** | `review-change` | the diff | owned by `review-change` (axes + visual reviewer); not a mode here |
 
 **Stage A — the orchestrator picks; the user is not asked.** Never before
@@ -55,6 +58,11 @@ which owns when the question is asked and what it recommends (blind review
 column: `start`/references/effort-mapping.md). A "none", or no question
 asked, means no goldfish; never add one unasked.
 
+**Stage P — no pick.** The prototype loop calls it; all three lenses run
+each round (persona walk is not run when PROFILE names no personas). Never
+before the user's first round: the user reviews first, lenses only answer a
+reply that says something is still off.
+
 ## 2. Run a stage
 
 1. **Write the brief file** `.scratch/<slug>/goldfish/brief.md`:
@@ -66,6 +74,11 @@ asked, means no goldfish; never add one unasked.
      no other lens's findings.
    - Stage B: spec Problem/Solution/Assumptions, the module map, the tickets'
      file maps. Still no conversation.
+   - Stage P: the checked index URL, `frames.tsv`, the spec's success
+     criteria and A-items (a bug or quick fix: its expected behavior and
+     DoD), hard constraints, PROFILE `## Taste rules`, the loop's
+     `Decision:` lines, and the user's notes verbatim. Lenses open the pages
+     in a browser tool when one exists, else read the HTML.
 2. **One fresh-context subagent per chosen lens**, all dispatched at once, no
    shared state. The dispatch prompt is: the lens name, the brief path, the
    lens file section to follow, the ABSOLUTE findings path
@@ -97,7 +110,8 @@ asked, means no goldfish; never add one unasked.
    Waiting on the user); a finding that adds scope beyond the confirmed
    Solution → declined, reason `scope confirmed`, unless the user reopens
    it. Stage B output lands as ticket edits or file-map changes — never a
-   second interview batch.
+   second interview batch. Stage P output lands as page fixes, never as
+   spec scope; the loop owns what the user sees next.
 
 ## 3. Anti-patterns
 

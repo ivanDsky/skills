@@ -40,7 +40,7 @@ never a second batch.
      money, deletions.
 3. Build ONE batch in frontier order: a question joins only if nothing else in
    the batch must be answered first. In a prototype run the batch always
-   includes the deploy question (`deploy: main | standalone | none`). Four
+   includes the deploy question (`deploy: main | standalone | none`). Five
    more always-join rules:
    - **DoD** — every feature ask gets one definition-of-done question ("what
      must be true for you to call this done?"), recommended default = review
@@ -63,6 +63,10 @@ never a second batch.
    - **Authoring walkthrough** — creation flows: the walkthrough from the
      prior-art step goes in the message before the ask call; one question
      confirms or corrects it. Screens are designed after it, never before.
+   - **Prototype** — when `start`'s redesign check fired, "Prototype first?
+     ➡️ yes" joins this batch instead of a separate ask; the answer is a
+     line in `intake.md` and decides whether the prototype loop runs after
+     the spec. No redesign → no question.
 4. Ask through the harness's ask tool (`ask`, `AskUserQuestion` or
    equivalent), never as plain-text questions that end the turn. The whole
    batch goes in ONE call: one entry per question with a short header, 2–4
