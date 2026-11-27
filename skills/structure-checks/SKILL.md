@@ -6,13 +6,14 @@ description: >-
   TypeScript projects (ESLint plus dependency-cruiser) — one class per file,
   hard file-size and complexity caps, layer dependencies, no agent-written
   comments, no mocking APIs, Compose and Svelte component rules — with a
-  shrink-only ratchet for existing violators, so workers fix by splitting
-  instead of arguing with prose. Use when setting up structure checks, when a
-  ticket adds or moves Kotlin or web files and needs its structure evidence,
-  when files keep growing or holding many classes, when agents leave comments
-  or reach for mocks, or when the user says konsist, detekt, eslint,
-  dependency-cruiser, structure test, one class per file, file size cap, or
-  enforce the architecture rules mechanically.
+  shrink-only ratchet for existing violators and a web e2e budget (one spec
+  per journey), so workers fix by splitting instead of arguing with prose.
+  Use when setting up structure checks, when a ticket adds or moves Kotlin or
+  web files and needs its structure evidence, when files or e2e specs keep
+  growing or files hold many classes, when agents leave comments or reach for
+  mocks, or when the user says konsist, detekt, eslint, dependency-cruiser,
+  structure test, one class per file, file size cap, e2e budget, or enforce
+  the architecture rules mechanically.
 interaction: mixed
 requires: [Gradle build for the Kotlin engine, Node project with ESLint for the web engine]
 ---
@@ -77,6 +78,9 @@ scratch lab on 2026-11-23; untested parts are marked `[unverified]` there.
    - Web, existing project: `eslint --fix --suppress-all` once for each newly
      adopted rule writes `eslint-suppressions.json`. CI fails when it gains
      entries against `main` (growth check in web-engine.md).
+   - Web with browser e2e specs: the e2e budget in web-engine.md (one spec
+     per journey in `tests/e2e/JOURNEYS.md`; unlisted specs and `test()`
+     count shrink-only), run from the same lint script.
    - The ratchet is for old code only; it never excuses new code.
 5. Prove the checks can fail on every engine in use, then delete the probes.
    Kotlin: a two-type file, a narrating comment, a mockk import and an
@@ -99,7 +103,7 @@ scratch lab on 2026-11-23; untested parts are marked `[unverified]` there.
   - Kotlin: `structure/**`, `structure/allowlist.txt`, `detekt.yml`, the
     detekt baseline.
   - Web: `eslint.config.*`, `tools/eslint/**`, `.dependency-cruiser.*`,
-    `eslint-suppressions.json`, the CI growth check.
+    `eslint-suppressions.json`, `tools/e2e-budget.sh`, the CI growth check.
 
   Needing a change is NEEDS_CONTEXT or a `Ruling:` the controller or user
   signs.

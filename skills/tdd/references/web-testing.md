@@ -20,17 +20,22 @@ Cypress) during `map-codebase`; the rungs don't change.
    browser, every commit. (Rung 2 ≈ Android's semantic JVM tests.)
 3. **Pixel evidence, no human** — rendered captures of real components:
    Storybook/Ladle stories + a screenshot test runner, or Playwright
-   component testing. One capture per state × size × theme variant;
-   diffed against committed references in CI. Catches overflow, spacing,
-   theme breakage — what semantics miss. (Rung 3 ≈ Roborazzi/`android
-   preview render`: this is the review-evidence workhorse. Reviewers cite
-   these captures; a finding graded without the applicable capture is
-   `cannot-verify`.)
+   component testing. One capture per state × size × theme variant. A
+   **separate capture command** (e.g. `pnpm capture`), never part of the
+   e2e run: a UI ticket runs it for its own screens; CI runs it only when
+   the project commits the captures as goldens and diffs them. Catches
+   overflow, spacing, theme breakage — what semantics miss. (Rung 3 ≈
+   Roborazzi/`android preview render`: this is the review-evidence
+   workhorse. Reviewers cite these captures; a finding graded without the
+   applicable capture is `cannot-verify`.)
 4. **Flows in a real browser, scripted** — Playwright E2E against a
    production-like build served locally: routing, auth redirects,
    persistence, multi-component interactions. Keep hermetic: seeded data,
-   no live third parties. A handful per critical user path, not per
-   component. (Rung 4 ≈ instrumented tests + Journeys.)
+   no live third parties. One spec per user journey, listed in
+   `tests/e2e/JOURNEYS.md` (`tdd` § What to test), not per component or
+   ticket. A worker runs only the specs of journeys its ticket adds or
+   changes; the full e2e run is main's CI. (Rung 4 ≈ instrumented tests +
+   Journeys.)
 5. **Human acceptance** — deploy (`deliver` targets), the user clicks.
    Manual browser time is the LAST resort and the user's, not the agent's:
    an agent clicking through a browser reproduces the audited Android
@@ -51,10 +56,10 @@ diff against references — never a fresh manual click-through.
 | Layer | Rung(s) | Cadence |
 |---|---|---|
 | Pure logic (utils, hooks internals, stores) | 2 | every commit |
-| Component behavior + a11y roles | 2 + 1 (a11y lint) | every commit |
-| Component visuals (states, themes, widths) | 3 | every commit (CI-diffed) |
+| Component behavior + a11y roles (keys, focus, text, state) | 2 + 1 (a11y lint) | every commit |
+| Component visuals (states, themes, widths) | 3, the capture command | UI change; CI-diffed only as committed goldens |
 | API integration | 2 against the memory adapter; MSW only in the real adapter's `*.real.test.ts`; 4 for the real contract | pre-merge |
-| Critical user journeys (auth, checkout, settings-save) | 4 | pre-merge |
+| Critical user journeys (auth, checkout, settings-save), one spec each in `JOURNEYS.md` | 4 | the journey's own ticket; full run on main CI |
 | Visual accept, feel, motion | 5 (human) | release |
 
 ## Svelte 5 / SvelteKit
@@ -67,4 +72,9 @@ Same rungs, Svelte tools. Source: https://svelte.dev/docs/svelte/llms.txt (Testi
 - **Rung 2, component:** `@testing-library/svelte` (`render`, `screen`) with `@testing-library/user-event`, in `jsdom`. For two-way bindings, context or snippet props, render a wrapper component made for the test. Low level: `mount`/`unmount` from `'svelte'`; effects only run after `flushSync()`. Think first whether the logic belongs in a class, where it needs no component test.
 - **Vitest config:** Vitest runs in Node, so add `resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined` (it makes Vitest load packages' `browser` entry points) and `test.environment: 'jsdom'` (or `// @vitest-environment jsdom` per file) for component tests.
 - **UI SDK primitives (own, not the library's):** `mount` and `checkPattern` from `@ui-sdk/core/testing`, in jsdom; see `skill://ui-sdk` `references/testing.md`.
-- **Rungs 3-4:** Playwright against the built app (`webServer: { command: 'npm run build && npm run preview', port: 4173 }`), projects for Chromium and WebKit when the UI is touch-first. Touch, sheets, focus and fast pointer sweeps are rung 4, because jsdom has no layout or real pointers.
+- **Rungs 3-4:** Playwright against the built app. Rung 4 never saves screenshots; rung 3 is its own config or command.
+- **Playwright config for many worktrees and agents:**
+  - Port from the environment, never a fixed 4173: `const port = Number(process.env.PW_PORT ?? 4173)`, `webServer: { command: \`npm run build && npm run preview -- --port ${port} --strictPort\`, port }`. The e2e script derives it per worktree: `export PW_PORT=${PW_PORT:-$((4200 + $(pwd | cksum | cut -d' ' -f1) % 800))}`. `--strictPort` makes a taken port fail loudly instead of Vite moving to the next one, and a per-worktree port stops `reuseExistingServer` from testing another worktree's server.
+  - Chromium runs every spec. WebKit runs only specs tagged `@webkit` (touch, sheets, Safari layout): a `webkit` project with `grep: /@webkit/`. No viewport × theme × browser loops in e2e: that matrix belongs to rung 3.
+  - CI: `workers` = the runner's cores (`os.availableParallelism()`); shard (`--shard=<i>/<n>` across jobs) once the e2e run passes ~5 min.
+- Touch, sheets, focus traps across real layout and fast pointer sweeps are rung 4, because jsdom has no layout or real pointers; focus order, keys and text inside one component are rung 2.

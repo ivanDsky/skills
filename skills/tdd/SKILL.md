@@ -46,7 +46,7 @@ The one test policy for every skill; `write-tickets`, `implement` and `user-chec
 **Keep writing:**
 - pure-rule tests — merges, state machines, rankers, parsers, hint deductions;
 - ViewModel state-transition tests with fakes;
-- one e2e per user journey;
+- one e2e spec per user journey, each listed as one line in the project's `tests/e2e/JOURNEYS.md`: a new spec needs a new journey line, and the budget check in `structure-checks` fails a spec count or `test()` count that grows without one;
 - sync conflict and idempotency cases;
 - corpus and property tests for solvers;
 - codec fuzz for share and import formats;
@@ -59,7 +59,8 @@ The one test policy for every skill; `write-tickets`, `implement` and `user-chec
 - hex or dp assertions where a screenshot capture covers the screen;
 - a UI test that repeats a ViewModel assertion;
 - DI-resolves tests beyond one graph check;
-- replay e2e tests that duplicate an existing journey.
+- replay e2e tests that duplicate an existing journey;
+- an e2e spec per UI ticket: behavior a component test in jsdom can see (keys, focus, typed text, state, rendered copy) goes to rung 2, pixels go to the capture command (rung 3), and e2e keeps only the journey (rung 4).
 
 **Screenshot captures** (rung 3 of the testing ladder). PROFILE says whether a project commits them as goldens or keeps them as untracked review renders.
 - One hero state per composable, light and dark, at phone width. Tablet only where the layout branches.
