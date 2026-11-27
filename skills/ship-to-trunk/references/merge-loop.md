@@ -72,7 +72,7 @@ environment needs that file or `ANDROID_HOME` for the Android SDK.
 ```bash
 ML=~/.agents/skills/ship-to-trunk/scripts/merge_lane.py   # python3 $ML -h: queue fields, results, exit codes
 python3 $ML enqueue --who <run slug> --nn <NN> --worktree ../<repo>-wt/<NN> --title "<conventional title>" \
-  --body-file .scratch/<slug>/pr-<NN>.md [--no-merge] [--red-fix <culprit>]   # when a worker reports ready
+  --body-file .scratch/<slug>/pr-<NN>.md [--no-merge] [--red-fix <culprit>] [--full]   # when a worker reports ready
 python3 $ML wait --who <run slug> --nn <NN>   # right after, async: one wait per ready ticket, to its final result
 ```
 
@@ -128,7 +128,7 @@ the orchestrator does next:
 
 - **merged** (`slice: <NN> PR #<n> merged @ <sha7>` with the squash commit
   on main, or `merged (main sha unresolved; tested @ <sha7>)` when gh
-  reports no merge commit; plus the `merge: … suite green tested @ <sha7>`
+  reports no merge commit; plus the `merge: … suite|affected green tested @ <sha7>`
   ledger lines, which name the tested stack, never a main commit; the result
   line carries both as `sha` (null when unresolved) and `tested`): close the
   ticket (the lane started the watcher).
@@ -201,6 +201,25 @@ stacks on a `--no-merge` A (it never merges), and on red main only the
 - `<suite>`: the first backticked command in the `pr-check: none` comment
   that starts with a script in the repo (`./gradlew …`); none written →
   assemble debug + unit `runner:` + `structure:` (when set).
+- **Affected check by default, the suite on demand.** PROFILE `-
+  affected-check: <command>   # full when: <glob>, <glob>` makes each
+  check run only what the batch can break. Placeholders, filled per check
+  from the diff between the commit the prefix is stacked on and its top:
+  `{files}` (changed files that still exist, shell-quoted) and
+  `{modules:<task>}` (`:<m>:<task>` for every module the commits touch and
+  every module depending on one, transitively). Examples: `pnpm exec
+  vitest related --run --passWithNoTests {files}`, `./gradlew
+  assembleDebug {modules:test}`. The lane runs `<suite>` instead when any
+  of these holds: the key is absent, `none` or `off`; the batch holds a
+  `--red-fix` ticket or a `--full` ticket (the release PR, the fix of an
+  unexpected red main); the commits touch the shared build setup or a
+  file matching a `full when:` glob (docs-only glob syntax; comma list,
+  prose after it ignored: lockfiles, tool configs, gate scripts); a
+  placeholder expands to nothing; `{modules:…}` has no module graph. Each
+  check, bisect steps included, recomputes this on its own prefix, and the
+  `e2e:` step appends to either. Main's post-merge workflow keeps running
+  the full suite on every push: that is the net for whatever the affected
+  map misses, and a red main it did not expect escalates (Red main below).
 - **Docs-only batches skip the suite.** When every file the batch's
   commits touch (both paths of a rename, deletions included) matches
   PROFILE `- lane docs-only: <glob>, <glob>` (default `docs/**, *.md,
@@ -220,7 +239,7 @@ stacks on a `--no-merge` A (it never merges), and on red main only the
   command means no key. When the batch's commits touch a module that
   matches a glob (`fnmatch` on names like `feature:play`), or the shared
   build setup (root build and settings scripts, `gradle.properties`,
-  `gradle/`, `build-logic/`), the lane runs `<suite> && <e2e>` as one check
+  `gradle/`, `build-logic/`), the lane runs `<check> && <e2e>` as one check
   in the same build slot: a red e2e is a red suite, bisect included (each
   half reuses the batch's `due` and `trigger`). Only modules the batch
   touches directly count, not their dependents: the module that runs the
@@ -229,13 +248,15 @@ stacks on a `--no-merge` A (it never merges), and on red main only the
   may differ); compile checks never run it. Main's post-merge workflow
   keeps running the tier on every push, so it still covers the batches
   that skip it.
-- **Batch guarantee.** Each suite tests only its batch top; B's tests A's
+- **Batch guarantee.** Each check tests only its batch top; B's tests A's
   top plus B. The intermediate main states (after the 1st, 2nd, … merge)
-  are never tested on their own. Accepted, because tickets in the queue
-  are independent (the frontier dispatches only tickets whose parents are
-  merged), main's post-merge workflow tests the newest push, and a red
-  main still stops everything. A requeued A ticket can land after B's:
-  independent tickets, so order across batches does not matter.
+  are never tested on their own, and an affected check tests only the
+  modules (or files) the batch reaches. Accepted, because tickets in the
+  queue are independent (the frontier dispatches only tickets whose
+  parents are merged), main's post-merge workflow runs the full suite on
+  the newest push, and a red main still stops everything. A requeued A
+  ticket can land after B's: independent tickets, so order across batches
+  does not matter.
 - **Throughput.** At the 4.0 min suite median one slot runs about 15
   suites an hour; two pipelined batches about 30, each covering up to 5
   tickets, for every session of the repository together. A red batch
@@ -273,8 +294,11 @@ stacks on a `--no-merge` A (it never merges), and on red main only the
   compile checks never count, and B counts its own rounds.
 - The PR body is written once by the worker, after the fast review
   (`open-pr` slice template). The lane fills its `**check:**` line:
-  `local suite green on batch top <sha7> (tickets <who>/<NN>,<who>/<NN>)[,
-  then compile green after main moved]; no PR CI by design`.
+  `local suite green|local affected check green on batch top <sha7>
+  (tickets <who>/<NN>,<who>/<NN>)[, then compile green after main moved];
+  no PR CI by design`. The ledger line says `suite green tested` or
+  `affected green tested`: the scope of the check that proved the green
+  top.
 
 ## Lane events
 
@@ -299,7 +323,10 @@ Every line has `ts` (UTC), `who` (the run slug of the `land` or
   (`stack`, `bisect` for a red batch's binary search, `merge` for a check
   between merges), `modules` (modules the batch's commits touch; `[]`
   without a module graph), `base` and `top` (sha7 of the commit it stacked
-  on, main or A's top, and of the head it ran on), `result`
+  on, main or A's top, and of the head it ran on), `scope` (`affected`|
+  `full`; null on compile checks), `why` (what forced `full`: `no
+  affected-check`, `red_fix or full ticket`, `full when: <file>`, `no
+  files`, `no module graph`, `no modules`; else null), `result`
   (`green`|`red`|`discarded`: B dropped because A went red), `wall_s`,
   `module_test_s` (`{module: seconds}`: JUnit `testsuite@time` summed per
   module from `<module>/build/test-results/**/*.xml` written since the
@@ -418,6 +445,25 @@ PROFILE `- main-check:`, else the `- release:` workflow; `python3 $MH -h`).
   → modules. One match is the culprit. Several (cancelled runs make one red
   run cover many merges) → the most likely first, the next if main stays
   red. Never bisect on CI.
+- **Expected or unexpected.** Most reds are small: a culprit whose
+  changed modules contain the failing test's module, fixed by its revert
+  or one obvious line (Owner below). That path stays light: no full suite,
+  no investigation beyond the log. A red is **unexpected** when any of
+  these holds: no commit in the range touches the failing module or one it
+  depends on (the affected check missed it); `unknown` with no file or
+  test pointing at a commit; the first revert or fix did not turn main
+  green; or the same test goes red again within a week of a fix. Then the
+  owner (no culprit: the first orchestrator to read the red, with the red
+  sha as `--culprit`) escalates, with the lane paused throughout: (1) run the full
+  suite locally on the red sha (`<suite>`, logged next to the lane's
+  logs) to see every failure, not just the first; (2) `diagnose-bug` at
+  full depth: root cause and a failing repro test; (3) fix with `tdd`;
+  (4) `assess-teardown` when its gate fires (second failed fix); (5) widen
+  the affected map so the miss cannot recur: a missing module edge, or a
+  `full when:` glob for the file kind that slipped through; (6) tell the
+  user what broke and why the check missed it; (7) enqueue the fix with
+  `--red-fix <culprit>` (always the full suite). A flaky test is neither:
+  quarantine it (next rule).
 - **Flaky test → quarantine in the same incident.** A test that fails on
   main and passes on rerun with no code change is flaky, not a culprit.
   Measure it first with `tdd`'s `flake_rate.py` (`tdd` § Flakes). The fix

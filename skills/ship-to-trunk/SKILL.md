@@ -33,7 +33,7 @@ start's `ask`); never switch a project to trunk on your own.
 ## Invariants (MUST)
 
 1. **Main is releasable after every merge**: it builds, the PR check passes
-   (`pr-check: none`: the local suite on the rebased head), and no
+   (`pr-check: none`: the lane's local check on the rebased head), and no
    unfinished user-visible behavior is reachable in a release build.
 2. **One ticket = one PR**, one concern, ≤ ~400 changed lines (generated
    files, goldens and lockfiles excluded). Bigger → split the ticket before
@@ -43,10 +43,12 @@ start's `ask`); never switch a project to trunk on your own.
 4. **Fresh base**: each ticket starts in its own worktree from
    `origin/main` fetched at dispatch, and rebases onto `origin/main` right
    before the PR and again before merge (`pr-check: none`: one rebase,
-   right before the suite, run by the repository's one merge lane after the
+   right before the check, run by the repository's one merge lane after the
    worker's fast review; every session enqueues into that lane, which
-   stacks up to 5 ready tickets per batch, runs one suite on each batch top
-   (plus PROFILE's `e2e:` tier when the batch touches one of its `when:`
+   stacks up to 5 ready tickets per batch, runs one check on each batch top
+   (PROFILE's `affected-check:` when set: only the tests the batch can
+   break; else, or for a `--full`/`--red-fix` ticket, the suite; plus
+   PROFILE's `e2e:` tier when the batch touches one of its `when:`
    modules or the shared build setup; two batches at once, the second
    stacked on the first) and opens and merges each PR in order).
    Never branch off another unmerged ticket by default.
@@ -69,7 +71,7 @@ flowchart LR
   B --> C[TDD + local gates]
   C --> D[rebase, PR]
   D --> E{PR check + fast review}
-  C -.->|pr-check: none| N[fast review, push branch: worker] -.-> L[merge lane: stack batch, one suite, PR + merge each] -.-> E2{authority}
+  C -.->|pr-check: none| N[fast review, push branch: worker] -.-> L[merge lane: stack batch, one check, PR + merge each] -.-> E2{authority}
   E2 -.->|dark| F
   E2 -.->|release or live change| G
   E -->|green, dark| F[agent merges]
@@ -85,7 +87,7 @@ Commands, conflicts and the no-CI fallback:
 
 | PR kind | Who merges |
 |---|---|
-| Slice, dark or non-behavioral, check green (`pr-check: none`: local suite green on the rebased branch, or on a batch top it is part of) + fast review clean | agent, when the consent ledger has `merge dark slices on green` |
+| Slice, dark or non-behavioral, check green (`pr-check: none`: local lane check green on the rebased branch, or on a batch top it is part of) + fast review clean | agent, when the consent ledger has `merge dark slices on green` |
 | Bug fix (live by nature) | agent on green, same as PROFILE's fix rules; patch bump per project policy |
 | Unflaggable live change (invariant 7) | user approves the PR |
 | Release PR (flags on and removed + bump) | user approves: an explicit Yes to "Release <X.Y.Z>?" asked once the PR is open and green, after thorough review |
@@ -126,7 +128,8 @@ red main stops all merges but the fix (Red main below).
    behavior), the same for every other shipped-on flag still in code, and a
    last commit with the version bump (PROFILE `version:`, the Gradle
    versionName fallback, top entry of `docs/release-history.md`). One gate suite, plus the thorough review
-   already required before it. It is enqueued with `--no-merge`: after the
+   already required before it. It is enqueued with `--no-merge --full`
+   (the full suite, never the affected check): after the
    green suite the PR is open and unmerged. The builder asks nothing; the
    merging orchestrator asks "Release <X.Y.Z>?" through the ask tool, with
    the release-history entry in the question (features turned on, fixes
@@ -147,7 +150,7 @@ red main stops all merges but the fix (Red main below).
 6. **Leftover removal, batched**: only for flags the release PR did not
    remove: dropped by a red suite, or flipped outside a release PR. One
    open "Remove the shipped-on flags" ticket at a time removes them on
-   fresh `origin/main`: one PR, one commit per flag, one suite, no fixes
+   fresh `origin/main`: one PR, one commit per flag, one check, no fixes
    inside it (under `pr-check: none`, the fix worker handles the lane's
    `red` result). The next release PR folds any open one in, and its ticket
    closes with a pointer. Stale flags are debt (`ponytail-debt` lists
@@ -164,7 +167,7 @@ red main stops all merges but the fix (Red main below).
 - **Independent series enqueue together**: slices that need none of each
   other merged first (mechanical moves of different packages) are built
   in parallel or back to back and enqueued at once, so one lane batch
-  tests them with one suite. A move or refactor series also holds feature
+  tests them with one check. A move or refactor series also holds feature
   tickets in its module until it lands (`work-tickets` claim skips them).
 - **Conflict on rebase** > ~50 lines, or in a file another in-flight ticket
   owns → the slicing was wrong: stop, re-slice, report. Never resolve by
@@ -175,7 +178,11 @@ red main stops all merges but the fix (Red main below).
   the verdict, each red run's cause and failing tests, the claim (one
   owner, 30-min takeover) and PRs held outside the lane; the lane pauses on
   red and queued tickets wait. A test that fails on main and passes on
-  rerun is quarantined in the same incident, for at most 48 h
+  rerun is quarantined in the same incident, for at most 48 h. A red no
+  culprit explains (the affected check missed it, no commit pointer, the
+  revert did not clear it, the same test red again) is unexpected and
+  escalates: full suite on the red sha, `diagnose-bug` at full depth,
+  `tdd` fix, widen the affected map, tell the user
   ([references/merge-loop.md](references/merge-loop.md) § Red main).
 - **No required PR check → no trunk.** Trunk mode needs CI as the judge:
   a workflow on `pull_request` that main's branch protection requires.
@@ -183,8 +190,9 @@ red main stops all merges but the fix (Red main below).
   user-approved); slices start only after it merged and the user turned on
   protection. Local gates never stand in for it, unless PROFILE says
   `pr-check: none` — an opt-in project ruling: CI runs on main only and the
-  merge gate is the local suite on the branch rebased onto fresh
-  `origin/main` ([references/merge-loop.md](references/merge-loop.md)).
+  merge gate is the local lane check (affected or suite) on the branch
+  rebased onto fresh `origin/main`; main's post-merge workflow runs the full
+  suite ([references/merge-loop.md](references/merge-loop.md)).
 
 ## Ledger
 

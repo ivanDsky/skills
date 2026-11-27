@@ -20,8 +20,10 @@ conditional: map-codebase (unmapped repo) · prototype mode · teardown gate
 The user tries the whole change before any review, test suite or PR body:
 feedback rounds are fast fixes that ignore code quality, and on OK the run
 goes back to design level (spec vs feedback vs code, senior-dev and
-architecture checks) and pays the debt down as hardening tickets. The full
-suite runs once, in review. The user reads code last, in the PR.
+architecture checks) and pays the debt down as hardening tickets. Review
+runs only the tests the change can break; the full suite runs on main's CI,
+and locally only when main goes red in a way nobody expected. The user
+reads code last, in the PR.
 
 Stages are conditional and effort-scaled: the effort level (fast / standard /
 thorough, set per project in `PROFILE.md`, overridable per session) maps to

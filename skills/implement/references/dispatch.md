@@ -50,8 +50,8 @@ requirements", the report path + contract below, the voice line from
 "never ask the user; questions go in the report as NEEDS_CONTEXT", and the
 hard-rules block below, pasted verbatim. The controller writes briefs and
 ledger lines in the same voice. `trunk` runs with `pr-check: none` add a
-sixth: "stop after the branch push; report ready; never run the full suite,
-rebase onto main, open the PR or merge".
+sixth: "stop after the branch push; report ready; never run the full suite
+or the lane's check, rebase onto main, open the PR or merge".
 
 ### Hard-rules block
 

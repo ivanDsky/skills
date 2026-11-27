@@ -3,7 +3,7 @@ name: review-change
 description: >-
   Run the effort-tiered review gate over the change — scripted checks plus
   screenshots, then code review, then a dual-verdict fresh-context subagent —
-  and own the fix loop, the one full-suite run, the ledger, and the teardown
+  and own the fix loop, the one affected-tests run, the ledger, and the teardown
   escalation. Use after user-check approved the behavior and its hardening
   tickets closed, before deliver, when a finished diff or branch needs its
   review gate, or when the user says review the change, run the review gate,
@@ -12,13 +12,13 @@ interaction: afk
 requires: []
 ---
 
-> **TL;DR** Runs the effort-tiered review gate — scripted checks, screenshots, code review, dual-verdict subagent — owns the fix loop and the one full-suite run; fires after user-check OK and hardening, before deliver.
+> **TL;DR** Runs the effort-tiered review gate — scripted checks, screenshots, code review, dual-verdict subagent — owns the fix loop and the one affected-tests run (full suite only when the change's reach is unknown); fires after user-check OK and hardening, before deliver.
 > **Related**: skill://user-check (upstream: approved behavior + hardening tickets; behavior-changing fixes go back to it), skill://implement (upstream tickets), skill://deliver (downstream ship), skill://assess-teardown (teardown escalation), skill://scope-creep-detector (drift catch), skill://structure-checks (fast-tier command), skill://goldfish-review (earlier blind lenses; shares its triage rules), skill://micro-architecture (its ui-components payload grades the component-API axis), skill://ship-to-trunk (trunk runs: fast tier per slice, thorough before the flip)
 
 # Review change
 
 Run the review gate over the whole change, then own what follows: fix rounds,
-the one full-suite run, the ledger, and the teardown escalation. The user has
+the one affected-tests run, the ledger, and the teardown escalation. The user has
 already tried the change (`user-check`), so behavior is approved; this gate
 checks it is tested and cleanly designed. Findings and verdicts live in a
 file; chat carries only the user-facing report. Both, plus reviewer reports
@@ -34,16 +34,19 @@ keep the steps below unchanged:
   UI ticket with `Reference:` lines → that reviewer also gets each golden
   and reference PNG and fails visible drift (`prototype`/references/contract.md).
   Dark or non-behavioral slices skip step 1's `user-check` precondition;
-  fix rounds run the touched module's tests and leave the full suite to the
+  fix rounds run the touched module's tests and leave the rest to the
   PR check. `pr-check: none`: the worker runs this tier before pushing the
   branch, then the orchestrator's merge lane stacks ready tickets and runs
-  the local suite once on the batch top. A rebase conflict
+  one check on the batch top (the affected check, or the suite; `ship-to-trunk`
+  § Invariants 4). A rebase conflict
   resolved by hand → fast tier again over the resolution diff only; a clean
   rebase is never re-reviewed.
 - **Once, before the release PR**: thorough tier over the feature's merged range
   (`git diff <base>..origin/main` scoped to its slice PRs), with the
-  `user-check: ok` precondition, and step 8's one full-suite run on
-  `origin/main`. Extra check, ❌ Important when missing: tests cover both
+  `user-check: ok` precondition. Step 8 runs nothing when main's post-merge
+  workflow is green at `origin/main` (`main_health.py status` under
+  `pr-check: none`): ledger `suite: green @ <sha> (full, main CI)`; the
+  release PR's own lane check runs the full suite (`--full`). Extra check, ❌ Important when missing: tests cover both
   flag states (on and off), and the release default stays off until the release PR.
 
 1. Pin the inputs: the diff vs base (`git diff <base>...HEAD` — verify the base
@@ -164,12 +167,20 @@ keep the steps below unchanged:
    Minors are ledgered as deferred — never silently fixed. Count failed fix
    rounds per module in the ledger.
    Stacked run: each fix commits into the layer that owns the file, never a
-   new layer (`open-pr`/references/stacks.md); the suite runs on the top.
+   new layer (`open-pr`/references/stacks.md); the check runs on the top.
    Fix rounds run only the touched module's tests. When the loop converges,
-   run the PROFILE.md test runner **once** over HEAD, log it to
-   `.scratch/<slug>/suite.log`, and ledger `suite: green @ <sha>`. This is
-   the run's only full-suite run; `deliver` and `open-pr` reuse it. Red →
-   one more fix round, then rerun.
+   run the tests the change can break **once** over HEAD: PROFILE
+   `affected-check:` with `{files}` = `git diff --name-only
+   --diff-filter=d <base>...HEAD` and `{modules:<task>}` = `:<m>:<task>`
+   for each touched module and each module depending on one. The PROFILE
+   test runner (the full suite) runs instead when there is no
+   `affected-check:` key, the diff touches the shared build setup or a file
+   matching its `full when:` globs, or a placeholder expands to nothing.
+   Log it to `.scratch/<slug>/suite.log` and ledger `suite: green @ <sha>
+   (affected|full)`; `deliver` and `open-pr` reuse it. Main's post-merge
+   CI runs the full suite; a red main nobody expected escalates there
+   (`ship-to-trunk`/references/merge-loop.md § Red main). Red → one more
+   fix round, then rerun.
 9. Teardown gate: 2 failed fix rounds on the same module (fire before round 3),
    a failed re-review the orchestrator judges structural, or reviewer
    discretion once with a logged reason → invoke `assess-teardown`.

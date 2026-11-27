@@ -80,7 +80,7 @@ run default: merged dark behind its flag, or live when it is a pure bug fix.
 Who merges is `ship-to-trunk` § Merge authority, never a rule of this skill:
 with the consent line, the agent merges on a green gate plus a clean fast
 review. The gate is the required PR check, or under `pr-check: none` the
-local suite on the branch rebased onto fresh `origin/main`. Only a missing
+lane's local check (affected tests, or the suite) on the branch rebased onto fresh `origin/main`. Only a missing
 consent line, a live change (invariant 7) or a release PR waits for the user.
 
 Per ticket, before dispatch, write the brief from the ticket
@@ -97,7 +97,7 @@ minus its question batch: the brief's repro steps stand in for the answers.
 **Device-tuned bugs** (the fix depends on how it feels or looks on one
 particular device: haptics, timing, rendering on a given model) iterate on
 the branch before any PR, because each merged guess costs a PR and a lane
-suite:
+check:
 1. The worker fixes on its branch, builds one check APK with `deliver`'s
    `ship_apk.py` (slug = ticket id), reports `device-check` with the build
    and the one thing to feel or look at, and stops. It opens no PR and

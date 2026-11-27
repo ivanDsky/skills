@@ -19,7 +19,7 @@ For each behavior, in order:
 1. **Red.** Write one minimal test for one behavior — "and" in the name means two tests. Clear name, real code, literal expected value, assertion on real behavior (never on a stub).
 2. **Watch it fail.** Run that test. It must fail because the feature is missing — not error on a typo, import, or fixture. Fix and re-run until the failure is the expected one.
 3. **Green.** Write the smallest code that passes. No extra options, no early generalizing.
-4. **Watch it pass.** Run the touched module's (or file's) tests, not only the new one. Report and fix every failure they show, including ones you did not cause. The full suite runs once per run, in `review-change` after its fix loop converges — never per cycle.
+4. **Watch it pass.** Run the touched module's (or file's) tests, not only the new one. Report and fix every failure they show, including ones you did not cause. Never the full suite: `review-change` runs the affected tests once after its fix loop converges, main's CI runs the full suite after merge, and only an unexpected red main brings it back locally.
 5. **Refactor.** Remove duplication, improve names, extract helpers. Tests stay green; add no behavior.
 6. Repeat from 1 for the next behavior.
 

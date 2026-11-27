@@ -151,8 +151,8 @@ check is `user-check` step 3.
 1. **Quick task** — ALL true: ≤3 files touched, no new public interface, no
    irreversible op, no deploy → code only (ponytail; no tests, no checks) →
    `user-check` (build or demo, one message, wait) → on OK, its re-gate
-   inline and `review-change` at the fast tier (tests for the change, suite
-   once, design check) → land.
+   inline and `review-change` at the fast tier (tests for the change, the
+   affected tests once, design check) → land.
    No spec, no tickets; the reply ends with `skipped:` and `residual risk:`
    lines.
 1b. **Bug report or one-shot fix** — broken behavior (crash, glitch, wrong
@@ -179,7 +179,7 @@ check is `user-check` step 3.
    the redesign check fires: `prototype` § 5) → tickets → implement
    (TDD at the seams) → `user-check` on the whole epic (feedback rounds are
    fast fixes) → on OK, re-gate into hardening tickets → implement →
-   `review-change` (suite once) → deliver → land. The user reviews code
+   `review-change` (affected tests once) → deliver → land. The user reviews code
    last, in the PR. Delivery `trunk` differs: slices merge dark (fast review
    each) as tickets close, `user-check` runs on a debug build from `main`
    with the release flag forced on, and the one release PR (flags on and
@@ -268,7 +268,7 @@ hand off).
 | implement | `implement` | ready frontier ticket; `user-check` fast fixes; re-gate hardening tickets |
 | user check | `user-check` | implement done (feature tickets) or quick-task code written — the user tries the whole change before any review (trunk: after the last slice merged dark, before the release PR); on OK it re-gates the run into hardening tickets |
 | review | `review-change` | hardening tickets closed after `user-check` OK (quick task: right after OK) |
-| deliver | `deliver` | review passes and `suite: green @ HEAD` is ledgered |
+| deliver | `deliver` | review passes and `suite: green @ HEAD (affected\|full)` is ledgered |
 | land | `open-pr` | run's delivery decision = pr (PROFILE `## Delivery` `changes:` or session answer), fired by `deliver`; = trunk → once per slice PR and for the release PR (`ship-to-trunk`) |
 | land | `ship-to-trunk` | delivery = trunk: slice size, fresh-base worktree per ticket, merge authority, live changes, flag lifecycle through the release PR |
 | support | `android-env` | first Android command of a session fails, or before the first build/device action (bootstrap checklist) |

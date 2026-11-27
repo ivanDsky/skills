@@ -33,12 +33,15 @@ owns it. `enqueue` fills the rest from the worktree, gives the entry a fresh
 `id`, and replaces an entry with the same who and nn (a ticket that re-enters
 after a fix):
   {"who","nn","id","enqueued","worktree","branch","head","base","title",
-   "body_file","no_merge":false,"red_fix":null,"lane_head"?,"requeues"?}
+   "body_file","no_merge":false,"red_fix":null,"full":false,"lane_head"?,
+   "requeues"?}
 `enqueued` is the UTC time of the enqueue (`2026-01-31T12:00:00Z`). `base` is
 the ticket's merge-base with origin/main; `base..head` is its own commits,
 restacked from scratch on every lane run. `no_merge: true` marks a PR only
 the user may merge (unflaggable live change, flip PR). `red_fix` (culprit
-sha|#PR) marks the fix PR of a red main. `lane_head` is the worktree HEAD the
+sha|#PR) marks the fix PR of a red main. `full: true` (`--full`) makes its
+batch run the full suite instead of the affected check (release PRs, a fix
+after an unexpected red main). `lane_head` is the worktree HEAD the
 lane left after rebasing a requeued ticket; `requeues` counts the requeues
 the ticket caused itself (main moved or red, main keeps moving, GitHub's sha
 race), not those for a ticket or batch it was stacked on ("stacked on ...").
@@ -103,10 +106,12 @@ Sequence:
     worktree (`lane/wt/0` for A, `lane/wt/1` for B) detached at the batch
     top and reset before every use (`checkout -f`, `clean -fd`; ignored
     build output stays), with the main checkout's `local.properties` copied
-    in when it has one, through `build-slot` when on PATH. The suite is the
-    command in PROFILE's `pr-check: none` comment, else debug + unit
-    `runner:` + `structure:`; log `lane/logs/lane-<NN-NN>-<sha7>.log`
-    (`...-compile.log` for a compile check, step 6). PROFILE `- e2e: <cmd>
+    in when it has one, through `build-slot` when on PATH. The check is the
+    affected check when PROFILE has `- affected-check: <cmd>` (see "Affected
+    check" below), else the suite: the command in PROFILE's `pr-check: none`
+    comment, else debug + unit `runner:` + `structure:`; log
+    `lane/logs/lane-<NN-NN>-<sha7>.log` (`...-compile.log` for a compile
+    check, step 6). PROFILE `- e2e: <cmd>
     # when: <module globs>` (a comma-separated list, e.g. `app,
     feature:*:api`; `none`/`off` = no key): when the batch's commits touch a
     matching module directly (no dependency closure) or the shared build
@@ -144,8 +149,8 @@ Sequence:
     k+1..n requeued ("stacked on a closed ticket"), nothing pushed; any
     other CLOSED PR is an older one of a reused branch name and is ignored.
     Push `--force-with-lease`; reuse the OPEN PR, else `gh pr create` (body
-    check line: `local suite green on batch top <sha7> (tickets
-    <who>/<NN>,...)[, then compile green after main moved]; no PR CI by
+    check line: `local suite|affected check green on batch top <sha7>
+    (tickets <who>/<NN>,...)[, then compile green after main moved]; no PR CI by
     design`); create fails -> `refused`.
     7.5 `gh pr merge <n> --squash --match-head-commit <sha>` (always with the
     PR number, never `--delete-branch`: gh would check out main locally);
@@ -160,7 +165,7 @@ Sequence:
     requeues k..n; anything else, or the last retry's error, is `refused`
     with k+1..n requeued ("stacked on a refused ticket"). 7.6 delete the remote
     branch, `git worktree remove`, delete the local branch.
- 8. Ledger lines, tickets named <who>/<NN>: `merge: batch <labels> suite
+ 8. Ledger lines, tickets named <who>/<NN>: `merge: batch <labels> suite|affected
     green tested @ <sha7>[, compile green tested @ <sha7>] (<s> suites[,
     <c> compiles])` (the tested stack, not main), each rerun decision
     `merge: <labels> main moved <k> commits - rerun|compile|push (<modules>)`
@@ -192,6 +197,23 @@ must be proved green). Main moving under a docs-only batch (steps 6 and 7.3)
 is always `push`: docs cannot break main's code, and nothing of the batch
 needs a suite or compile check to be re-proved.
 
+Affected check. PROFILE `- affected-check: <cmd>   # full when: <glob>, ...`
+runs only the tests the batch can break, instead of the suite. Placeholders,
+filled per check from `git diff <stacked-on> <prefix top>`:
+  {files}           the changed files that exist at the top (renames: the new
+                    path), shell-quoted, space-separated
+  {modules:<task>}  `:<m>:<task>` for each module the commits touch and each
+                    module depending on one, transitively (the module graph)
+The suite runs instead (scope `full`) when the batch holds a `red_fix` or
+`full` ticket, the key is absent or `none`, the commits touch the shared build
+setup or a file matching a `full when:` glob (docs-glob syntax), `{modules:...}`
+has no module graph, or a placeholder expands to nothing. Each check
+(bisect steps included) recomputes this on its own prefix; the e2e step
+appends to either. Ledger and PR check line name the scope that proved the
+green top: `suite green` (full) or `affected green` / `local affected check
+green`. Main's post-merge workflow runs the full suite on every push: it is
+the net for what the affected check did not run.
+
 Rerun rule (mechanical), judged over the files that differ between main and
 the commit the batch was stacked on, mapped to modules (from `include(...)` in
 settings.gradle.kts, dependencies from `project(":x")` and `projects.x` in
@@ -207,7 +229,7 @@ the build files):
            `--dry-run` that rejects a task (JVM-only module, flavors) -> rerun.
   push     otherwise.
 
-The suite tests only the batch top. The intermediate main states (after the
+The check tests only the batch top. The intermediate main states (after the
 1st, 2nd, ... merge of a batch) are not tested on their own. Batches merge in
 queue order, but a ticket requeued from A goes back to the queue while B may
 still merge: tickets are independent by construction.
@@ -230,7 +252,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
-MAX_ROUNDS = 3  # full-suite reruns per batch; compile checks are not counted
+MAX_ROUNDS = 3  # check reruns per batch (main moved); compile checks are not counted
 MAX_BATCH = 5  # tickets per batch
 REQUEUE_CAP = 6  # requeues of one queue entry; the next one ends it `stuck`
 COMPILE_TASKS = ("compileDebugKotlin", "compileDebugUnitTestKotlin")
@@ -320,6 +342,63 @@ def suite_command(wt):
         if v:
             parts.append(v)
     return " && ".join(parts)
+
+
+FULL_WHEN = re.compile(r"\bfull when:\s*(.*)")
+MODULES_TASK = re.compile(r"\{modules:([^}\s]+)\}")
+
+
+def full_when_globs(comment):
+    """Globs of an `affected-check:` comment's `full when:` list (comma-separated, each
+    optionally backticked); prose after the list is ignored."""
+    m = FULL_WHEN.search(comment or "")
+    globs = []
+    for item in m.group(1).split(",") if m else []:
+        words = item.split()
+        if not words:
+            break
+        globs.append(words[0].strip("`"))
+        if len(words) > 1:
+            break
+    return [g for g in globs if g]
+
+
+def dependents(deps, mods):
+    """`mods` plus every module that depends on one of them, transitively."""
+    return {m for m in deps if m in mods or mods & closure(deps, m)}
+
+
+def check_plan(wt, tickets, base, head):
+    """(command, scope, why) of a check on base..head: scope `affected` is PROFILE
+    `affected-check:` with its placeholders filled; `full` is the suite, and `why`
+    names what forced it."""
+    suite = suite_command(wt)
+    cmd, comment = profile_line(wt, "affected-check")
+    cmd = (cmd or "").strip("` ")
+    if not cmd or cmd.lower() in ("none", "off"):
+        return suite, "full", "no affected-check"
+    if any(t.get("red_fix") or t.get("full") for t in tickets):
+        return suite, "full", "red_fix or full ticket"
+    changed = names(wt, "--no-renames", base, head)
+    globs = [(glob_re(g), "/" not in g) for g in full_when_globs(comment)]
+    hit = next((f for f in changed if SHARED_ROOT_FILES.match(f) or
+                any(rx.match(f.rsplit("/", 1)[-1] if flat else f) for rx, flat in globs)), None)
+    if hit:
+        return suite, "full", f"full when: {hit}"
+    if "{files}" in cmd:
+        files = names(wt, "--diff-filter=d", base, head)
+        if not files:
+            return suite, "full", "no files"
+        cmd = cmd.replace("{files}", shlex.join(files))
+    if MODULES_TASK.search(cmd):
+        graph = module_graph(wt)
+        if not graph:
+            return suite, "full", "no module graph"
+        mods = sorted(dependents(graph[1], to_modules(graph[0], changed)[0]))
+        if not mods:
+            return suite, "full", "no modules"
+        cmd = MODULES_TASK.sub(lambda m: " ".join(f":{x}:{m.group(1)}" for x in mods), cmd)
+    return cmd, "affected", None
 
 
 E2E_START = re.compile(r"^merge_lane: e2e start$", re.M)
@@ -658,7 +737,7 @@ def cmd_enqueue(a):
          "head": out("git", "rev-parse", "HEAD", cwd=wt),
          "base": out("git", "merge-base", "HEAD", "origin/main", cwd=wt),
          "title": a.title, "body_file": str(Path(a.body_file).resolve()),
-         "no_merge": a.no_merge, "red_fix": a.red_fix}
+         "no_merge": a.no_merge, "red_fix": a.red_fix, "full": a.full}
     # Logged first: in the log, a ticket's results always follow its enqueue.
     EventLog(a.who, lane).log("enqueue", {"nn": a.nn, "id": e["id"]})
     Queue(lane / "queue.jsonl").update(
@@ -1007,12 +1086,11 @@ class Batch:
     def __init__(self, land, pipe, cands, k):
         self.land, self.pipe, self.cands, self.k = land, pipe, cands, k
         self.rounds = self.full = self.suites = self.compiles = self.merged = 0
-        self.kind, self.cc, self.tag, self.cmd, self.e2e = "rerun", None, "suite", None, None
+        self.kind, self.cc, self.tag, self.cmd, self.e2e, self.e2e_cmd = "rerun", None, "suite", None, None, None
         self.stack, self.green, self.pending, self.check = [], list(cands), [], None
         self.base = self.main0 = self.under = None
-        self.suite7, self.red, self.live, self.docs = "", False, True, False
+        self.suite7, self.red, self.live, self.docs, self.scope = "", False, True, False, None
         self.git = land.git
-        self.suite_cmd = suite_command(cands[0]["worktree"])
 
     @property
     def top(self):
@@ -1038,8 +1116,8 @@ class Batch:
             prev = e["head_t"]
         self.green = self.stack
         if self.stack:
-            self.cmd, self.tag = (self.suite_cmd, "suite") if self.kind == "rerun" else (self.cc, "compile")
-            self.e2e = None
+            self.cmd, self.tag = (None, "suite") if self.kind == "rerun" else (self.cc, "compile")
+            self.e2e = self.e2e_cmd = None
             if self.tag == "suite":
                 self.full += 1
                 top = self.stack[-1]
@@ -1047,18 +1125,21 @@ class Batch:
                 e2e, trigger = (None, None) if self.docs else e2e_plan(top["worktree"], base, top["head_t"])
                 if trigger is not None:
                     self.e2e = {"due": bool(e2e), "trigger": trigger}
-                if e2e:
-                    self.cmd = with_e2e(self.suite_cmd, e2e)
+                self.e2e_cmd = e2e
             if not self.docs:
                 self.check = self.start(self.stack, self.cmd, self.tag, base, "stack")
 
     def start(self, prefix, cmd, tag, base, phase):
-        """Start one build command (the suite or a compile check) on the prefix's top in
-        this batch's scratch worktree. `base`: the commit the prefix is stacked on;
+        """Start one build command on the prefix's top in this batch's scratch worktree:
+        `cmd` for a compile check; a suite check computes its own (`check_plan` on the
+        prefix, then the batch's e2e step). `base`: the commit the prefix is stacked on;
         `phase`: stack | bisect | merge."""
         top = prefix[-1]
+        scope = why = None
         if tag == "suite":
             self.suites += 1
+            cmd, scope, why = check_plan(top["worktree"], prefix, base, top["head_t"])
+            cmd = with_e2e(cmd, self.e2e_cmd) if self.e2e_cmd else cmd
         else:
             self.compiles += 1
         logdir = self.land.lane / "logs"
@@ -1071,7 +1152,7 @@ class Batch:
             p = subprocess.Popen(self.land.slot + ["bash", "-c", cmd], cwd=wt, stdin=subprocess.DEVNULL,
                                  stdout=f, stderr=subprocess.STDOUT, start_new_session=True)
         c = {"p": p, "lstart": proc_start(p.pid), "t0": t0, "log": str(log), "prefix": prefix, "tag": tag,
-             "phase": phase, "base": base, "wt": wt, "round": self.rounds,
+             "phase": phase, "base": base, "wt": wt, "round": self.rounds, "scope": scope, "why": why,
              "e2e": self.e2e if tag == "suite" else None}
         self.land.checks.append((self, c))
         self.land.track()
@@ -1090,7 +1171,7 @@ class Batch:
             "pipe": self.pipe, "batch": [label(e) for e in prefix], "batch_size": len(prefix),
             "round": c["round"], "phase": c["phase"],
             "modules": batch_modules(c["wt"], c["base"], top["head_t"]),
-            "base": c["base"][:7], "top": top["head_t"][:7],
+            "base": c["base"][:7], "top": top["head_t"][:7], "scope": c["scope"], "why": c["why"],
             "result": "discarded" if discard else "red" if rc else "green", "wall_s": round(wall, 1),
             # whole seconds: a coarse mtime clock must not hide a file this run wrote
             "module_test_s": module_test_seconds(c["wt"], int(c["t0"])),
@@ -1114,6 +1195,7 @@ class Batch:
         """Finish the check (bisect a red one), then the main check of step 6,
         restacking until main holds still or the batch is requeued."""
         while self.stack:
+            proof = self.check["scope"] if self.check else None  # the scope of the check proving the green top
             rc, log = self.finish(self.check) if self.check else (0, None)  # no check: docs only
             self.check = None
             if rc:
@@ -1123,16 +1205,17 @@ class Batch:
                 logs, lo, hi = {len(self.stack): log}, 0, len(self.stack)
                 while hi - lo > 1:
                     mid = (lo + hi) // 2
-                    rc2, log2 = self.finish(self.start(self.stack[:mid], self.cmd, self.tag, self.base, "bisect"))
+                    c2 = self.start(self.stack[:mid], self.cmd, self.tag, self.base, "bisect")
+                    rc2, log2 = self.finish(c2)
                     if rc2:
                         hi, logs[mid] = mid, log2
                     else:
-                        lo = mid
+                        lo, proof = mid, c2["scope"]
                 self.pending.append((self.stack[hi - 1], "red", {"log": logs[hi]}))
                 self.pending += [(e, "requeued", {"reason": "stacked on a red ticket"}) for e in self.stack[hi:]]
                 self.green = self.stack[:lo]
             if self.tag == "suite" and self.green:
-                self.suite7 = self.green[-1]["head_t"][:7]
+                self.suite7, self.scope = self.green[-1]["head_t"][:7], proof
             if not self.green:
                 break
             run("git", "fetch", "origin", cwd=self.git)
@@ -1175,7 +1258,8 @@ class Batch:
         if self.docs:
             L.ledger(f"merge: batch {labels(green)} suite skipped (docs only) @ {self.suite7}", green)
         else:
-            L.ledger(f"merge: batch {labels(green)} suite green tested @ {self.suite7}{then} ({ran})", green)
+            what = "affected" if self.scope == "affected" else "suite"
+            L.ledger(f"merge: batch {labels(green)} {what} green tested @ {self.suite7}{then} ({ran})", green)
         prev_t = self.base
         for i, e in enumerate(green):
             if not self.merge_one(e, green[i:], prev_t, after_compile):
@@ -1231,8 +1315,9 @@ class Batch:
             run("git", "push", "-u", "--force-with-lease", "origin", "HEAD", cwd=wt)
             body = Path(e["body_file"]).read_text()
             note = ", then compile green after main moved" if compiled else ""
-            what = "skipped (docs only)" if self.docs else "green"
-            check = (f"**check:** local suite {what} on batch top {self.suite7} (tickets {labels(green)}){note}; "
+            what = ("suite skipped (docs only)" if self.docs else
+                    "affected check green" if self.scope == "affected" else "suite green")
+            check = (f"**check:** local {what} on batch top {self.suite7} (tickets {labels(green)}){note}; "
                      "no PR CI by design")
             if re.search(r"^\*\*check:\*\*.*$", body, re.M):
                 body = re.sub(r"^\*\*check:\*\*.*$", lambda _: check, body, flags=re.M)
@@ -1380,6 +1465,8 @@ def main():
     n.add_argument("--body-file", required=True)
     n.add_argument("--no-merge", action="store_true", help="only the user may merge this PR")
     n.add_argument("--red-fix", metavar="CULPRIT", help="this PR fixes red main (sha|#PR)")
+    n.add_argument("--full", action="store_true",
+                   help="its batch runs the full suite, not the affected check (release PR, unexpected red main)")
     w = sub.add_parser("wait", help="land until these tickets have a final result; print their lines")
     w.add_argument("--who", required=True, help="run slug the tickets were enqueued with")
     w.add_argument("--nn", required=True, nargs="+")

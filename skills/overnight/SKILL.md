@@ -48,8 +48,8 @@ grill ─rounds─> brief ─preflight─> go ─> night run ──────�
    Why?" Offer the 3-5 likeliest causes from what you saw (environment
    down, missing secret, an open design fork, a flaky suite, scope creep);
    each gets a contingency answer.
-5. Preflight while the user is still awake: main builds and its suite is
-   green; every tool, device, server, token and auth the night needs
+5. Preflight while the user is still awake: main builds and its last CI
+   run is green (read it, never rerun the suite); every tool, device, server, token and auth the night needs
    answers; the morning delivery path (build → device or served URL) works
    once as a dry run. A failure is fixed now or becomes a grill question.
 6. Write the brief per [brief.md](references/brief.md) to

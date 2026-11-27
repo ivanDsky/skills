@@ -45,11 +45,11 @@ recollection.
    runs `merge_lane.py enqueue --who <slug> --nn <NN> ...` and starts one
    `merge_lane.py wait --who <slug> --nn <NN>` background bash job for
    that ticket (the lane is shared by every session: batches of up to 5,
-   one suite per batch top, two batches pipelined, then PR + merge per
+   one check per batch top (affected tests, or the suite), two batches pipelined, then PR + merge per
    ticket). A series of independent slices (no slice needs another merged
    first, e.g. mechanical moves of different packages) is built in
    parallel or back to back and enqueued together, so one batch tests them
-   with one suite; never enqueue a series one ticket at a time as each
+   with one check; never enqueue a series one ticket at a time as each
    finishes. It handles each result line per merge-loop.md (red → fix
    worker, conflict → rebase worker, refused/closed/stuck → the reason
    first, waiting_user → ask tool, Claude Code: `AskUserQuestion`). The orchestrator also runs one

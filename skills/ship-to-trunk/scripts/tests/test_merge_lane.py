@@ -237,6 +237,54 @@ def test_e2e_plan_without_a_module_graph_is_due(tmp_path):
     assert ml.e2e_plan(flat, *commit_files(flat, "x.kt")) == ("./gradlew :app:e2eTest", [])
 
 
+# ------------------------------------------------------------- affected check
+
+AFFECTED = "- affected-check: ./gradlew {modules:test} && related {files}   # full when: `*.toml`, scripts/** — why\n"
+FULL = "./gradlew assembleDebug"  # the suite of a PROFILE with no pr-check command and no runner
+
+
+@pytest.mark.parametrize("comment,globs", [
+    ("full when: `*.toml`, scripts/** — prose", ["*.toml", "scripts/**"]),
+    ("full when: package.json, pnpm-lock.yaml (the lockfile), vite.config.ts", ["package.json", "pnpm-lock.yaml"]),
+    ("vitest related over the batch's files", []),
+])
+def test_full_when_globs_read_only_the_comma_separated_list(comment, globs):
+    assert ml.full_when_globs(comment) == globs
+
+
+def test_check_plan_fills_the_changed_files_and_the_touched_modules_with_their_dependents(tmp_path):
+    repo = nested_repo(tmp_path / "r", AFFECTED)
+    base, head = commit_files(repo, "feature/home/api/A.kt", "README.md")
+    assert ml.check_plan(repo, [{}], base, head) == (
+        "./gradlew :app:test :feature:home:api:test :feature:home:impl:test && related README.md feature/home/api/A.kt",
+        "affected", None)
+
+
+@pytest.mark.parametrize("profile,files,ticket,why", [
+    ("- e2e: none\n", ["app/A.kt"], {}, "no affected-check"),
+    ("- affected-check: none\n", ["app/A.kt"], {}, "no affected-check"),
+    (AFFECTED, ["app/A.kt"], {"red_fix": "abc1234"}, "red_fix or full ticket"),
+    (AFFECTED, ["app/A.kt"], {"full": True}, "red_fix or full ticket"),
+    (AFFECTED, ["app/A.kt", "gradle/libs.versions.toml"], {}, "full when: gradle/libs.versions.toml"),
+    (AFFECTED, ["app/A.kt", "app/deps.toml"], {}, "full when: app/deps.toml"),
+    (AFFECTED, ["scripts/gate.sh"], {}, "full when: scripts/gate.sh"),
+    ("- affected-check: ./gradlew {modules:test}\n", ["README.md"], {}, "no modules"),
+])
+def test_check_plan_runs_the_suite_when_the_affected_set_cannot_be_trusted(tmp_path, profile, files, ticket, why):
+    repo = nested_repo(tmp_path / "r", profile)
+    assert ml.check_plan(repo, [{}, ticket], *commit_files(repo, *files)) == (FULL, "full", why)
+
+
+def test_check_plan_without_a_module_graph_or_with_only_deletions_runs_the_suite(tmp_path):
+    flat = nested_repo(tmp_path / "flat", AFFECTED, edges=None)
+    assert ml.check_plan(flat, [{}], *commit_files(flat, "x.kt")) == (FULL, "full", "no module graph")
+    repo = nested_repo(tmp_path / "r", "- affected-check: related {files}\n")
+    base = git("rev-parse", "HEAD", cwd=repo)
+    git("rm", "-q", "app/build.gradle.kts", cwd=repo)
+    git("commit", "-q", "-m", "delete", cwd=repo)
+    assert ml.check_plan(repo, [{}], base, git("rev-parse", "HEAD", cwd=repo)) == (FULL, "full", "no files")
+
+
 # ----------------------------------------------------------- lane end to end
 
 GRAPH = {"app": ["feature"], "feature": ["core"], "core": [], "docs": []}
@@ -1028,6 +1076,7 @@ def test_green_batch_logs_the_suite_with_module_test_time_and_the_merge(glane, g
     assert TS.match(suite.pop("ts")) and isinstance(suite.pop("wall_s"), float)
     assert suite == {"who": "test-run", "event": "suite", "pipe": "A", "batch": ["test-run/01"], "batch_size": 1,
                      "round": 1, "phase": "stack", "modules": ["feature"], "base": base7, "top": sha,
+                     "scope": "full", "why": "no affected-check",
                      "result": "green", "module_test_s": {"feature": 3.75}, "e2e": None}
     assert [(e["who"], e["nn"], e["result"], e["reason"], e["pr"]) for e in events(glane, "ticket")] == [
         ("test-run", "01", "merged", None, 42)]
@@ -1635,3 +1684,52 @@ def test_rename_from_src_to_docs_runs_the_suite(lane, gh):
     assert r.returncode == 0, r.stdout + r.stderr
     assert len(suite_runs(gh)) == 1
     assert "skipped" not in r.stdout
+
+
+# ------------------------------------------------------ affected check, lane
+
+AFFECTED_LANE = "- affected-check: echo affected {modules:test} {files}   # full when: `*.toml`\n"
+
+
+@pytest.fixture
+def affected_lane(tmp_path, gh, profile_text, real_runs):
+    """glane factory whose PROFILE adds `key` (an affected check); ticket 01 adds feature/F.kt."""
+    gh.set(runs=real_runs, create_url=PR_URL, create_branch="ticket/1", land=True)
+    return lambda key=AFFECTED_LANE: Lane(tmp_path, profile_text + "- lane docs-only: none\n" + key, graph=GRAPH,
+                                          ticket_file="feature/F.kt")
+
+
+def test_lane_runs_the_affected_check_and_says_so_in_ledger_and_pr(affected_lane, gh):
+    lane = affected_lane()
+    lane.enqueue()
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert suite_runs(gh) == ["bash -c echo affected :app:test :feature:test feature/F.kt"]
+    assert re.search(r"^merge: batch test-run/01 affected green tested @ \w{7} \(1 suites\)$", r.stdout, re.M)
+    assert "local affected check green on batch top" in lane.pr_body("01").read_text()
+    assert [(e["scope"], e["why"]) for e in events(lane, "suite")] == [("affected", None)]
+
+
+def test_full_ticket_runs_the_suite_for_its_batch(affected_lane, gh):
+    lane = affected_lane()
+    lane.enqueue("01", "--full")
+    r = lane.land()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert suite_runs(gh) == ["bash -c ./suite.sh"]
+    assert re.search(r"^merge: batch test-run/01 suite green tested @ \w{7} \(1 suites\)$", r.stdout, re.M)
+    assert "local suite green on batch top" in lane.pr_body("01").read_text()
+    assert [(e["scope"], e["why"]) for e in events(lane, "suite")] == [("full", "red_fix or full ticket")]
+
+
+def test_bisect_runs_the_affected_check_of_each_prefix(affected_lane, gh):
+    """01 touches feature, 02 touches core and fails the check: the bisect step on 01 alone tests
+    only feature and its dependents, and that green prefix merges as affected-tested."""
+    lane = affected_lane("- affected-check: echo affected {modules:test} && [ ! -e core/C.kt ]\n")
+    lane.enqueue("01")
+    lane.enqueue("02", wt=lane.add_ticket("2", "core/C.kt"))
+    r = lane.land()
+    assert r.returncode == 1
+    assert sorted((x["nn"], x["result"]) for x in lane.results(r)) == [("01", "merged"), ("02", "red")]
+    assert suite_runs(gh) == ["bash -c echo affected :app:test :core:test :feature:test && [ ! -e core/C.kt ]",
+                              "bash -c echo affected :app:test :feature:test && [ ! -e core/C.kt ]"]
+    assert re.search(r"^merge: batch test-run/01 affected green tested @ \w{7} \(2 suites\)$", r.stdout, re.M)
