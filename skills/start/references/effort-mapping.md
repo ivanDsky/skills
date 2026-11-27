@@ -125,8 +125,12 @@ Orchestrator by stage (who runs each stage: lifecycle.md):
   `user-check` feedback loop, where fast fixes ignore code quality at every
   effort and the re-gate pays it down. `user-check` itself runs at every
   effort; only its check doc scales.
-- Full suite: once per run, in `review-change` after the fix loop converges,
-  at every effort. Ticket cycles and fix rounds run touched-module tests.
+- Tests: ticket cycles and fix rounds run touched-module tests; once per
+  run, in `review-change` after the fix loop converges, the tests the
+  change can break (PROFILE `affected-check:`, else the full suite), at
+  every effort. The full suite otherwise runs only on main's post-merge CI
+  and when a red main nobody expected escalates (`ship-to-trunk` § Red
+  main).
 - Review-site publish: `thorough` defaults to yes (the `user-check` check
   doc is the primary hands-on surface); fast/standard follow the run's decision
   (PROFILE `Review site publish:` or the session answer in start's plan).

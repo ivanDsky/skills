@@ -147,6 +147,7 @@ Send the batch and stop. Never a second batch.
 # - pr-check: none   # written only on a `trunk-local` answer: merge gate is local: `<suite>` green on the PR branch rebased onto fresh origin/main; CI on main only. Absent (default) → trunk waits on main's required PR check
 # - main-check: <workflow file>   # optional, `pr-check: none` only: main's post-merge workflow watched by ship-to-trunk's main_health.py; absent → the `release:` workflow
 # - e2e: <command>   # when: <module globs, comma-separated>; optional, `pr-check: none` only: a slow end-to-end tier the ship-to-trunk lane appends to a batch's suite only when the batch touches a matching module or the shared build setup; `none`/`off` or absent → never
+# - affected-check: <command with {files} and/or {modules:<task>}>   # full when: <globs, comma-separated>; the tests a change can break, run by review-change's step 8 and the ship-to-trunk lane instead of the suite. {files} = changed files, {modules:test} = touched modules + their dependents. Web: `pnpm lint && pnpm check && pnpm exec vitest related --run --passWithNoTests {files}`, full when lockfiles, tool configs, gate scripts. Gradle: `./gradlew assembleDebug {modules:test}`. Absent → the suite every time; main CI always runs the full suite
 
 ## Tracker                   # shared backlog: file-tickets files, work-tickets claims
 - backend: github            # from question 5: github (GitHub Issues) | local (<git-common-dir>/backlog/)

@@ -11,8 +11,8 @@ one PR, or when a change cannot hide behind a flag.
 | 02..N slices | one capability each, end to end, behind the flag; each builds and passes alone | gated |
 | shared-file edits | registry / DI module / nav graph / `when` entry, alone and first | gated or inert |
 | hardening (after user-check) | fixes plus regression tests for the bug each fixes (`tdd` § What to test, what not to) | gated |
-| release (written up front, last) | flags removed with the old path they hid (one commit per flag), every other shipped-on flag folded in, then version bump + changelog; one PR, one suite; replaces the flip and cleanup tickets | removes each `<Key>` |
-| leftover removal (batched, lifecycle step 6) | flags a red suite dropped from a release, or flipped outside one; one commit per flag, one PR, one suite | removes each `<Key>` |
+| release (written up front, last) | flags removed with the old path they hid (one commit per flag), every other shipped-on flag folded in, then version bump + changelog; one PR, one full suite (`--full`); replaces the flip and cleanup tickets | removes each `<Key>` |
+| leftover removal (batched, lifecycle step 6) | flags a red suite dropped from a release, or flipped outside one; one commit per flag, one PR, one check | removes each `<Key>` |
 
 Every ticket names `flag: <Key> | none` and, for invariant-7 changes,
 `live: <what> — <why it is backward compatible>`.

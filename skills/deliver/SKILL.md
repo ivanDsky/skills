@@ -14,8 +14,8 @@ interaction: afk
 requires: [firebase CLI when target=firebase, tailscale CLI when target=tailscale]
 ---
 
-> **TL;DR** Builds the change and deploys to PROFILE.md targets with output attached as evidence; never reruns the suite; fires when review passes and the run ships.
-> **Related**: skill://review-change (gate before delivery; owns the one suite run), skill://user-check (approved build; reuses build identity), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://deploy-cloudflare (public Cloudflare deploy; web-preview never goes public), skill://implement (tickets to close), skill://open-pr (land step when delivery = pr), skill://android-env (worktrees share the build ledger), skill://ship-to-trunk (trunk runs: deliver ships the flip)
+> **TL;DR** Builds the change and deploys to PROFILE.md targets with output attached as evidence; never reruns tests; fires when review passes and the run ships.
+> **Related**: skill://review-change (gate before delivery; owns the one affected-tests run), skill://user-check (approved build; reuses build identity), skill://deploy-firebase (firebase target), skill://deploy-tailscale (tailscale target), skill://deploy-cloudflare (public Cloudflare deploy; web-preview never goes public), skill://implement (tickets to close), skill://open-pr (land step when delivery = pr), skill://android-env (worktrees share the build ledger), skill://ship-to-trunk (trunk runs: deliver ships the flip)
 
 # Deliver
 
@@ -23,10 +23,10 @@ Produce the evidence that closes the run: a green build, a deploy when a
 target is set, closed tickets, and an honest delivery summary. Review has
 passed; this stage adds no code.
 
-1. Verify the gate on the tree you ship — never rerun the suite. The ledger
-   needs `user-check: ok` (or `skipped`) and `suite: green @ <sha>` from
-   `review-change`, with `<sha>` equal to HEAD. HEAD moved since → back to
-   `review-change` (it reruns the suite once); missing user check → back to
+1. Verify the gate on the tree you ship — never rerun tests. The ledger
+   needs `user-check: ok` (or `skipped`) and `suite: green @ <sha>
+   (affected|full)` from `review-change`, with `<sha>` equal to HEAD. HEAD moved since → back to
+   `review-change` (it reruns its check once); missing user check → back to
    `user-check`. Fixes go back through `implement` + `review-change`.
    `trunk` run: deliver fires once, after the release PR merged (ledger
    `release: <X.Y.Z> approved by user <date> (PR #<n>)`), and ships `main`

@@ -19,7 +19,7 @@ For each behavior, in order:
 1. **Red.** Write one minimal test for one behavior — "and" in the name means two tests. Clear name, real code, literal expected value, assertion on real behavior (never on a stub).
 2. **Watch it fail.** Run that test. It must fail because the feature is missing — not error on a typo, import, or fixture. Fix and re-run until the failure is the expected one.
 3. **Green.** Write the smallest code that passes. No extra options, no early generalizing.
-4. **Watch it pass.** Run the touched module's (or file's) tests, not only the new one. Report and fix every failure they show, including ones you did not cause. The full suite runs once per run, in `review-change` after its fix loop converges — never per cycle.
+4. **Watch it pass.** Run the touched module's (or file's) tests, not only the new one. Report and fix every failure they show, including ones you did not cause. Never the full suite: `review-change` runs the affected tests once after its fix loop converges, main's CI runs the full suite after merge, and only an unexpected red main brings it back locally.
 5. **Refactor.** Remove duplication, improve names, extract helpers. Tests stay green; add no behavior.
 6. Repeat from 1 for the next behavior.
 
@@ -46,7 +46,7 @@ The one test policy for every skill; `write-tickets`, `implement` and `user-chec
 **Keep writing:**
 - pure-rule tests — merges, state machines, rankers, parsers, hint deductions;
 - ViewModel state-transition tests with fakes;
-- one e2e per user journey;
+- one e2e spec per user journey, each listed as one line in the project's `tests/e2e/JOURNEYS.md`: a new spec needs a new journey line, and the budget check in `structure-checks` fails a spec count or `test()` count that grows without one;
 - sync conflict and idempotency cases;
 - corpus and property tests for solvers;
 - codec fuzz for share and import formats;
@@ -59,7 +59,8 @@ The one test policy for every skill; `write-tickets`, `implement` and `user-chec
 - hex or dp assertions where a screenshot capture covers the screen;
 - a UI test that repeats a ViewModel assertion;
 - DI-resolves tests beyond one graph check;
-- replay e2e tests that duplicate an existing journey.
+- replay e2e tests that duplicate an existing journey;
+- an e2e spec per UI ticket: behavior a component test in jsdom can see (keys, focus, typed text, state, rendered copy) goes to rung 2, pixels go to the capture command (rung 3), and e2e keeps only the journey (rung 4).
 
 **Screenshot captures** (rung 3 of the testing ladder). PROFILE says whether a project commits them as goldens or keeps them as untracked review renders.
 - One hero state per composable, light and dark, at phone width. Tablet only where the layout branches.

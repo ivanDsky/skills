@@ -10,7 +10,8 @@
     "Set up ESLint and dependency-cruiser on this SvelteKit app so a feature can't import another feature and only the composition root imports adapters",
     "Ban vi.fn, vi.mock and spies in this TypeScript project with lint so agents write fakes instead",
     "Agents keep leaving narrating comments and 400-line files in our Svelte code — make lint fail on both",
-    "This ticket adds new Svelte components and TypeScript files — what evidence do I need for the structure rules?"
+    "This ticket adds new Svelte components and TypeScript files — what evidence do I need for the structure rules?",
+    "Our Playwright e2e folder keeps growing with every ticket — add a shrink-only lint check that fails when e2e tests grow without a new journey"
   ],
   "negative": [
     {

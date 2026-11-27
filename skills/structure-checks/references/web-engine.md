@@ -288,9 +288,46 @@ now=$([ -f eslint-suppressions.json ] && count < eslint-suppressions.json || ech
 [ "$now" -le "$base" ] || { echo "eslint-suppressions.json grew: $base -> $now"; exit 1; }
 ```
 
+### e2e budget
+
+Browser end-to-end specs are the slowest tests a web project has, and one
+spec per ticket grows main's CI without bound. The budget: one spec per user
+journey, each listed as a line `- <journey> — tests/e2e/<file>.spec.ts` in
+`tests/e2e/JOURNEYS.md` (`tdd` § What to test). `tools/e2e-budget.sh`, run
+from the `structure:` lint script, compares HEAD with `origin/main` and fails
+when the spec files not named in `JOURNEYS.md` grow (shrink-only: existing
+unlisted specs are the ratchet's old code), or when the `test()` calls under
+`tests/e2e/` grow without a new journey line. `test.describe` and hooks do
+not count; `test.only/skip/fixme/fail` do. Run on a scratch repo through
+six cases (no change, an added test, a new unlisted spec, a new journey with
+its spec, a deleted spec, an added `test.only`), each with the expected
+verdict:
+
+```sh
+#!/bin/sh
+set -eu
+ref=${1:-origin/main} dir=tests/e2e
+j=$dir/JOURNEYS.md
+specs() { git ls-tree -r --name-only "$1" -- "$dir" | grep -E '\.spec\.ts$' || true; }
+unlisted() { specs "$1" | while read -r f; do git show "$1:$j" 2>/dev/null | grep -qF "$f" || echo "$f"; done | wc -l | tr -d ' '; }
+tests() { specs "$1" | while read -r f; do git show "$1:$f" | grep -cE '\btest(\.(only|skip|fixme|fail))?\(' || true; done | awk '{s+=$1} END {print s+0}'; }
+journeys() { git show "$1:$j" 2>/dev/null | grep -c '^- ' || true; }
+u0=$(unlisted "$ref") u1=$(unlisted HEAD) t0=$(tests "$ref") t1=$(tests HEAD) j0=$(journeys "$ref") j1=$(journeys HEAD)
+[ "$u1" -le "$u0" ] || { echo "e2e budget: spec files outside $j grew: $u0 -> $u1"; exit 1; }
+[ "$t1" -le "$t0" ] || [ "$j1" -gt "$j0" ] || { echo "e2e budget: test() calls grew $t0 -> $t1 with no new journey line in $j"; exit 1; }
+echo "e2e budget: $t1 tests, $j1 journeys, $u1 unlisted specs"
+```
+
+It reads committed trees only: commit before running it. A new journey line
+is legitimate only when the ticket names that journey (`write-tickets` UI
+ticket Evidence); review grades a journey line no ticket asked for as
+Important. Adopting it in a project whose specs predate `JOURNEYS.md`: list
+the specs that really are journeys, leave the rest unlisted, and the count
+only falls from there.
+
 ## Protected files
 
-`eslint.config.*`, `tools/eslint/**`, `.dependency-cruiser.*`,
+`eslint.config.*`, `tools/eslint/**`, `.dependency-cruiser.*`, `tools/e2e-budget.sh`,
 `eslint-suppressions.json`, and the CI growth check. A worker never edits
 them; a change needs a ledgered `Ruling:`.
 

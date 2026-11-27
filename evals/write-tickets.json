@@ -15,7 +15,8 @@
     "Turn the spec into tickets and just post the list — don't make me confirm granularity unless the plan is huge",
     "The leaderboard spec passed checkpoint — publish its slices to the backlog under the leaderboard epic",
     "Ticket the sync spec, and tier it so only the unresolved conflict-merge design question goes to Fable; the new repository module is deep, not open",
-    "The Community shelves epic is sliced and its flag ticket is written — finish the trunk ticket set so the epic ends in exactly one release ticket that turns the flags on, removes them and bumps the version, with no separate flip or cleanup ticket"
+    "The Community shelves epic is sliced and its flag ticket is written — finish the trunk ticket set so the epic ends in exactly one release ticket that turns the flags on, removes them and bumps the version, with no separate flip or cleanup ticket",
+    "Write the tickets for the settings screen redesign spec — the UI tickets' Evidence shouldn't be a new e2e spec each, only the one that changes the save-settings journey"
   ],
   "negative": [
     {

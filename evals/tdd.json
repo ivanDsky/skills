@@ -10,7 +10,8 @@
     "Decide which goldens this composable needs and quarantine the test that flaked twice",
     "this e2e test fails sometimes on main — find out if it's flaky before we quarantine it",
     "Write the test first for this Svelte 5 ViewModel class that holds $state — no component mounting",
-    "My $effect never runs in the Vitest test for this SvelteKit component; how do I test it red-green?"
+    "My $effect never runs in the Vitest test for this SvelteKit component; how do I test it red-green?",
+    "Every UI ticket ships its own Playwright spec and CI takes half an hour — which of these keyboard and focus checks belong in a jsdom component test instead?"
   ],
   "negative": [
     {

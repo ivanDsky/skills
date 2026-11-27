@@ -96,9 +96,9 @@ commit screenshots to the run branch.
 
 Only when the PROFILE consent ledger pre-approves merge-to-main AND review is
 green AND, if checks exist, `gh pr checks` is green (no CI → say "no CI";
-it is not a pass). Exception: PROFILE `pr-check: none` → the local suite on
+it is not a pass). Exception: PROFILE `pr-check: none` → the lane's local check on
 the branch rebased onto fresh `origin/main` is the pass, and the summary
-says so ("local suite green on <sha>; no PR CI by design"). Then
+says so ("local suite|affected check green on <sha>; no PR CI by design"). Then
 `gh pr merge <n> --squash --match-head-commit <sha>`, then `git push origin
 --delete <branch>` — never `--delete-branch`, which checks out main locally
 and fails in a worktree after a good merge (non-zero merge exit → `gh pr
@@ -116,12 +116,12 @@ worktree never switches to main), then any post-merge step in PROFILE
 `ship-to-trunk` (`ship-to-trunk`/references/merge-loop.md). What changes here:
 
 1. **Slice PR** (dark or non-behavioral): no user-check precondition; it
-   needs the PR check green (`pr-check: none`: local suite green on the
+   needs the PR check green (`pr-check: none`: the lane's local check green on the
    rebased head, or on a batch top it is part of) + `review-change` fast
    tier clean. `pr-check: none`: both pass before the PR exists — the
    worker writes the body once, after review (with a `**check:**` line),
    and pushes the branch only; the repository's merge lane
-   (`merge_lane.py`) fills the check line (`local suite green on batch top
+   (`merge_lane.py`) fills the check line (`local suite|affected check green on batch top
    <sha7> (tickets <slug>/<NN>,<slug>/<NN>); no PR CI by design`), runs
    `gh pr create` and merges, ticket by ticket. Body to
    `.scratch/<slug>/pr-<NN>.md`, **≤ ~120 words**, no screenshots or diagram:

@@ -73,7 +73,12 @@ its decisions; fold new corrections in as ticket edits, never a re-interview.
      moves files also carries the DoD line "structure checks green" with the
      `structure:` command as Evidence (`structure-checks`; not configured →
      say so in the ticket). Tests a ticket asks for follow `tdd` § What to
-     test, what not to. No DoD → not a ticket: thin or split until one exists.
+     test, what not to. A UI ticket's Evidence is its unit and component
+     test command plus the capture command (rung 3, `tdd`/references/web-testing.md
+     on web); it gets an e2e line only when it adds or changes a journey
+     in the project's `tests/e2e/JOURNEYS.md`, naming that journey. Never
+     "the ticket's e2e spec saves PNGs" or "the DoD is the e2e exit code".
+     No DoD → not a ticket: thin or split until one exists.
    - **Contract lines** — tickets under a frozen UI contract only:
      `Contract: .scratch/<slug>/contract/` and one
      `Reference: <golden or test> = reference/<file>.png` line per pair
